@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://emanuelindustri-source.github.io/mesa-viva/sitemap.xml

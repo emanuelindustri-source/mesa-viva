@@ -1,0 +1,28 @@
+{
+  "name": "Mesa Viva",
+  "short_name": "Mesa Viva",
+  "description": "Juegos de cartas y mesa con alma venezolana. Juega solo, con bots o con amigos, incluso sin internet.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "orientation": "portrait-primary",
+  "background_color": "#061713",
+  "theme_color": "#0d2b26",
+  "lang": "es",
+  "dir": "ltr",
+  "categories": ["games", "entertainment", "education"],
+  "icons": [
+    { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "./icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Caída", "short_name": "Caída", "url": "./#/setup/caida", "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Sala de juego", "short_name": "Sala", "url": "./#/room", "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Niveles", "short_name": "Niveles", "url": "./#/levels", "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }] }
+  ],
+  "prefer_related_applications": false
+}

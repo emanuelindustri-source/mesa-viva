@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Mesa Viva">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0a2821"/><stop offset="1" stop-color="#04120e"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fffaf0"/><stop offset="1" stop-color="#f0dfc0"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.4" r="0.6">
+      <stop offset="0" stop-color="#e0a63a" stop-opacity="0.25"/><stop offset="1" stop-color="#e0a63a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <circle cx="256" cy="256" r="230" fill="url(#glow)"/>
+  <circle cx="256" cy="300" r="178" fill="none" stroke="#e7c66a" stroke-opacity="0.12" stroke-width="2"/>
+  <g transform="translate(160 130) rotate(13 110 150)">
+    <rect width="220" height="300" rx="22" fill="#7c1f2b" stroke="#e7c66a" stroke-width="4"/>
+    <rect x="13" y="13" width="194" height="274" rx="15" fill="none" stroke="#e7c66a" stroke-opacity="0.45" stroke-width="2"/>
+  </g>
+  <g transform="translate(110 110) rotate(-10 110 150)">
+    <rect width="220" height="300" rx="22" fill="url(#card)" stroke="#96703a" stroke-width="3"/>
+    <rect x="12" y="12" width="196" height="276" rx="16" fill="none" stroke="#b08a4a" stroke-opacity="0.35" stroke-width="2"/>
+    <g fill="#4d6f4f">
+      <circle cx="72" cy="98" r="12"/><circle cx="148" cy="98" r="12"/>
+      <circle cx="72" cy="150" r="12"/><circle cx="148" cy="150" r="12"/>
+      <circle cx="72" cy="202" r="12"/><circle cx="148" cy="202" r="12"/>
+    </g>
+    <circle cx="110" cy="262" r="15" fill="#b07a22" opacity="0.8"/>
+  </g>
+  <g transform="translate(330 70)">
+    <g stroke="#e7c66a" stroke-width="11" stroke-linecap="round">
+      <path d="M80 2v28"/><path d="M80 130v28"/><path d="M2 80h28"/><path d="M130 80h28"/>
+      <path d="M25 25l20 20"/><path d="M115 115l20 20"/><path d="M135 25l-20 20"/><path d="M45 115l-20 20"/>
+    </g>
+    <circle cx="80" cy="80" r="42" fill="#e0a63a" stroke="#f2d493" stroke-width="5"/>
+    <circle cx="80" cy="80" r="19" fill="#7c1f2b"/>
+  </g>
+</svg>

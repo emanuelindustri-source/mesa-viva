@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: mesa-viva-room
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server/room-server.mjs
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: ALLOWED_ORIGINS
+        value: https://emanuelindustri-source.github.io

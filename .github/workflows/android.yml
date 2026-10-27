@@ -1,0 +1,59 @@
+name: Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    name: Compilar APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+      - name: Aceptar licencias del SDK
+        run: yes | sdkmanager --licenses || true
+      - name: Instalar plataforma
+        run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
+      - name: Dependencias web
+        run: npm ci
+      - name: Build web
+        run: npm run build
+        env:
+          VITE_ROOM_WS_URL: ${{ vars.VITE_ROOM_WS_URL }}
+      - name: Sincronizar assets
+        run: npm run android:sync
+      - name: Compilar APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+      - name: Renombrar APK
+        run: |
+          mkdir -p artifacts
+          cp android/app/build/outputs/apk/debug/app-debug.apk artifacts/mesa-viva-${GITHUB_REF_NAME}-debug.apk
+      - name: Subir artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: mesa-viva-debug-apk
+          path: artifacts/*.apk
+          retention-days: 30
+      - name: Publicar release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*.apk
+          generate_release_notes: true

@@ -1,0 +1,51 @@
+{
+  "name": "mesa-viva",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Mesa Viva: juego de cartas y mesa con alma venezolana. Offline-first, multijugador, multilingüe.",
+  "license": "MIT",
+  "author": "Emanuel Industri",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/emanuelindustri-source/mesa-viva.git"
+  },
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "rooms": "node server/room-server.mjs",
+    "icons": "python tools/make_icons.py",
+    "android:sync": "node tools/sync-android.mjs",
+    "android:build": "npm run build && npm run android:sync && cd android && gradlew.bat assembleDebug"
+  },
+  "dependencies": {
+    "@fontsource/fraunces": "^5.1.1",
+    "@fontsource/outfit": "^5.1.1",
+    "framer-motion": "^11.15.0",
+    "jspdf": "^2.5.2",
+    "jsqr": "^1.4.0",
+    "lucide-react": "^0.468.0",
+    "lz-string": "^1.5.0",
+    "qrcode": "^1.5.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "ws": "^8.22.0",
+    "zustand": "^5.0.2"
+  },
+  "devDependencies": {
+    "@types/lz-string": "^1.3.34",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "~5.7.2",
+    "vite": "^6.0.5",
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

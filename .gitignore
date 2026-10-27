@@ -1,0 +1,48 @@
+# Dependencias
+node_modules/
+.pnp
+.pnp.js
+
+# Build
+dist/
+dist-ssr/
+*.local
+coverage/
+i18n-report.txt
+
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/app/src/main/assets/www/
+android/.idea/
+android/*.iml
+*.apk
+*.aab
+*.jks
+*.keystore
+!android/app/debug.keystore
+android/keystore.properties
+
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+
+# Entorno (nunca subir secretos)
+.env
+.env.*
+!.env.example
+
+# Logs y temporales
+*.log
+npm-debug.log*
+tools/tmp/
+artifacts/
