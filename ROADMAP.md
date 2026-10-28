@@ -1,6 +1,8 @@
 # Roadmap
 
-## v0.1.0 · La primera mesa (actual)
+## v0.1.1 · La primera mesa (actual)
+
+Pulido de onboarding, cartas/fichas, coordenadas de tablero y CI Android. La base de v0.1.0 se mantiene.
 
 - [x] 8 juegos jugables con bots: Caída, Furia de Colores, Dominó, Dados Mentirosos, Ajedrez, Damas, Serpientes y Escaleras, Mancala.
 - [x] Modo pasar el teléfono con pantalla de privacidad.

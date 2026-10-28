@@ -20,7 +20,7 @@ Objetivo de respuesta: 72 horas. No se promete recompensa económica por reporte
 - **Android**: assets servidos con `WebViewAssetLoader` sobre origen HTTPS seguro; cámara solo con permiso explícito; PDF guardado vía MediaStore; sin permisos innecesarios.
 - **Diagnóstico**: los errores se guardan localmente y solo salen del dispositivo si el usuario crea el correo. El informe no incluye cartas ni contraseñas.
 
-## Limitaciones conocidas (v0.1.0)
+## Limitaciones conocidas (v0.1.x)
 
 - El relay público no está incluido: hay que desplegar `server/room-server.mjs` o apuntar Ajustes al servidor propio. Si no hay relay, las salas en línea no conectan; los modos locales sí funcionan.
 - La sala LAN sin internet por doble QR está en el roadmap; requiere relay nativo en el anfitrión o WebRTC manual.
