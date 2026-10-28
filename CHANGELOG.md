@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.2.0 · 2026-10-28
+
+La mesa se amplía y se vuelve local.
+
+### Añadido
+
+- **Go** 9×9 y 13×13: capturas de grupos, ko, pases, rendición, komi 6.5 y conteo de territorio.
+- **Jungle / Dou Shou Qi**: río, trampas, jerarquía animal, saltos de tigre y león, guaridas y bots con búsqueda alfa-beta.
+- **Sala LAN sin internet en Android**: relay WebSocket nativo en el teléfono anfitrión, QR con la IP local y código de sala, unión automática del invitado y limpieza del servidor al salir.
+- Preparación de Go con tamaño de tablero 9×9/13×13.
+- 3 pruebas nuevas de motores (15 en total), incluidas las reglas básicas de Go y Jungle.
+
+### Cambiado
+
+- Catálogo: Go y Jungle pasan de “próximos” a jugables.
+- Portada, README y contadores: de 8 a 10 juegos.
+- Salas LAN: el invitado configura el relay desde el QR sin escribir direcciones.
+
+### Corregido
+
+- El cierre de una sala LAN detiene el relay nativo y limpia las claves locales.
+- La app limpia un relay LAN huérfano al arrancar.
+
 ## 0.1.1 · 2026-10-28
 
 Pulido de mesa y CI.

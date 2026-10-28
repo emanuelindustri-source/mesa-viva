@@ -33,6 +33,7 @@ export function Board({
             className={cx(
               'board-cell',
               cell.tone && `tone-${cell.tone}`,
+              cell.side && `side-${cell.side}`,
               cell.highlight && `hl-${cell.highlight}`,
               cell.glyph && 'has-glyph',
               interactive && 'is-cell-button',

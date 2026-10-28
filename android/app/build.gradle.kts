@@ -11,8 +11,8 @@ android {
         applicationId = "com.mesaviva.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 2
-        versionName = "0.1.1"
+        versionCode = 3
+        versionName = "0.2.0"
 
         vectorDrawables {
             useSupportLibrary = true
@@ -45,4 +45,6 @@ android {
 dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.webkit:webkit:1.11.0")
+    implementation("org.java-websocket:Java-WebSocket:1.5.7")
+    implementation("org.slf4j:slf4j-nop:2.0.13")
 }

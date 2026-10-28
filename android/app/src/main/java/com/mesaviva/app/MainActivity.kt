@@ -51,6 +51,7 @@ class MainActivity : Activity() {
     private var errorPanel: LinearLayout? = null
     private var pendingPermission: PermissionRequest? = null
     private var pendingFileCallback: ValueCallback<Array<Uri>>? = null
+    private var lanRelay: LanRelayServer? = null
 
     private val sensorManager by lazy { getSystemService(SENSOR_SERVICE) as SensorManager }
     private var accelerometer: Sensor? = null
@@ -280,6 +281,21 @@ class MainActivity : Activity() {
         }
 
         @JavascriptInterface
+        fun startLanServer(): String {
+            if (lanRelay == null) lanRelay = LanRelayServer()
+            return lanRelay?.start() ?: ""
+        }
+
+        @JavascriptInterface
+        fun stopLanServer() {
+            lanRelay?.stop()
+            lanRelay = null
+        }
+
+        @JavascriptInterface
+        fun lanServerUrl(): String = lanRelay?.url ?: ""
+
+        @JavascriptInterface
         fun savePdf(filename: String, base64: String): Boolean {
             return try {
                 val safeName = filename.replace(Regex("[^A-Za-z0-9._-]"), "_").take(120).ifBlank { "mesa-viva.pdf" }
@@ -393,6 +409,8 @@ class MainActivity : Activity() {
     }
 
     override fun onDestroy() {
+        lanRelay?.stop()
+        lanRelay = null
         webView?.removeJavascriptInterface("MesaViva")
         webView?.destroy()
         webView = null

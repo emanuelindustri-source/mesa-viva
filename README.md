@@ -2,7 +2,7 @@
 
 **Mesa Viva** es una aplicación de juegos de cartas y mesa con alma venezolana. Funciona sin conexión para jugar solo, contra bots o pasando el teléfono; y tiene salas en línea con código y QR para jugar con amigos. La web y el APK Android comparten el mismo motor de juego.
 
-> Estado actual: **v0.1.1**. Ocho juegos jugables, sala en línea por relay WebSocket, 11 idiomas de interfaz, temas de festividad, perfil con 10 niveles y exportación de crónicas a PDF.
+> Estado actual: **v0.2.0**. Diez juegos jugables, sala LAN sin internet por QR en Android, sala en línea por relay WebSocket, 11 idiomas de interfaz, temas de festividad, perfil con 10 niveles y exportación de crónicas a PDF.
 
 ---
 
@@ -15,7 +15,9 @@
 - **Ajedrez** completo (enroque, al paso, promoción, jaque mate, ahogado, 50 movimientos, repetición, material insuficiente) con IA alfa-beta.
 - **Damas** con captura obligatoria, cadenas y coronación.
 - **Serpientes y Escaleras** y **Mancala** con bots.
-- **Modos**: solo contra bots, pasar el teléfono (humanos y bots mezclados), sala en línea con rondas y chat.
+- **Go** 9×9 y 13×13 con capturas, ko, komi 6.5 y conteo de territorio.
+- **Jungle / Dou Shou Qi** con río, trampas, saltos de tigre y león y guaridas.
+- **Modos**: solo contra bots, pasar el teléfono (humanos y bots mezclados), sala en línea con rondas y chat y **sala LAN sin internet** en Android.
 - **Progresión**: 10 niveles, XP por partida, victoria, dificultad, puntos y racha; recompensas desbloqueables.
 - **Crónica de partida**: últimos 5 movimientos visibles, historial completo, descarga PDF con infografía.
 - **Temas**: Halloween criollo (El Silbón, La Sayona, El Hachero), Navidad, Reyes, Carnaval, San Valentín, San Patricio, Semana Santa, Cruz de Mayo, Corpus Christi, independencia por país y mesa neutral. El acento puede venir de la temporada, del sistema (Material You en Android) o del color dominante del fondo de pantalla.
@@ -26,7 +28,7 @@
 
 ## Catálogo y roadmap
 
-El catálogo dentro de la app muestra la visión completa de **30 juegos** con su estado y enlaces de reglas. La primera ola jugable son los 8 anteriores. Ludo, Backgammon, Damas Chinas, Go, Xiangqi, Shogi, Janggi, Jungle, Luzhanqi, Ur, Tren Mexicano, Chickenfoot, Aeroplane Chess, Póker, Mahjong, Riichi, Mahjong con naipes, Ajedrez para tres y Soroban están marcados como próximos o en investigación. No se usan marcas, arte ni reglamentos propietarios de terceros: los nombres comerciales del catálogo son referencias culturales.
+El catálogo dentro de la app muestra la visión completa de **30 juegos** con su estado y enlaces de reglas. La primera ola jugable son los 10 anteriores. Ludo, Backgammon, Damas Chinas, Xiangqi, Shogi, Janggi, Luzhanqi, Ur, Tren Mexicano, Chickenfoot, Aeroplane Chess, Póker, Mahjong, Riichi, Mahjong con naipes, Ajedrez para tres y Soroban están marcados como próximos o en investigación. No se usan marcas, arte ni reglamentos propietarios de terceros: los nombres comerciales del catálogo son referencias culturales.
 
 ## Arranque rápido (web)
 
@@ -59,7 +61,15 @@ npm run dev        # web en http://localhost:5173
 
 Producción: despliega el relay en Render/Fly/Railway/VPS con TLS (`wss://`) y configura `VITE_ROOM_WS_URL` al compilar o la URL desde Ajustes. Incluye `render.yaml` como punto de partida. El servidor respeta `PORT`, `ALLOWED_ORIGINS`, `MAX_ROOMS` y caduca salas inactivas. Para una experiencia pública, añade límites de uso y supervisión.
 
-> La sala en línea necesita el relay. Los modos locales (bots y pasar el teléfono) funcionan completamente sin internet. La sala LAN *sin servidor* por QR queda documentada en el roadmap: requiere un relay nativo en el teléfono anfitrión o WebRTC manual con doble QR.
+> La sala en línea necesita el relay. Los modos locales (bots y pasar el teléfono) funcionan completamente sin internet. En **Android**, el anfitrión puede crear una **sala LAN sin internet**: la app levanta un relay WebSocket en su propio teléfono, muestra un QR con `ws://IP-LOCAL:9001` y el invitado se une desde la misma WiFi u hotspot. En la web/PWA la sala LAN requiere desplegar el relay Node o usar la URL de un equipo de la red.
+
+### Sala LAN sin internet (Android)
+
+1. Conecta el teléfono anfitrión a una WiFi o activa un hotspot.
+2. **Sala → Sin internet → Crear sala sin internet**.
+3. Comparte el QR o el código. El QR incluye `relay=ws://…` para que el invitado configure el servidor automáticamente.
+4. El invitado abre **Sala → Sin internet → Escanear QR LAN**, escribe su nombre y entra.
+5. El anfitrión debe mantener la app abierta mientras dure la partida. Si la red bloquea puertos, revisa el firewall del hotspot o usa otra WiFi local.
 
 ## Android
 
@@ -82,7 +92,7 @@ Para una compilación limpia desde la raíz:
 npm run android:build
 ```
 
-El APK carga los assets locales con `WebViewAssetLoader` sobre un origen HTTPS seguro (`appassets.androidplatform.net`), lo que permite cámara, almacenamiento y audio. Incluye puentes nativos para vibración, sensores, color del sistema y guardado de PDF. La URL del relay se puede cambiar en Ajustes; para el emulador suele ser `ws://10.0.2.2:9001` y para un teléfono en la misma red, `ws://IP-DEL-PC:9001`.
+El APK carga los assets locales con `WebViewAssetLoader` sobre un origen HTTPS seguro (`appassets.androidplatform.net`), lo que permite cámara, almacenamiento y audio. Incluye puentes nativos para vibración, sensores, color del sistema, guardado de PDF y el relay LAN (`startLanServer`/`stopLanServer`). La URL del relay se puede cambiar en Ajustes; para el emulador suele ser `ws://10.0.2.2:9001` y para un teléfono en la misma red, `ws://IP-DEL-PC:9001`.
 
 **Firma de release**: el repo no incluye keystore. Genera uno propio, guárdalo fuera del repositorio y configura `android/keystore.properties` (ignorado por git) para producir un APK/AAB firmado. El workflow de CI produce un APK de depuración instalable.
 
@@ -106,7 +116,7 @@ python tools/check_i18n.py   # claves usadas vs. catálogo español
 
 ```
 src/core/        tipos, azar, niveles, registro, Match autoritativo
-src/games/       motores de los 8 juegos
+src/games/       motores de los 10 juegos
 src/ui/          pantallas, mesa, cartas, dados, tablero, resultados
 src/net/         protocolo de sala y relay WebSocket
 src/theme/       festividades, Semana Santa/Carnaval, paletas y Material You

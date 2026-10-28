@@ -730,6 +730,108 @@ function MancalaSurface({ view, act, busy }: SurfaceProps) {
   );
 }
 
+/* ------------------------------------------------------------------ Go */
+
+function GoSurface({ view, act, busy }: SurfaceProps) {
+  const t = useT();
+  const ex = extra(view);
+  const board = view.center.board;
+  const legal = new Set((ex.legalMoves ?? []) as number[]);
+  const captures = (ex.captures ?? {}) as Record<string, number>;
+  const komi = num(ex.komi, 6.5);
+  const size = num(ex.size, 9);
+  const passes = num(ex.passes, 0);
+  if (!board) return null;
+  const onCell = (index: number) => {
+    if (busy || !legal.has(index)) return;
+    act({ type: 'play', index });
+    haptic('card', true);
+    sfx('card');
+  };
+  return (
+    <div className="surface surface-go">
+      <div className="table-meta">
+        <span>{size}×{size}</span>
+        <span>·</span>
+        <span>komi {komi}</span>
+        {passes > 0 ? <><span>·</span><span>{t('table.goPasses', { n: passes })}</span></> : null}
+      </div>
+      <div className="board-frame board-frame-go">
+        <Board board={board} onCell={onCell} interactive={!busy && legal.size > 0} />
+      </div>
+      <div className="go-captures">
+        {view.players.map((player, index) => (
+          <span key={player.id} className={cx('capture-chip', player.isTurn && 'is-turn')}>
+            <span className="go-stone-dot" aria-hidden="true" style={{ background: index === 0 ? '#16181b' : '#f4ecd8' }} />
+            <span className="capture-name">{player.name}</span>
+            <span>{captures[player.id] ?? 0} {t('table.goCaptured')}</span>
+          </span>
+        ))}
+      </div>
+      <p className="board-hint">{legal.size > 0 ? t('prompt.goPlaceStone') : t('prompt.goWaitStone')}</p>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ Jungle */
+
+function JungleSurface({ view, act, busy }: SurfaceProps) {
+  const t = useT();
+  const { legal, selected, setSelected, ex } = useBoardSelection(view);
+  const board = view.center.board;
+  const pieces = (ex.pieces ?? { r: 0, b: 0 }) as { r: number; b: number };
+  if (!board) return null;
+  const cells = board.cells.map((cell) => ({ ...cell }));
+  for (const move of legal) {
+    if (cells[move.to]) {
+      cells[move.to] = {
+        ...cells[move.to],
+        highlight: cells[move.to]?.glyph ? 'capture' : 'move',
+      };
+    }
+  }
+  if (selected !== null && cells[selected]) cells[selected] = { ...cells[selected], highlight: 'selected' };
+  const onCell = (index: number) => {
+    if (busy) return;
+    if (selected !== null) {
+      const move = legal.find((candidate) => candidate.from === selected && candidate.to === index);
+      if (move) {
+        act({ type: 'move', from: selected, to: index });
+        setSelected(null);
+        haptic('card', true);
+        sfx('card');
+        return;
+      }
+    }
+    if (legal.some((candidate) => candidate.from === index)) {
+      setSelected(index);
+      haptic('select', true);
+      sfx('tap');
+    } else {
+      setSelected(null);
+    }
+  };
+  return (
+    <div className="surface surface-jungle">
+      <div className="jungle-score">
+        <span className="capture-chip"><span className="go-stone-dot" style={{ background: '#d9534f' }} />{t('jungle.red')}: {pieces.r}</span>
+        <span className="capture-chip"><span className="go-stone-dot" style={{ background: '#1b242b' }} />{t('jungle.black')}: {pieces.b}</span>
+      </div>
+      <div className="board-frame board-frame-jungle">
+        <Board board={{ ...board, cells }} onCell={onCell} interactive />
+      </div>
+      <div className="jungle-legend">
+        {['🐭 1', '🐱 2', '🐶 3', '🐺 4', '🐆 5', '🐯 6', '🦁 7', '🐘 8'].map((item) => (
+          <span key={item}>{item}</span>
+        ))}
+      </div>
+      <p className="board-hint">
+        {selected !== null ? t('table.selectDestination') : t('prompt.jungleYourTurn')}
+      </p>
+    </div>
+  );
+}
+
 /* ------------------------------------------------------------------ switch */
 export function GameSurface({ view, act, busy }: SurfaceProps) {
   switch (view.gameId) {
@@ -749,6 +851,10 @@ export function GameSurface({ view, act, busy }: SurfaceProps) {
       return <SnakesSurface view={view} act={act} busy={busy} />;
     case 'mancala':
       return <MancalaSurface view={view} act={act} busy={busy} />;
+    case 'go':
+      return <GoSurface view={view} act={act} busy={busy} />;
+    case 'jungle':
+      return <JungleSurface view={view} act={act} busy={busy} />;
     default:
       return (
         <div className="surface surface-fallback">

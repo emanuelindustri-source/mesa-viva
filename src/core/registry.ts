@@ -7,6 +7,8 @@ import { ajedrezModule } from '../games/ajedrez';
 import { damasModule } from '../games/damas';
 import { serpientesModule } from '../games/serpientes';
 import { mancalaModule } from '../games/mancala';
+import { goModule } from '../games/go';
+import { jungleModule } from '../games/jungle';
 
 export const GAME_MODULES: Record<GameId, GameModule<unknown>> = {
   caida: caidaModule as unknown as GameModule<unknown>,
@@ -17,6 +19,8 @@ export const GAME_MODULES: Record<GameId, GameModule<unknown>> = {
   damas: damasModule as unknown as GameModule<unknown>,
   serpientes: serpientesModule as unknown as GameModule<unknown>,
   mancala: mancalaModule as unknown as GameModule<unknown>,
+  go: goModule as unknown as GameModule<unknown>,
+  jungle: jungleModule as unknown as GameModule<unknown>,
 };
 
 export const GAMES: GameMeta[] = Object.values(GAME_MODULES).map((m) => m.meta);
@@ -55,11 +59,11 @@ export const CATALOG: CatalogEntry[] = [
   { id: 'ludo', name: 'Ludo', category: 'tablero', status: 'soon', players: '2–4', emoji: '🎲', url: 'https://www.ymimports.com/pages/how-to-play-ludo' },
   { id: 'backgammon', name: 'Backgammon', category: 'tablero', status: 'soon', players: '2', emoji: '🎯', url: 'https://www.ymimports.com/pages/how-to-play-backgammon' },
   { id: 'chino', name: 'Damas Chinas', category: 'tablero', status: 'soon', players: '2–6', emoji: '✡️', url: 'https://www.ymimports.com/pages/how-to-play-chinese-checkers' },
-  { id: 'go', name: 'Go', category: 'tablero', status: 'soon', players: '2', emoji: '⚪', url: 'https://www.ymimports.com/pages/how-to-play-go' },
+  { id: 'go', name: 'Go', category: 'tablero', status: 'playable', players: '2', emoji: '⚪', url: 'https://www.ymimports.com/pages/how-to-play-go', note: '9×9 y 13×13, capturas, ko y komi 6.5.' },
   { id: 'xiangqi', name: 'Xiangqi', category: 'tablero', status: 'soon', players: '2', emoji: '🀄', url: 'https://www.ymimports.com/pages/how-to-play-xiangqi-chinese-chess' },
   { id: 'shogi', name: 'Shogi', category: 'tablero', status: 'soon', players: '2', emoji: '☗', url: 'https://www.ymimports.com/pages/how-to-play-shogi' },
   { id: 'janggi', name: 'Janggi', category: 'tablero', status: 'research', players: '2', emoji: '🀄', url: 'https://www.ymimports.com/pages/how-to-play-janggi' },
-  { id: 'jungle', name: 'Jungle', category: 'tablero', status: 'soon', players: '2', emoji: '🐯', url: 'https://www.ymimports.com/pages/how-to-play-jungle' },
+  { id: 'jungle', name: 'Jungle', category: 'tablero', status: 'playable', players: '2', emoji: '🐯', url: 'https://www.ymimports.com/pages/how-to-play-jungle', note: 'Dou Shou Qi: río, trampas y saltos de tigre y león.' },
   { id: 'luzhanqi', name: 'Luzhanqi', category: 'tablero', status: 'research', players: '2–4', emoji: '🎖️', url: 'https://www.ymimports.com/pages/how-to-play-luzhanqi' },
   { id: 'ur', name: 'Juego Real de Ur', category: 'tablero', status: 'soon', players: '2', emoji: '🏺', url: 'https://www.ymimports.com/pages/how-to-play-royal-game-of-ur' },
   { id: 'mexican-train', name: 'Tren Mexicano', category: 'tablero', status: 'soon', players: '2–8', emoji: '🚂', url: 'https://www.ymimports.com/pages/how-to-play-mexican-train-dominos' },

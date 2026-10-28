@@ -21,6 +21,17 @@ import { initAudio } from './audio/engine';
 installDiagnostics();
 setLocale(useAppStore.getState().settings.language);
 
+if (typeof localStorage !== 'undefined' && localStorage.getItem('mesa-viva-lan-host') === '1') {
+  try {
+    (window as unknown as { MesaViva?: { stopLanServer?: () => void } }).MesaViva?.stopLanServer?.();
+  } catch {
+    // Si no hay puente nativo, solo se limpian las claves.
+  }
+  localStorage.removeItem('mesa-viva-lan-host');
+  localStorage.removeItem('mesa-viva-lan-url');
+  localStorage.removeItem('mesa-viva-room-server');
+}
+
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
     void navigator.serviceWorker.register('./sw.js').catch(() => undefined);

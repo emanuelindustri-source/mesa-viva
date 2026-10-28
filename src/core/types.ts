@@ -8,7 +8,9 @@ export type GameId =
   | 'ajedrez'
   | 'damas'
   | 'serpientes'
-  | 'mancala';
+  | 'mancala'
+  | 'go'
+  | 'jungle';
 
 export type Difficulty = 'easy' | 'normal' | 'hard';
 export type GameCategory = 'cartas' | 'tablero' | 'dados';
@@ -40,6 +42,7 @@ export interface GameOptions {
   teams?: boolean;
   seed?: number;
   doubleTwelve?: boolean;
+  boardSize?: number;
 }
 
 export interface Rng {
@@ -79,6 +82,7 @@ export interface BoardCell {
   label?: string;
   sub?: string;
   tone?: string;
+  side?: 'r' | 'b' | 'w';
   highlight?: Highlight;
   pieceId?: string;
 }

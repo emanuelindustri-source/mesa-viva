@@ -48,11 +48,18 @@ export function RoomScreen() {
   const [chatText, setChatText] = useState('');
   const [selectedGame, setSelectedGame] = useState<GameId | ''>('');
   const [joining, setJoining] = useState(false);
+  const [lanHost, setLanHost] = useState(() => typeof localStorage !== 'undefined' && localStorage.getItem('mesa-viva-lan-host') === '1');
+  const nativeLan = typeof window !== 'undefined' && typeof (window as unknown as { MesaViva?: { startLanServer?: unknown } }).MesaViva?.startLanServer === 'function';
 
   useEffect(() => {
+    const relay = route.params.get('relay');
+    if (relay && /^wss?:\/\//i.test(relay)) {
+      localStorage.setItem('mesa-viva-room-server', relay);
+      if (nativeLan) setTab('offline');
+    }
     const fromUrl = route.params.get('code');
     if (fromUrl) setCode(normalizeCode(fromUrl));
-  }, [route.params]);
+  }, [route.params, nativeLan]);
 
   useEffect(() => {
     if (room.error) {
@@ -63,7 +70,12 @@ export function RoomScreen() {
 
   const inviteUrl = useMemo(() => {
     if (!room.room) return '';
-    return `${window.location.origin}${window.location.pathname}#/room?code=${room.room.code}`;
+    const params = new URLSearchParams({ code: room.room.code });
+    const relay = (typeof localStorage !== 'undefined'
+      ? localStorage.getItem('mesa-viva-lan-url') ?? localStorage.getItem('mesa-viva-room-server')
+      : '')?.trim();
+    if (relay) params.set('relay', relay);
+    return `${window.location.origin}${window.location.pathname}#/room?${params.toString()}`;
   }, [room.room]);
 
   if (room.view && (room.phase === 'playing' || room.phase === 'result')) {
@@ -77,6 +89,31 @@ export function RoomScreen() {
     }
     trackAction('room:create', name);
     room.create(name.trim(), avatar);
+  };
+
+  const createLanRoom = () => {
+    if (name.trim().length < 2) {
+      toast(t('error.nameRequired'), 'warn');
+      return;
+    }
+    const bridge = (window as unknown as { MesaViva?: { startLanServer?: () => string } }).MesaViva;
+    const lanUrl = bridge?.startLanServer?.();
+    if (!lanUrl) {
+      toast(t('sala.lanError'), 'danger');
+      return;
+    }
+    try {
+      const parsed = new URL(lanUrl);
+      const localUrl = `ws://127.0.0.1:${parsed.port || '9001'}`;
+      localStorage.setItem('mesa-viva-lan-url', lanUrl);
+      localStorage.setItem('mesa-viva-room-server', localUrl);
+      localStorage.setItem('mesa-viva-lan-host', '1');
+      setLanHost(true);
+      trackAction('room:lanHost', lanUrl);
+      room.create(name.trim(), avatar);
+    } catch {
+      toast(t('sala.lanError'), 'danger');
+    }
   };
 
   const join = () => {
@@ -191,6 +228,44 @@ export function RoomScreen() {
               {room.connecting ? <p className="room-connecting">{t('sala.connecting')}</p> : null}
             </section>
           </div>
+        ) : nativeLan ? (
+          <div className="room-entry-grid">
+            <section className="room-entry-card">
+              <div className="room-entry-icon"><WifiOff size={22} /></div>
+              <h3>{t('sala.lanHostTitle')}</h3>
+              <p>{t('sala.lanHostDesc')}</p>
+              <label className="field">
+                <span>{t('sala.name')}</span>
+                <input value={name} onChange={(event) => setName(event.target.value)} maxLength={16} placeholder={t('onboarding.namePlaceholder')} />
+              </label>
+              <div className="field-label">{t('onboarding.avatar')}</div>
+              <div className="avatar-row">
+                {AVATARS.slice(0, 7).map((item) => (
+                  <button key={item.id} type="button" className={`avatar-choice mini ${avatar === item.id ? 'is-active' : ''}`} onClick={() => setAvatar(item.id)} aria-label={item.label}>
+                    <span>{item.emoji}</span>
+                  </button>
+                ))}
+              </div>
+              <Button variant="primary" full icon={<Wifi size={17} />} loading={room.connecting} onClick={createLanRoom}>{t('sala.lanCreate')}</Button>
+              <p className="room-hint"><WifiOff size={13} /> {t('sala.lanHint')}</p>
+            </section>
+            <section className="room-entry-card room-join-card">
+              <div className="room-entry-icon"><QrCode size={22} /></div>
+              <h3>{t('sala.lanJoinTitle')}</h3>
+              <p>{t('sala.lanJoinDesc')}</p>
+              <Button variant="secondary" full icon={<QrCode size={17} />} onClick={() => setScanOpen(true)}>{t('sala.lanScan')}</Button>
+              <label className="field">
+                <span>{t('sala.code')}</span>
+                <input value={code} onChange={(event) => setCode(normalizeCode(event.target.value))} maxLength={6} placeholder={t('lobby.codePlaceholder')} className="code-input" autoCapitalize="characters" />
+              </label>
+              <label className="field">
+                <span>{t('sala.name')}</span>
+                <input value={name} onChange={(event) => setName(event.target.value)} maxLength={16} placeholder={t('onboarding.namePlaceholder')} />
+              </label>
+              <Button variant="gold" full icon={joining ? undefined : <ArrowRight size={17} />} loading={joining || room.connecting} onClick={join}>{t('sala.joinBtn')}</Button>
+              <p className="room-hint"><Users size={13} /> {t('sala.lanGuestHint')}</p>
+            </section>
+          </div>
         ) : (
           <div className="room-offline-card">
             <div className="room-entry-icon"><WifiOff size={22} /></div>
@@ -215,8 +290,14 @@ export function RoomScreen() {
         <Modal open={scanOpen} onClose={() => setScanOpen(false)} title={t('sala.scanTitle')} subtitle={t('sala.scanGuest')} size="md" variant="bottom">
           <QRScanner
             onResult={(value) => {
-              const match = value.match(/code=([A-Z0-9]{4,6})/i) ?? value.match(/\b([A-Z0-9]{6})\b/);
-              const found = match?.[1];
+              const codeMatch = value.match(/[?&]code=([A-Z0-9]{4,6})/i) ?? value.match(/\b([A-Z0-9]{6})\b/);
+              const relayMatch = value.match(/[?&]relay=([^&]+)/i);
+              const relay = relayMatch?.[1] ? decodeURIComponent(relayMatch[1]) : null;
+              if (relay && /^wss?:\/\//i.test(relay)) {
+                localStorage.setItem('mesa-viva-room-server', relay);
+                if (nativeLan) setTab('offline');
+              }
+              const found = codeMatch?.[1];
               if (found) {
                 setCode(normalizeCode(found));
                 setScanOpen(false);
@@ -246,7 +327,12 @@ export function RoomScreen() {
         title={t('sala.title')}
         subtitle={`${t('sala.room')} ${room.room.code} · ${t('sala.playersIn', { n: room.room.players.length })}`}
         onBack={() => setTab('online')}
-        actions={<Chip tone={isHost ? 'gold' : 'purple'}>{isHost ? t('sala.host') : t('sala.guest')}</Chip>}
+        actions={
+        <>
+          {lanHost ? <Chip tone="gold"><WifiOff size={12} /> {t('sala.lanBadge')}</Chip> : null}
+          <Chip tone={isHost ? 'gold' : 'purple'}>{isHost ? t('sala.host') : t('sala.guest')}</Chip>
+        </>
+      }
       />
 
       <section className="room-code-card">
@@ -378,6 +464,7 @@ export function RoomScreen() {
           <section className="room-panel room-info-panel">
             <div className="room-info-row"><QrCode size={17} /><div><strong>{t('sala.qr')}</strong><p>{t('sala.qrHint', { code: room.room.code })}</p></div><Button variant="ghost" size="sm" onClick={() => setQrOpen(true)}>{t('common.open')}</Button></div>
             <div className="room-info-row"><Link2 size={17} /><div><strong>{t('sala.copyLink')}</strong><p>{inviteUrl.slice(0, 44)}…</p></div><Button variant="ghost" size="sm" onClick={() => void copyCode()}>{t('sala.copy')}</Button></div>
+            {lanHost ? <div className="room-info-row"><WifiOff size={17} /><div><strong>{t('sala.lanHostTitle')}</strong><p>{t('sala.lanHostNote')}</p></div></div> : null}
             <div className="room-info-row"><ShieldIcon /><div><strong>{t('sala.guestHint')}</strong><p>{t('sala.onlineHint')}</p></div></div>
           </section>
         </aside>

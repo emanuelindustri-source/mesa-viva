@@ -30,6 +30,19 @@ interface RoomStore {
 let host: RoomHost | null = null;
 let guest: RoomGuest | null = null;
 
+function stopNativeLan(): void {
+  if (typeof localStorage === 'undefined') return;
+  if (localStorage.getItem('mesa-viva-lan-host') !== '1') return;
+  try {
+    (window as unknown as { MesaViva?: { stopLanServer?: () => void } }).MesaViva?.stopLanServer?.();
+  } catch {
+    // Si el puente nativo no está, solo limpiamos las claves.
+  }
+  localStorage.removeItem('mesa-viva-lan-host');
+  localStorage.removeItem('mesa-viva-lan-url');
+  localStorage.removeItem('mesa-viva-room-server');
+}
+
 const initial = {
   role: null as Role | null,
   room: null as RoomInfo | null,
@@ -73,7 +86,10 @@ export const useRoom = create<RoomStore>((set, get) => {
           phase: view.result ? 'result' : 'playing',
         })),
         onError: (error) => set({ error, connecting: false }),
-        onClosed: reset,
+        onClosed: () => {
+          stopNativeLan();
+          reset();
+        },
       });
     },
 
@@ -92,7 +108,10 @@ export const useRoom = create<RoomStore>((set, get) => {
         })),
         onLobby: () => set({ phase: 'lobby', view: null, roundId: null }),
         onError: (error) => set({ error, connecting: false }),
-        onClosed: reset,
+        onClosed: () => {
+          stopNativeLan();
+          reset();
+        },
       });
     },
 
@@ -138,6 +157,7 @@ export const useRoom = create<RoomStore>((set, get) => {
     leave: () => {
       if (host) host.close();
       else if (guest) guest.close();
+      stopNativeLan();
       reset();
     },
 

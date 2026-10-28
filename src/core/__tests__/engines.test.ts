@@ -9,6 +9,8 @@ import { ajedrezModule } from '../../games/ajedrez';
 import { damasModule } from '../../games/damas';
 import { mancalaModule } from '../../games/mancala';
 import { serpientesModule } from '../../games/serpientes';
+import { goModule } from '../../games/go';
+import { jungleModule } from '../../games/jungle';
 import { Match } from '../match';
 import type { Seat } from '../types';
 import { easterSunday, resolveFestival } from '../../theme/festivals';
@@ -155,5 +157,43 @@ describe('Mancala y Serpientes', () => {
     const view = match.view('p0');
     expect(view.players[0]?.score).toBeGreaterThanOrEqual(1);
     expect(serpientesModule.meta.maxPlayers).toBe(4);
+  });
+});
+
+describe('Go', () => {
+  it('abre 81 intersecciones en 9×9 y termina con dos pases', () => {
+    const match = new Match({ gameId: 'go', seats: seats(2), options: { boardSize: 9 }, difficulty: 'normal', seed: 37 });
+    const view = match.view('p0');
+    expect(view.center.board?.cols).toBe(9);
+    expect(view.center.board?.rows).toBe(9);
+    expect((view.extra?.legalMoves as number[]).length).toBe(81);
+    expect(match.act('p0', { type: 'play', index: 40 }).ok).toBe(true);
+    expect(match.view('p1').turnId).toBe('p1');
+    expect(match.act('p1', { type: 'pass' }).ok).toBe(true);
+    expect(match.act('p0', { type: 'pass' }).ok).toBe(true);
+    expect(match.view('p0').phase).toBe('matchEnd');
+    expect(match.view('p0').result?.scores).toBeTruthy();
+    expect(goModule.meta.maxPlayers).toBe(2);
+  });
+
+  it('respeta el tablero de 13×13', () => {
+    const match = new Match({ gameId: 'go', seats: seats(2), options: { boardSize: 13 }, difficulty: 'normal', seed: 41 });
+    expect(match.view('p0').center.board?.cols).toBe(13);
+    expect((match.view('p0').extra?.legalMoves as number[]).length).toBe(169);
+  });
+});
+
+describe('Jungle', () => {
+  it('inicia con 16 animales y acepta un movimiento legal', () => {
+    const match = new Match({ gameId: 'jungle', seats: seats(2), options: {}, difficulty: 'normal', seed: 43 });
+    const view = match.view('p0');
+    const pieces = view.extra?.pieces as { r: number; b: number };
+    expect(pieces.r).toBe(8);
+    expect(pieces.b).toBe(8);
+    const moves = (view.extra?.legalMoves ?? []) as Array<{ from: number; to: number }>;
+    expect(moves.length).toBeGreaterThan(0);
+    expect(match.act('p0', { type: 'move', from: moves[0]!.from, to: moves[0]!.to }).ok).toBe(true);
+    expect(match.view('p1').turnId).toBe('p1');
+    expect(jungleModule.meta.maxPlayers).toBe(2);
   });
 });

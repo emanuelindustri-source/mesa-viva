@@ -1,6 +1,20 @@
 # Roadmap
 
-## v0.1.1 · La primera mesa (actual)
+## v0.2.0 · La mesa se amplía (actual)
+
+Go, Jungle y la sala LAN sin internet en Android.
+
+- [x] 10 juegos jugables con bots: Caída, Furia de Colores, Dominó, Dados Mentirosos, Ajedrez, Damas, Serpientes y Escaleras, Mancala, Go y Jungle.
+- [x] Go 9×9/13×13 con capturas, ko y conteo.
+- [x] Jungle con río, trampas, saltos y guaridas.
+- [x] Sala LAN sin internet con relay nativo en el teléfono anfitrión y QR.
+- [x] Limpieza del relay LAN al salir o al arrancar la app.
+- [x] 15 pruebas de motores.
+- [ ] Ludo y Backgammon (próxima ola).
+- [ ] Reconexión de invitados a mitad de partida y bots que cubran asientos desconectados.
+- [ ] Torneos y ligas de sala.
+
+## v0.1.1 · La primera mesa
 
 Pulido de onboarding, cartas/fichas, coordenadas de tablero y CI Android. La base de v0.1.0 se mantiene.
 
@@ -14,17 +28,6 @@ Pulido de onboarding, cartas/fichas, coordenadas de tablero y CI Android. La bas
 - [x] APK Android con puentes nativos.
 - [x] Diagnóstico y envío por correo.
 - [x] PWA instalable y offline.
-
-## v0.2.0 · La mesa crece
-
-- [ ] Ludo, Backgammon, Damas Chinas y Go.
-- [ ] Xiangqi, Shogi, Janggi, Jungle y Ur.
-- [ ] Póker sin dinero real, con fichas de práctica.
-- [ ] Tren Mexicano, Chickenfoot y dominó doble 12 completo.
-- [ ] Sala LAN sin internet con QR: relay nativo en el teléfono anfitrión o WebRTC manual con doble QR.
-- [ ] Reconexión de invitados a mitad de partida y bots que cubran asientos desconectados.
-- [ ] Torneos y ligas de sala.
-- [ ] Más personajes, avatares y efectos desbloqueables.
 
 ## v0.3.0 · La fiesta completa
 

@@ -73,6 +73,7 @@ export function SetupScreen({ gameId, initialMode }: { gameId: string; initialMo
   const [teams, setTeams] = useState(meta?.id === 'domino');
   const [target, setTarget] = useState(meta?.id === 'caida' ? 24 : 100);
   const [doubleTwelve, setDoubleTwelve] = useState(false);
+  const [boardSize, setBoardSize] = useState(9);
   const [rulesOpen, setRulesOpen] = useState(false);
 
   const anyBot = seats.some((s) => s.isBot);
@@ -105,7 +106,8 @@ export function SetupScreen({ gameId, initialMode }: { gameId: string; initialMo
     ...(meta?.id === 'caida' || meta?.id === 'domino' ? { target } : {}),
     ...(canTeams ? { teams } : {}),
     ...(meta?.id === 'domino' ? { doubleTwelve } : {}),
-  }), [meta?.id, target, canTeams, teams, doubleTwelve]);
+    ...(meta?.id === 'go' ? { boardSize } : {}),
+  }), [meta?.id, target, canTeams, teams, doubleTwelve, boardSize]);
 
   if (!meta) {
     return (
@@ -310,6 +312,18 @@ export function SetupScreen({ gameId, initialMode }: { gameId: string; initialMo
                 <input type="checkbox" checked={doubleTwelve} onChange={(event) => setDoubleTwelve(event.target.checked)} />
                 <span>{t('setup.doubleTwelve')}</span>
               </label>
+            ) : null}
+            {meta.id === 'go' ? (
+              <div className="option-row">
+                <span>{t('setup.boardSize')}</span>
+                <div className="segmented">
+                  {[9, 13].map((value) => (
+                    <button key={value} type="button" className={boardSize === value ? 'is-active' : ''} onClick={() => setBoardSize(value)}>
+                      {value}×{value}
+                    </button>
+                  ))}
+                </div>
+              </div>
             ) : null}
             <div className="setup-info-line">
               <Clock size={14} /> {meta.avgMinutes} {t('common.min')} · {t(`tag.${meta.tagKeys[0]?.replace('tag.', '') ?? 'clasico'}`)}
