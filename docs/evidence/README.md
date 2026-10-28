@@ -4,7 +4,7 @@ Capturas de las versiones publicadas. Se conservan para auditoría y para que cu
 
 | Versión | Carpeta | Contenido |
 |---|---|---|
-| v0.8.0 | [`v0.8.0/`](./v0.8.0/) | Cáscara Compose, catálogo, póker, Serpientes nativo y WebView |
+| v0.8.0 | [`v0.8.0/`](./v0.8.0/) | Cáscara Compose, catálogo, póker, Serpientes nativo, WebView y QR del APK |
 
 Reglas:
 
