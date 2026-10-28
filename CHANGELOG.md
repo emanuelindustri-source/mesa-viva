@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.4.0 · 2026-10-28
+
+Mesa resistente y Android 16.
+
+### Añadido
+
+- **Reconexión de invitados**: el invitado conserva su asiento y vuelve a la sala tras perder la conexión.
+- Relay Node y relay LAN de Android aceptan `rejoin`, mantienen una ventana de gracia de 60 s y distinguen salida voluntaria de caída.
+- Avisos de “reconectando” y “volviste a la mesa”.
+- **Android 16**: edge-to-edge con insets de barras/teclado y back predictivo integrado con el WebView.
+- **APK de release firmado** (RSA 4096) además del APK de depuración.
+- Prueba de protocolo de reconexión con relay real.
+
+### Cambiado
+
+- Versión de app y service worker a 0.4.0; `versionCode=5`.
+- Android se mantiene en `targetSdk=36` y sin librerías nativas `.so`.
+
+### Pendiente
+
+- Los juegos Damas Chinas, Xiangqi y Póker pasan a v0.5.0 para no sacrificar calidad.
+- La prueba de la sala LAN sigue pendiente en teléfono físico.
+
 ## 0.3.0 · 2026-10-28
 
 La mesa clásica.

@@ -1,7 +1,7 @@
 {
   "name": "mesa-viva",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.4.0",
   "type": "module",
   "description": "Mesa Viva: juego de cartas y mesa con alma venezolana. Offline-first, multijugador, multilingüe.",
   "license": "MIT",
@@ -17,6 +17,7 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "rooms": "node server/room-server.mjs",
+    "test:relay": "node tools/test-rejoin.mjs",
     "icons": "python tools/make_icons.py",
     "android:sync": "node tools/sync-android.mjs",
     "android:build": "npm run build && npm run android:sync && cd android && gradlew.bat assembleDebug"

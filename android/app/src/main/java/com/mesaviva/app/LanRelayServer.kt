@@ -36,7 +36,13 @@ class LanRelayServer {
     private data class Room(
         val host: WebSocket,
         val hostId: String,
-        val guests: ConcurrentHashMap<String, WebSocket> = ConcurrentHashMap(),
+        val guests: ConcurrentHashMap<String, Guest> = ConcurrentHashMap(),
+    )
+
+    private data class Guest(
+        var ws: WebSocket?,
+        val name: String,
+        val avatar: String,
     )
 
     private data class Client(
@@ -162,16 +168,55 @@ class LanRelayServer {
                     return
                 }
                 val guestId = "guest-${shortId()}"
+                val name = msg.optString("name", "Invitado").take(24)
+                val avatar = msg.optString("avatar", "tucan").take(24)
                 client.roomCode = code
                 client.role = "guest"
                 client.clientId = guestId
-                room.guests[guestId] = ws
+                room.guests[guestId] = Guest(ws, name, avatar)
                 send(ws, JSONObject().put("t", "joined").put("code", code).put("guestId", guestId))
                 send(room.host, JSONObject()
                     .put("t", "guest")
                     .put("guestId", guestId)
-                    .put("name", msg.optString("name", "Invitado").take(24))
-                    .put("avatar", msg.optString("avatar", "tucan").take(24)))
+                    .put("name", name)
+                    .put("avatar", avatar))
+            }
+
+            "rejoin" -> {
+                val code = normalize(msg.optString("code"))
+                val room = rooms[code]
+                if (room == null) {
+                    send(ws, JSONObject().put("t", "error").put("key", "sala.invalid"))
+                    return
+                }
+                val guestId = msg.optString("guestId")
+                val guest = room.guests[guestId]
+                if (guest == null) {
+                    send(ws, JSONObject().put("t", "error").put("key", "sala.rejoinExpired"))
+                    return
+                }
+                val previous = guest.ws
+                if (previous != null && previous !== ws) {
+                    try {
+                        previous.close(1000, "replaced by reconnect")
+                    } catch (_: Exception) {
+                        // Ignorar.
+                    }
+                }
+                guest.ws = ws
+                client.roomCode = code
+                client.role = "guest"
+                client.clientId = guestId
+                send(ws, JSONObject().put("t", "joined").put("code", code).put("guestId", guestId))
+                send(room.host, JSONObject().put("t", "guestRejoined").put("guestId", guestId))
+            }
+
+            "leave" -> {
+                val room = client.roomCode?.let { rooms[it] } ?: return
+                if (client.role != "guest") return
+                val guestId = client.clientId ?: return
+                room.guests.remove(guestId)
+                send(room.host, JSONObject().put("t", "guestLeft").put("guestId", guestId).put("permanent", true))
             }
 
             "send" -> {
@@ -180,7 +225,8 @@ class LanRelayServer {
                 if (client.role == "host") {
                     val to = msg.optString("to")
                     val guest = room.guests[to] ?: return
-                    send(guest, JSONObject()
+                    val socket = guest.ws ?: return
+                    send(socket, JSONObject()
                         .put("t", "message")
                         .put("from", client.clientId)
                         .put("payload", payload))
@@ -202,17 +248,23 @@ class LanRelayServer {
         val room = rooms[code] ?: return
         if (client.role == "host") {
             for (guest in room.guests.values) {
-                send(guest, JSONObject().put("t", "closed"))
+                val socket = guest.ws ?: continue
+                send(socket, JSONObject().put("t", "closed"))
                 try {
-                    guest.close()
+                    socket.close()
                 } catch (_: Exception) {
                     // Ignorar.
                 }
             }
             rooms.remove(code)
         } else {
-            room.guests.remove(client.clientId)
-            send(room.host, JSONObject().put("t", "guestLeft").put("guestId", client.clientId))
+            val guest = room.guests[client.clientId] ?: return
+            if (guest.ws !== ws) return
+            guest.ws = null
+            send(room.host, JSONObject()
+                .put("t", "guestLeft")
+                .put("guestId", client.clientId)
+                .put("permanent", false))
         }
     }
 

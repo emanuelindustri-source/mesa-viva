@@ -23,6 +23,7 @@ import android.util.Base64
 import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
+import android.window.OnBackInvokedDispatcher
 import android.webkit.JavascriptInterface
 import android.webkit.PermissionRequest
 import android.webkit.ValueCallback
@@ -39,6 +40,9 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.webkit.WebViewAssetLoader
 import java.io.File
 import kotlin.math.abs
@@ -69,13 +73,24 @@ class MainActivity : Activity() {
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window.statusBarColor = Color.parseColor("#061713")
-        window.navigationBarColor = Color.parseColor("#061713")
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.statusBarColor = Color.TRANSPARENT
+        window.navigationBarColor = Color.TRANSPARENT
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
 
         val root = FrameLayout(this).apply {
             setBackgroundColor(Color.parseColor("#061713"))
-            fitsSystemWindows = true
+            fitsSystemWindows = false
+        }
+        ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
+            val bars = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars()
+                    or WindowInsetsCompat.Type.displayCutout()
+                    or WindowInsetsCompat.Type.ime(),
+            )
+            view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+            insets
         }
         val web = WebView(this).apply {
             setBackgroundColor(Color.parseColor("#061713"))
@@ -151,6 +166,12 @@ class MainActivity : Activity() {
         )
 
         setContentView(root)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            onBackInvokedDispatcher.registerOnBackInvokedCallback(
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+            ) { handleBack() }
+        }
         configureWebView(web)
         web.loadUrl(baseUrl)
     }
@@ -401,11 +422,15 @@ class MainActivity : Activity() {
         webView?.onPause()
     }
 
-    @Deprecated("Back tradicional del WebView")
+    private fun handleBack() {
+        val web = webView
+        if (web != null && web.canGoBack()) web.goBack() else finish()
+    }
+
+    @Deprecated("Compatibilidad con Android anterior a 13")
     @Suppress("DEPRECATION")
     override fun onBackPressed() {
-        val web = webView
-        if (web != null && web.canGoBack()) web.goBack() else super.onBackPressed()
+        handleBack()
     }
 
     override fun onDestroy() {

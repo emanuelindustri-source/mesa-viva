@@ -8,7 +8,7 @@ const MAX_ROOMS = Number(process.env.MAX_ROOMS ?? 500);
 const MAX_GUESTS = 8;
 const MAX_MESSAGE = 64 * 1024;
 
-/** @type {Map<string, { host: import('ws').WebSocket, guests: Map<string, import('ws').WebSocket>, createdAt: number }>} */
+/** @type {Map<string, { host: import('ws').WebSocket, guests: Map<string, { ws: import('ws').WebSocket | null, name: string, avatar: string }>, createdAt: number }>} */
 const rooms = new Map();
 
 const httpServer = createServer((req, res) => {
@@ -122,18 +122,51 @@ server.on('connection', (ws) => {
         return;
       }
       const guestId = `guest-${randomUUID().slice(0, 8)}`;
+      const name = String(msg.name ?? 'Invitado').slice(0, 24);
+      const avatar = String(msg.avatar ?? 'tucan').slice(0, 24);
       ws.roomCode = code;
       ws.role = 'guest';
       ws.clientId = guestId;
-      room.guests.set(guestId, ws);
+      room.guests.set(guestId, { ws, name, avatar });
       send(ws, { t: 'joined', code, guestId });
       send(room.host, {
         t: 'guest',
         guestId,
-        name: String(msg.name ?? 'Invitado').slice(0, 24),
-        avatar: String(msg.avatar ?? 'tucan').slice(0, 24),
+        name,
+        avatar,
       });
       console.log(`[room] guest ${code} (${guestId})`);
+      return;
+    }
+
+    if (msg.t === 'rejoin') {
+      const code = normalize(msg.code);
+      const room = rooms.get(code);
+      if (!room) {
+        send(ws, { t: 'error', key: 'sala.invalid' });
+        return;
+      }
+      const guestId = String(msg.guestId ?? '');
+      const guest = room.guests.get(guestId);
+      if (!guest) {
+        send(ws, { t: 'error', key: 'sala.rejoinExpired' });
+        return;
+      }
+      const previous = guest.ws;
+      if (previous && previous !== ws) {
+        try {
+          previous.close(1000, 'replaced by reconnect');
+        } catch {
+          // Ignorar.
+        }
+      }
+      guest.ws = ws;
+      ws.roomCode = code;
+      ws.role = 'guest';
+      ws.clientId = guestId;
+      send(ws, { t: 'joined', code, guestId });
+      send(room.host, { t: 'guestRejoined', guestId });
+      console.log(`[room] guest reconnected ${code} (${guestId})`);
       return;
     }
 
@@ -142,10 +175,18 @@ server.on('connection', (ws) => {
       if (!room) return;
       if (ws.role === 'host') {
         const guest = room.guests.get(String(msg.to ?? ''));
-        if (guest) send(guest, { t: 'message', from: ws.clientId, payload: msg.payload });
+        if (guest?.ws) send(guest.ws, { t: 'message', from: ws.clientId, payload: msg.payload });
       } else {
         send(room.host, { t: 'message', from: ws.clientId, payload: msg.payload });
       }
+      return;
+    }
+
+    if (msg.t === 'leave') {
+      const room = ws.roomCode ? rooms.get(ws.roomCode) : null;
+      if (!room || ws.role !== 'guest') return;
+      room.guests.delete(ws.clientId);
+      send(room.host, { t: 'guestLeft', guestId: ws.clientId, permanent: true });
       return;
     }
 
@@ -161,19 +202,27 @@ server.on('connection', (ws) => {
     if (!room) return;
     if (ws.role === 'host') {
       for (const guest of room.guests.values()) {
-        send(guest, { t: 'closed' });
-        try {
-          guest.close(1000, 'host closed');
-        } catch {
-          // Ignorar.
+        if (guest.ws) {
+          send(guest.ws, { t: 'closed' });
+          try {
+            guest.ws.close(1000, 'host closed');
+          } catch {
+            // Ignorar.
+          }
         }
       }
       rooms.delete(code);
       console.log(`[room] host closed ${code}`);
     } else {
-      room.guests.delete(ws.clientId);
-      send(room.host, { t: 'guestLeft', guestId: ws.clientId });
-      console.log(`[room] guest left ${code} (${ws.clientId})`);
+      const guest = room.guests.get(ws.clientId);
+      if (!guest || guest.ws !== ws) return;
+      guest.ws = null;
+      send(room.host, { t: 'guestLeft', guestId: ws.clientId, permanent: false });
+      setTimeout(() => {
+        const current = room.guests.get(ws.clientId);
+        if (current && current.ws === null) room.guests.delete(ws.clientId);
+      }, 65000);
+      console.log(`[room] guest disconnected ${code} (${ws.clientId})`);
     }
   });
 
@@ -199,7 +248,7 @@ const heartbeat = setInterval(() => {
     if (Date.now() - room.createdAt > 12 * 60 * 60 * 1000) {
       try {
         room.host.close(1000, 'expired');
-        for (const guest of room.guests.values()) guest.close(1000, 'expired');
+        for (const guest of room.guests.values()) guest.ws?.close(1000, 'expired');
       } catch {
         // Ignorar.
       }
@@ -218,7 +267,7 @@ function shutdown() {
   for (const room of rooms.values()) {
     try {
       room.host.close(1000, 'server shutdown');
-      for (const guest of room.guests.values()) guest.close(1000, 'server shutdown');
+      for (const guest of room.guests.values()) guest.ws?.close(1000, 'server shutdown');
     } catch {
       // Ignorar.
     }

@@ -2,7 +2,7 @@
 
 **Mesa Viva** es una aplicación de juegos de cartas y mesa con alma venezolana. Funciona sin conexión para jugar solo, contra bots o pasando el teléfono; y tiene salas en línea con código y QR para jugar con amigos. La web y el APK Android comparten el mismo motor de juego.
 
-> Estado actual: **v0.3.0**. Doce juegos jugables, Ludo y Backgammon, sala LAN sin internet por QR en Android, sala en línea por relay WebSocket, 11 idiomas de interfaz, temas de festividad, perfil con 10 niveles y exportación de crónicas a PDF.
+> Estado actual: **v0.4.0**. Doce juegos jugables, reconexión automática de invitados, sala LAN sin internet por QR en Android, APK firmado y Android 16 (API 36), sala en línea por relay WebSocket, 11 idiomas de interfaz, temas de festividad, perfil con 10 niveles y exportación de crónicas a PDF.
 
 ---
 
@@ -19,12 +19,12 @@
 - **Jungle / Dou Shou Qi** con río, trampas, saltos de tigre y león y guaridas.
 - **Ludo** 2–4 jugadores con cuatro fichas, capturas, casillas seguras, dado y meta exacta.
 - **Backgammon** con barra, capturas, dobles, bear-off y 15 fichas por bando.
-- **Modos**: solo contra bots, pasar el teléfono (humanos y bots mezclados), sala en línea con rondas y chat y **sala LAN sin internet** en Android.
+- **Modos**: solo contra bots, pasar el teléfono (humanos y bots mezclados), sala en línea con rondas y chat, **sala LAN sin internet** en Android y **reconexión automática** del invitado si se cae la conexión.
 - **Progresión**: 10 niveles, XP por partida, victoria, dificultad, puntos y racha; recompensas desbloqueables.
 - **Crónica de partida**: últimos 5 movimientos visibles, historial completo, descarga PDF con infografía.
 - **Temas**: Halloween criollo (El Silbón, La Sayona, El Hachero), Navidad, Reyes, Carnaval, San Valentín, San Patricio, Semana Santa, Cruz de Mayo, Corpus Christi, independencia por país y mesa neutral. El acento puede venir de la temporada, del sistema (Material You en Android) o del color dominante del fondo de pantalla.
 - **Idiomas**: español, inglés, portugués de Brasil, portugués de Portugal, alemán, ruso, italiano, francés, chino tradicional, chino simplificado y japonés.
-- **Android**: APK con shell nativo, WebView seguro con `WebViewAssetLoader`, vibración, sensores para agitar/“lanzar” el teléfono, color Material You, cámara para QR y guardado de PDF en Descargas.
+- **Android**: APK Kotlin nativo con `WebViewAssetLoader`, target Android 16 (API 36), edge-to-edge con insets, back predictivo, APK de release firmado, vibración, sensores para agitar/“lanzar” el teléfono, color Material You, cámara para QR y guardado de PDF en Descargas.
 - **Privacidad**: sin cuentas, sin anuncios, sin rastreo. Las partidas locales se quedan en el dispositivo. El diagnóstico se envía solo si tú abres el correo.
 - **PWA**: instalable, service worker y funcionamiento offline.
 
@@ -77,7 +77,7 @@ Producción: despliega el relay en Render/Fly/Railway/VPS con TLS (`wss://`) y c
 
 Requisitos: JDK 17, Android SDK API 36, Gradle wrapper incluido.
 
-**[Descargar el APK de la última versión](https://github.com/emanuelindustri-source/mesa-viva/releases/latest)** · APK de depuración instalable (sideload). Para salas en línea, configura el relay en **Ajustes → Servidor de salas**.
+**[Descargar el APK de la última versión](https://github.com/emanuelindustri-source/mesa-viva/releases/latest)** · APK de release firmado y APK de depuración instalable (sideload). Para salas en línea, configura el relay en **Ajustes → Servidor de salas**.
 
 ```bash
 npm run build
@@ -96,13 +96,14 @@ npm run android:build
 
 El APK carga los assets locales con `WebViewAssetLoader` sobre un origen HTTPS seguro (`appassets.androidplatform.net`), lo que permite cámara, almacenamiento y audio. Incluye puentes nativos para vibración, sensores, color del sistema, guardado de PDF y el relay LAN (`startLanServer`/`stopLanServer`). La URL del relay se puede cambiar en Ajustes; para el emulador suele ser `ws://10.0.2.2:9001` y para un teléfono en la misma red, `ws://IP-DEL-PC:9001`.
 
-**Firma de release**: el repo no incluye keystore. Genera uno propio, guárdalo fuera del repositorio y configura `android/keystore.properties` (ignorado por git) para producir un APK/AAB firmado. El workflow de CI produce un APK de depuración instalable.
+**Firma de release**: el repo no incluye keystore. El APK firmado se genera localmente con un keystore guardado fuera del repositorio y `android/keystore.properties` (ignorado por git); ese archivo y el `.jks` deben respaldarse en un lugar privado. El workflow de CI produce un APK de depuración instalable. El APK no incluye librerías nativas `.so`, así que no tiene el problema de alineación de 16 KB.
 
 ## Pruebas y calidad
 
 ```bash
 npm run typecheck
 npm run test
+npm run test:relay            # requiere npm run rooms en otra terminal
 python tools/check_i18n.py   # claves usadas vs. catálogo español
 ```
 

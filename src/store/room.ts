@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { RoomGuest, RoomHost, makeRoomCode, type RoomInfo } from '../net/room';
 import type { GameAction, GameId, GameView } from '../core/types';
+import { toast } from './toasts';
+import { t } from '../i18n';
 
 type Role = 'host' | 'guest';
 type Phase = 'idle' | 'lobby' | 'playing' | 'result';
@@ -108,6 +110,7 @@ export const useRoom = create<RoomStore>((set, get) => {
         })),
         onLobby: () => set({ phase: 'lobby', view: null, roundId: null }),
         onError: (error) => set({ error, connecting: false }),
+        onStatus: (key) => toast(t(key), key === 'sala.reconnecting' ? 'warn' : 'success'),
         onClosed: () => {
           stopNativeLan();
           reset();

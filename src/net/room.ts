@@ -53,6 +53,7 @@ interface GuestCallbacks {
   onView: (view: GameView) => void;
   onLobby: () => void;
   onError: (error: string) => void;
+  onStatus?: (key: string) => void;
   onClosed: () => void;
 }
 
@@ -74,7 +75,8 @@ type ServerMessage =
   | { t: 'hosted'; code: string; hostId: string }
   | { t: 'joined'; code: string; guestId: string }
   | { t: 'guest'; guestId: string; name: string; avatar: string }
-  | { t: 'guestLeft'; guestId: string }
+  | { t: 'guestRejoined'; guestId: string }
+  | { t: 'guestLeft'; guestId: string; permanent?: boolean }
   | { t: 'message'; from: string; payload: WireMessage }
   | { t: 'error'; key: string }
   | { t: 'closed' }
@@ -105,7 +107,7 @@ export function normalizeCode(raw: string): string {
   return raw.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
 }
 
-function sendSocket(ws: WebSocket | null, message: ServerMessage | { t: 'host'; code: string } | { t: 'join'; code: string; name: string; avatar: string } | { t: 'send'; to?: string; payload: unknown } | { t: 'ping' }): boolean {
+function sendSocket(ws: WebSocket | null, message: ServerMessage | { t: 'host'; code: string } | { t: 'join'; code: string; name: string; avatar: string } | { t: 'rejoin'; code: string; guestId: string } | { t: 'leave' } | { t: 'send'; to?: string; payload: unknown } | { t: 'ping' }): boolean {
   if (!ws || ws.readyState !== WebSocket.OPEN) return false;
   try {
     ws.send(JSON.stringify(message));
@@ -127,6 +129,7 @@ export class RoomHost {
   private finishedRound = false;
   private closed = false;
   private ready = false;
+  private disconnectTimers = new Map<string, number>();
 
   constructor(code: string, hostName: string, hostAvatar: string, callbacks: HostCallbacks) {
     this.code = normalizeCode(code);
@@ -218,12 +221,50 @@ export class RoomHost {
           ...this.room,
           players: this.room.players.map((p) => p.id === msg.guestId ? { ...p, connected: false } : p),
         };
-        if (this.match) {
+        const existing = this.disconnectTimers.get(msg.guestId);
+        if (existing !== undefined) window.clearTimeout(existing);
+        if (msg.permanent && this.match) {
           this.addChat(msg.guestId, 'salió de la mesa');
           this.returnToLobby();
+          break;
+        }
+        if (this.match) {
+          this.addChat(msg.guestId, 'se desconectó de la mesa');
+          const timer = window.setTimeout(() => {
+            this.disconnectTimers.delete(msg.guestId);
+            const player = this.room.players.find((p) => p.id === msg.guestId);
+            if (this.match && player && !player.connected) {
+              this.addChat(msg.guestId, 'no volvió a la mesa');
+              this.returnToLobby();
+            }
+          }, 60000);
+          this.disconnectTimers.set(msg.guestId, timer);
+          this.broadcastRoom();
         } else {
           this.broadcastRoom();
         }
+        break;
+      }
+      case 'guestRejoined': {
+        const timer = this.disconnectTimers.get(msg.guestId);
+        if (timer !== undefined) window.clearTimeout(timer);
+        this.disconnectTimers.delete(msg.guestId);
+        this.room = {
+          ...this.room,
+          players: this.room.players.map((p) => p.id === msg.guestId ? { ...p, connected: true } : p),
+        };
+        const player = this.room.players.find((p) => p.id === msg.guestId);
+        if (!player) break;
+        this.sendTo(msg.guestId, { t: 'welcome', room: this.room, youId: msg.guestId });
+        if (this.match) {
+          const viewerId = this.seats.some((seat) => seat.id === msg.guestId) ? msg.guestId : 'spectator';
+          try {
+            this.sendTo(msg.guestId, { t: 'view', view: this.match.view(viewerId) });
+          } catch {
+            // La vista se reenviará en el próximo cambio.
+          }
+        }
+        this.broadcastRoom();
         break;
       }
       case 'message':
@@ -401,6 +442,8 @@ export class RoomHost {
     this.seats = [];
     this.roundId = null;
     this.finishedRound = false;
+    for (const timer of this.disconnectTimers.values()) window.clearTimeout(timer);
+    this.disconnectTimers.clear();
     this.broadcast({ t: 'lobby' });
     this.broadcastRoom();
   }
@@ -420,6 +463,8 @@ export class RoomHost {
     if (this.closed) return;
     this.closed = true;
     if (this.botTimer !== null) window.clearInterval(this.botTimer);
+    for (const timer of this.disconnectTimers.values()) window.clearTimeout(timer);
+    this.disconnectTimers.clear();
     try {
       this.ws?.close(1000, 'host closed');
     } catch {
@@ -436,22 +481,48 @@ export class RoomGuest {
   private closed = false;
   private youId: string | null = null;
   private welcomeTimer: number | null = null;
+  private reconnectTimer: number | null = null;
+  private reconnectAttempts = 0;
+  private readonly url: string;
+  private readonly safeName: string;
+  private readonly safeAvatar: string;
 
   constructor(code: string, name: string, avatar: string, callbacks: GuestCallbacks) {
     this.code = normalizeCode(code);
     this.callbacks = callbacks;
-    const url = roomServerUrl();
-    if (!url) {
+    this.url = roomServerUrl();
+    this.safeName = sanitizeName(name) || 'Invitado';
+    this.safeAvatar = avatar || 'tucan';
+    if (!this.url) {
       callbacks.onError('sala.serverMissing');
       return;
     }
-    const safeName = sanitizeName(name) || 'Invitado';
-    this.ws = new WebSocket(url);
-    this.ws.onopen = () => {
-      if (this.closed) return;
-      sendSocket(this.ws, { t: 'join', code: this.code, name: safeName, avatar: avatar || 'tucan' });
+    this.connect(false);
+    this.welcomeTimer = window.setTimeout(() => {
+      if (!this.closed && !this.youId) callbacks.onError('sala.connectionError');
+    }, 14000);
+  }
+
+  private connect(rejoin: boolean): void {
+    if (this.closed || !this.url) return;
+    const ws = new WebSocket(this.url);
+    this.ws = ws;
+    ws.onopen = () => {
+      if (this.closed) {
+        try {
+          ws.close();
+        } catch {
+          // Ignorar.
+        }
+        return;
+      }
+      if (rejoin && this.youId) {
+        sendSocket(ws, { t: 'rejoin', code: this.code, guestId: this.youId });
+      } else {
+        sendSocket(ws, { t: 'join', code: this.code, name: this.safeName, avatar: this.safeAvatar });
+      }
     };
-    this.ws.onmessage = (event) => {
+    ws.onmessage = (event) => {
       let msg: ServerMessage | null = null;
       try {
         msg = JSON.parse(String(event.data)) as ServerMessage;
@@ -460,15 +531,30 @@ export class RoomGuest {
       }
       if (msg) this.receive(msg);
     };
-    this.ws.onerror = () => {
-      if (!this.closed) callbacks.onError('sala.needInternet');
+    ws.onerror = () => {
+      if (!this.closed && !rejoin) this.callbacks.onError('sala.needInternet');
     };
-    this.ws.onclose = () => {
-      if (!this.closed) callbacks.onError('sala.connectionError');
+    ws.onclose = () => {
+      if (this.closed) return;
+      if (this.youId) this.scheduleReconnect();
+      else this.callbacks.onError('sala.connectionError');
     };
-    this.welcomeTimer = window.setTimeout(() => {
-      if (!this.closed && !this.youId) callbacks.onError('sala.connectionError');
-    }, 14000);
+  }
+
+  private scheduleReconnect(): void {
+    if (this.closed || this.reconnectTimer !== null) return;
+    if (this.reconnectAttempts >= 6) {
+      this.callbacks.onError('sala.reconnectFailed');
+      this.close();
+      return;
+    }
+    this.reconnectAttempts += 1;
+    this.callbacks.onStatus?.('sala.reconnecting');
+    const delay = Math.min(700 * this.reconnectAttempts, 4200);
+    this.reconnectTimer = window.setTimeout(() => {
+      this.reconnectTimer = null;
+      this.connect(true);
+    }, delay);
   }
 
   private receive(msg: ServerMessage): void {
@@ -482,6 +568,11 @@ export class RoomGuest {
       return;
     }
     if (msg.t === 'error') {
+      if (msg.key === 'sala.rejoinExpired' || msg.key === 'sala.invalid') {
+        this.callbacks.onError(msg.key);
+        this.close();
+        return;
+      }
       this.callbacks.onError(msg.key);
       return;
     }
@@ -489,12 +580,16 @@ export class RoomGuest {
     const payload = msg.payload;
     if (!payload) return;
     switch (payload.t) {
-      case 'welcome':
+      case 'welcome': {
+        const wasReconnect = this.reconnectAttempts > 0;
         if (this.welcomeTimer !== null) window.clearTimeout(this.welcomeTimer);
         this.welcomeTimer = null;
+        this.reconnectAttempts = 0;
         this.youId = payload.youId;
         this.callbacks.onRoom(payload.room, payload.youId);
+        if (wasReconnect) this.callbacks.onStatus?.('sala.reconnected');
         break;
+      }
       case 'room':
         this.callbacks.onRoom(payload.room, this.youId ?? '');
         break;
@@ -503,7 +598,8 @@ export class RoomGuest {
         break;
       case 'view':
         this.callbacks.onView(payload.view);
-        break;      case 'lobby':
+        break;
+      case 'lobby':
         this.callbacks.onLobby();
         break;
       case 'error':
@@ -540,7 +636,8 @@ export class RoomGuest {
 
   private send(payload: WireMessage): void {
     if (!sendSocket(this.ws, { t: 'send', payload })) {
-      this.callbacks.onError('sala.connectionError');
+      if (this.youId) this.callbacks.onStatus?.('sala.reconnecting');
+      else this.callbacks.onError('sala.connectionError');
     }
   }
 
@@ -548,7 +645,11 @@ export class RoomGuest {
     if (this.closed) return;
     this.closed = true;
     if (this.welcomeTimer !== null) window.clearTimeout(this.welcomeTimer);
+    if (this.reconnectTimer !== null) window.clearTimeout(this.reconnectTimer);
+    this.welcomeTimer = null;
+    this.reconnectTimer = null;
     try {
+      sendSocket(this.ws, { t: 'leave' });
       this.ws?.close(1000, 'guest left');
     } catch {
       // Ignorar.

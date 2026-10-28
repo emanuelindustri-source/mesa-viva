@@ -1,6 +1,19 @@
 # Roadmap
 
-## v0.3.0 · La mesa clásica (actual)
+## v0.4.0 · Mesa resistente (actual)
+
+Reconexión de invitados, Android 16 y APK firmado.
+
+- [x] Reconexión automática del invitado con identidad y ventana de gracia.
+- [x] `rejoin`/`leave` en relay Node y relay LAN Kotlin.
+- [x] Edge-to-edge y back predictivo en Android 16.
+- [x] APK de release firmado con keystore fuera del repositorio.
+- [x] 21 pruebas de motores + prueba de reconexión con relay real.
+- [ ] Damas Chinas, Xiangqi y Póker (v0.5.0).
+- [ ] Prueba de sala LAN en teléfono físico.
+- [ ] Torneos y ligas de sala.
+
+## v0.3.0 · La mesa clásica
 
 Ludo, Backgammon y Android moderno.
 
