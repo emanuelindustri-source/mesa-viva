@@ -4,14 +4,14 @@
 
 ## Estado actual
 
-- **Versión publicada:** 0.7.0
+- **Versión publicada:** 0.7.1
 - **Juego:** 14 juegos jugables.
 - **Repositorio:** <https://github.com/emanuelindustri-source/mesa-viva>
 - **Portada:** <https://emanuelindustri-source.github.io/mesa-viva/>
 - **Juego web:** <https://emanuelindustri-source.github.io/mesa-viva/play/>
-- **Release:** <https://github.com/emanuelindustri-source/mesa-viva/releases/tag/v0.7.0>
-- **VERSION:** `0.7.0`
-- **Commit de release:** `cbc522b`
+- **Release:** <https://github.com/emanuelindustri-source/mesa-viva/releases/tag/v0.7.1>
+- **VERSION:** `0.7.1`
+- **Commit de release:** pendiente
 
 ### Calidad
 
@@ -19,7 +19,7 @@
 - TypeScript sin errores.
 - Web, APK debug y APK firmado compilados.
 - CI, Pages y Android verdes.
-- APK firmado v0.7.0: `9BE4F1B16295500B4016289BBB505441F90DBB7291B4A989244BFBD6583B33A8`.
+- APK firmado v0.7.1: `E1A5A73702BA243664BBA61C5ECAF4A54B068387A3C8C2A0FEA846BA5F14E3BA`.
 - APK firmado más grande (8.19 MB) por Compose.
 
 ### Android real
@@ -36,7 +36,7 @@
 - Plan: `docs/COMPOSE_MIGRATION.md`.
 - Próxima fase: inicio, ajustes, niveles y lobby nativos.
 
-## Siguiente versión: 0.7.0
+## Siguiente versión: 0.8.0
 
 Ver [`v0.7.0.md`](./v0.7.0.md). Incluye:
 

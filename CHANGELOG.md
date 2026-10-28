@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.7.1 · 2026-10-28
+
+Caída, mesa legible.
+
+### Corregido
+
+- Bots de Caída a 1500 ms + 700 ms tras caída, canto, entrega o fin de mano.
+- Entrega visible con 4 cartas, resultado y puntos.
+- Carta recién jugada resaltada; capturas con fantasma, flecha y flotante +N.
+- Mano centrada sin cartas cortadas ni frames con cartas de más.
+- Cabecera compacta para 4 jugadores.
+- Píldora de captura con limpieza por mano; ya no queda congelada.
+- Barra de acciones con altura reservada y toast desplazado.
+- Canto solo antes de la primera carta; sin victoria instantánea.
+- Reglas completas y meta por defecto 100.
+- Pluralización y pistas de cartas corregidas.
+- Partículas capadas y `reduceMotion` automático en equipos de baja potencia.
+- 25 pruebas.
+
 ## 0.7.0 · 2026-10-28
 
 La estrella.

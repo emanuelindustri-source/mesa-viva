@@ -71,7 +71,7 @@ export function SetupScreen({ gameId, initialMode }: { gameId: string; initialMo
   );
   const [difficulty, setDifficulty] = useState<Difficulty>('normal');
   const [teams, setTeams] = useState(meta?.id === 'domino');
-  const [target, setTarget] = useState(meta?.id === 'caida' ? 24 : 100);
+  const [target, setTarget] = useState(meta?.id === 'caida' ? 100 : 100);
   const [doubleTwelve, setDoubleTwelve] = useState(false);
   const [boardSize, setBoardSize] = useState(9);
   const [rulesOpen, setRulesOpen] = useState(false);
@@ -81,7 +81,7 @@ export function SetupScreen({ gameId, initialMode }: { gameId: string; initialMo
   const maxPlayers = meta?.maxPlayers ?? 4;
   const categoryLabel = meta?.category === 'cartas' ? t('catalog.cards') : meta?.category === 'tablero' ? t('catalog.board') : t('catalog.dice');
   const canTeams = Boolean(meta && (meta.id === 'caida' || meta.id === 'domino') && count === 4);
-  const targetOptions = meta?.id === 'caida' ? [24, 30, 50] : meta?.id === 'domino' ? [50, 100, 150] : [];
+  const targetOptions = meta?.id === 'caida' ? [40, 70, 100] : meta?.id === 'domino' ? [50, 100, 150] : [];
 
   useEffect(() => {
     setSeats((previous) => {

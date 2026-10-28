@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { makeRng } from '../rng';
 import { awardXp, levelForXp } from '../levels';
 import { detectCanto } from '../../games/caida';
+import { caidaModule } from '../../games/caida';
 import { furiaModule } from '../../games/furia';
 import { dominoModule } from '../../games/domino';
 import { dadosModule } from '../../games/dados';
@@ -57,7 +58,7 @@ describe('Caída', () => {
     expect(detectCanto([card('oros', 1), card('copas', 11), card('espadas', 12)])?.key).toBe('registro');
     expect(detectCanto([card('oros', 1), card('copas', 11), card('espadas', 11)])?.key).toBe('casaChica');
     expect(detectCanto([card('oros', 10), card('copas', 11), card('espadas', 12)])?.key).toBe('patrulla');
-    expect(detectCanto([card('oros', 7), card('copas', 7), card('espadas', 7)])?.points).toBe(5);
+    expect(detectCanto([card('oros', 7), card('copas', 7), card('espadas', 7)])?.points).toBe(3);
   });
 
   it('reparte, entrega la mesa y juega sin filtrar la mano rival', () => {
@@ -75,6 +76,36 @@ describe('Caída', () => {
     expect(mine.players.every((p) => p.cardsLeft === 3)).toBe(true);
     expect(mine.phase).toBe('play');
     expect(mine.turnId).toBe('p1');
+  });
+
+  it('no permite cantar después de jugar la primera carta', () => {
+    const state = caidaModule.create(seats(2), {}, makeRng(5));
+    state.phase = 'play';
+    state.turn = 0;
+    state.hands.p0 = [
+      { id: 'oros-1', suit: 'oros', rank: 1 },
+      { id: 'copas-1', suit: 'copas', rank: 1 },
+      { id: 'espadas-1', suit: 'espadas', rank: 1 },
+    ];
+    state.playedThisHand.p0 = true;
+    const result = caidaModule.act(state, { type: 'canto' }, 'p0', makeRng(5));
+    expect(result.error).toBe('error.cantoAfterPlay');
+  });
+
+  it('termina la mano y espera el marcador antes de repartir', () => {
+    const state = caidaModule.create(seats(2), {}, makeRng(9));
+    state.phase = 'play';
+    state.turn = 0;
+    state.hands.p0 = [{ id: 'oros-1', suit: 'oros', rank: 1 }];
+    state.hands.p1 = [];
+    state.deck = [];
+    const result = caidaModule.act(state, { type: 'play', cardId: 'oros-1' }, 'p0', makeRng(9));
+    expect(result.error).toBeUndefined();
+    expect(result.state.phase).toBe('handEnd');
+    expect(result.state.lastHandSummary?.length).toBe(2);
+    const next = caidaModule.act(result.state, { type: 'nextHand' }, 'p0', makeRng(9));
+    expect(next.state.phase).toBe('entrega');
+    expect(next.state.handNo).toBe(2);
   });
 });
 

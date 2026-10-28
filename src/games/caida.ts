@@ -66,6 +66,11 @@ interface CaidaState {
   delivery?: DeliveryResult;
   lastCapture?: CaptureResult;
   lastCanto?: { playerId: string; key: string; points: number; instant: boolean };
+  lastPlayed?: { playerId: string; card: CardView };
+  lastCapturer?: string;
+  handStartScores: Record<string, number>;
+  playedThisHand: Record<string, boolean>;
+  lastHandSummary?: Array<{ playerId: string; name: string; cards: number; points: number; score: number }>;
   winnerIds?: string[];
   result?: MatchResult;
   rng: Rng;
@@ -103,26 +108,26 @@ export function detectCanto(hand: CardView[]): CantoResult | null {
   if (triple) {
     return {
       key: 'trivilin',
-      points: 5,
-      instant: triple[0] === 12,
+      points: 3,
+      instant: false,
       rank: triple[0],
     };
   }
   if (has(1) && has(11) && has(11) && counts.get(11) === 2) {
-    return { key: 'casaChica', points: 11, instant: false };
+    return { key: 'casaChica', points: 5, instant: false };
   }
   if (has(1) && has(12) && counts.get(12) === 2) {
-    return { key: 'casaGrande', points: 12, instant: false };
+    return { key: 'casaGrande', points: 6, instant: false };
   }
-  if (has(1) && has(10) && has(11)) return { key: 'registrico', points: 10, instant: false };
-  if (has(1) && has(11) && has(12)) return { key: 'registro', points: 8, instant: false };
+  if (has(1) && has(10) && has(11)) return { key: 'registrico', points: 5, instant: false };
+  if (has(1) && has(11) && has(12)) return { key: 'registro', points: 4, instant: false };
 
   if (pair) {
     const pairRank = pair[0];
     const third = ranks.find((r) => r !== pairRank) ?? 0;
     const adjacent = third === pairRank - 1 || third === pairRank + 1;
-    if (adjacent) return { key: 'vigia', points: 7, instant: false, rank: pairRank };
-    return { key: 'ronda', points: rankPoints(pairRank), instant: false, rank: pairRank };
+    if (adjacent) return { key: 'vigia', points: 4, instant: false, rank: pairRank };
+    return { key: 'ronda', points: Math.min(2, rankPoints(pairRank)), instant: false, rank: pairRank };
   }
 
   const unique = [...counts.keys()].sort((a, b) => a - b);
@@ -134,7 +139,7 @@ export function detectCanto(hand: CardView[]): CantoResult | null {
         (a === 1 && b === 2 && c === 3) ||
         (a === 5 && b === 6 && c === 7) ||
         (a === 10 && b === 11 && c === 12);
-      if (consecutive) return { key: 'patrulla', points: 6, instant: false };
+      if (consecutive) return { key: 'patrulla', points: 3, instant: false };
     }
   }
   return null;
@@ -222,6 +227,11 @@ function newHand(state: CaidaState, dealer: number): CaidaState {
     delivery: undefined,
     lastCapture: undefined,
     lastCanto: undefined,
+    lastPlayed: undefined,
+    lastCapturer: undefined,
+    handStartScores: { ...state.scores },
+    playedThisHand: Object.fromEntries(state.seats.map((s) => [s.id, false])),
+    lastHandSummary: undefined,
   };
 }
 
@@ -238,7 +248,7 @@ function startDelivery(state: InternalState): { state: InternalState; events: Re
   const asc = [1, 2, 3, 4];
   const desc = [4, 3, 2, 1];
   const ok = ranks.every((r, i) => r === asc[i]) || ranks.every((r, i) => r === desc[i]);
-  const points = ok ? 4 : 1;
+  const points = ok ? 2 : 1;
   const recipient = ok ? dealer : (state.seats[nextIndex(state.dealer, state.seats.length)] as Seat);
   const scores = { ...state.scores, [recipient.id]: (state.scores[recipient.id] ?? 0) + points };
   const delivery: DeliveryResult = {
@@ -279,29 +289,62 @@ function startDelivery(state: InternalState): { state: InternalState; events: Re
     turn: nextIndex(state.dealer, state.seats.length),
     lastCapture: undefined,
     lastCanto: undefined,
+    lastPlayed: undefined,
+    lastCapturer: undefined,
   };
   return { state: checkTarget(nextState), events };
 }
 
 function endHand(state: InternalState): { state: InternalState; events: ReturnType<typeof event>[] } {
   const events = [event('log.handEnd', {}, 'info')];
+  let captured = { ...state.captured };
+  let table = state.table;
+  if (table.length > 0 && state.lastCapturer) {
+    const owner = state.seats.find((seat) => seat.id === state.lastCapturer);
+    if (owner) {
+      captured = {
+        ...captured,
+        [owner.id]: [...(captured[owner.id] ?? []), ...table],
+      };
+      events.push(event('log.tableSweep', { p: owner.name, n: table.length }, 'info', owner.id));
+    }
+  }
+  table = [];
   const scores = { ...state.scores };
   for (const seat of state.seats) {
-    const count = state.captured[seat.id]?.length ?? 0;
+    const count = captured[seat.id]?.length ?? 0;
     const pts = Math.floor(count / 10);
     if (pts > 0) {
       scores[seat.id] = (scores[seat.id] ?? 0) + pts;
       events.push(event('log.cardsCounted', { p: seat.name, n: count, points: pts }, 'success', seat.id));
     }
   }
-  const nextState: InternalState = { ...state, scores, phase: 'handEnd' };
+  const summary = state.seats.map((seat) => ({
+    playerId: seat.id,
+    name: seat.name,
+    cards: captured[seat.id]?.length ?? 0,
+    points: (scores[seat.id] ?? 0) - (state.handStartScores[seat.id] ?? 0),
+    score: scores[seat.id] ?? 0,
+  }));
+  const nextState: InternalState = {
+    ...state,
+    captured,
+    table,
+    scores,
+    phase: 'handEnd',
+    lastHandSummary: summary,
+    lastCapture: undefined,
+    lastPlayed: undefined,
+    delivery: undefined,
+    lastCanto: undefined,
+    lastCapturer: undefined,
+  };
   const checked = checkTarget(nextState);
   if (checked.phase === 'matchEnd') {
     events.push(event('log.matchEnd', { p: playerName(state.seats, checked.winnerIds?.[0] ?? '') }, 'magic'));
     return { state: checked, events };
   }
-  const dealer = nextIndex(state.dealer, state.seats.length);
-  return { state: newHand({ ...nextState, phase: 'handEnd' }, dealer), events };
+  return { state: nextState, events };
 }
 
 function playCard(
@@ -369,6 +412,9 @@ function playCard(
     captured,
     scores,
     turn: nextIndex(state.turn, state.seats.length),
+    playedThisHand: { ...state.playedThisHand, [actorId]: true },
+    lastPlayed: { playerId: actorId, card },
+    lastCapturer: captureCards.length > 0 ? actorId : state.lastCapturer,
     lastCapture:
       captureCards.length > 0
         ? { playerId: actorId, cards: captureCards, points, mesa, rank: card.rank }
@@ -393,28 +439,19 @@ function claimCanto(state: InternalState, actorId: string): { state: InternalSta
   if (!seat || seat.id !== actorId) return { state, events: [], error: 'error.notYourTurn' };
   const claimed = state.claimedHands[actorId] ?? [];
   if (claimed.includes(state.handNo)) return { state, events: [], error: 'error.alreadyClaimed' };
+  if (state.playedThisHand[actorId]) return { state, events: [], error: 'error.cantoAfterPlay' };
   const canto = detectCanto(state.hands[actorId] ?? []);
   if (!canto) return { state, events: [], error: 'error.noCanto' };
   const scores = { ...state.scores, [actorId]: (state.scores[actorId] ?? 0) + canto.points };
-  const instantWin = canto.instant || (canto.key === 'trivilin' && state.handNo === 1);
   const next: InternalState = {
     ...state,
     scores,
     claimedHands: { ...state.claimedHands, [actorId]: [...claimed, state.handNo] },
-    lastCanto: { playerId: actorId, key: canto.key, points: canto.points, instant: instantWin },
+    lastCanto: { playerId: actorId, key: canto.key, points: canto.points, instant: false },
   };
   const events = [
-    event(
-      instantWin ? 'log.cantoWin' : 'log.canto',
-      { p: seat.name, canto: cantoLabel(canto.key), points: canto.points },
-      instantWin ? 'magic' : 'success',
-      actorId,
-    ),
+    event('log.canto', { p: seat.name, canto: cantoLabel(canto.key), points: canto.points }, 'success', actorId),
   ];
-  if (instantWin) {
-    const finished = finishMatch(next, 'result.reason.canto', actorId);
-    return { state: finished, events };
-  }
   return { state: checkTarget(next), events };
 }
 
@@ -449,9 +486,11 @@ function createGame(seats: Seat[], options: GameOptions, rng: Rng): InternalStat
     dealer: 0,
     turn: 0,
     handNo: 1,
-    target: options.target ?? 24,
+    target: options.target ?? 100,
     teams,
     phase: 'entrega',
+    handStartScores: Object.fromEntries(withTeams.map((s) => [s.id, 0])),
+    playedThisHand: Object.fromEntries(withTeams.map((s) => [s.id, false])),
     rng,
   };
 }
@@ -480,11 +519,17 @@ export const caidaModule: GameModule<CaidaState> = {
     const isTurn = turnSeat?.id === viewerId;
     const canto = isTurn && state.phase === 'play' ? detectCanto(state.hands[viewerId] ?? []) : null;
     const canClaim =
-      Boolean(canto) && !(state.claimedHands[viewerId] ?? []).includes(state.handNo) && state.phase === 'play';
+      Boolean(canto) &&
+      !(state.claimedHands[viewerId] ?? []).includes(state.handNo) &&
+      !state.playedThisHand[viewerId] &&
+      state.phase === 'play';
     const isDealer = state.seats[state.dealer]?.id === viewerId;
     const actions: UIAction[] = [];
     if (state.phase === 'entrega' && isDealer) {
       actions.push(makeAction('deliver', 'action.deliver', { type: 'deliver' }, { tone: 'primary', icon: 'sparkles' }));
+    }
+    if (state.phase === 'handEnd') {
+      actions.push(makeAction('nextHand', 'action.nextHand', { type: 'nextHand' }, { tone: 'primary', icon: 'arrow-right' }));
     }
     if (canClaim && canto) {
       actions.push(
@@ -494,6 +539,9 @@ export const caidaModule: GameModule<CaidaState> = {
           labelParams: { canto: canto.key, points: canto.points },
         }),
       );
+    }
+    if (state.phase === 'play') {
+      actions.push(makeAction('resign', 'action.resign', { type: 'resign' }, { tone: 'danger', icon: 'flag' }));
     }
     const hand = sortCards(state.hands[viewerId] ?? []).map((card) => ({
       ...card,
@@ -505,6 +553,8 @@ export const caidaModule: GameModule<CaidaState> = {
       prompt = isDealer
         ? { key: 'prompt.caidaDeliver', tone: 'info' }
         : { key: 'prompt.caidaWaitDeliver', params: { player: state.seats[state.dealer]?.name ?? '—' }, tone: 'info' };
+    } else if (state.phase === 'handEnd') {
+      prompt = { key: 'prompt.caidaHandEnd', tone: 'success' };
     } else if (state.phase === 'matchEnd') {
       prompt = { key: 'prompt.matchEnd', tone: 'success' };
     } else if (isTurn) {
@@ -549,7 +599,11 @@ export const caidaModule: GameModule<CaidaState> = {
         delivery: state.delivery ?? null,
         lastCapture: state.lastCapture ?? null,
         lastCanto: state.lastCanto ?? null,
+        lastPlayed: state.lastPlayed ?? null,
+        lastCapturer: state.lastCapturer ?? null,
+        handSummary: state.lastHandSummary ?? null,
         canClaim,
+        playedThisHand: state.playedThisHand[viewerId] ?? false,
       },
     };
     return view;
@@ -557,6 +611,12 @@ export const caidaModule: GameModule<CaidaState> = {
 
   act(state, action, actorId, _rng): ActResult<CaidaState> {
     const internal = state as InternalState;
+    if (action.type === 'nextHand') {
+      if (internal.phase !== 'handEnd') return { state, events: [], error: 'error.notNow' };
+      if (!internal.seats.some((seat) => seat.id === actorId)) return { state, events: [], error: 'error.invalidAction' };
+      const dealer = nextIndex(internal.dealer, internal.seats.length);
+      return { state: newHand(internal, dealer), events: [] };
+    }
     if (action.type === 'deliver') {
       if (internal.phase !== 'entrega') return { state, events: [], error: 'error.notNow' };
       if (internal.seats[internal.dealer]?.id !== actorId) return { state, events: [], error: 'error.notYourTurn' };
@@ -584,7 +644,7 @@ export const caidaModule: GameModule<CaidaState> = {
     }
     if (internal.phase !== 'play' || seat?.id !== botId) return null;
     const canto = detectCanto(internal.hands[botId] ?? []);
-    const canClaim = Boolean(canto) && !(internal.claimedHands[botId] ?? []).includes(internal.handNo);
+    const canClaim = Boolean(canto) && !(internal.claimedHands[botId] ?? []).includes(internal.handNo) && !internal.playedThisHand[botId];
     if (canClaim) return { type: 'canto' };
     const cardId = chooseBotCard(internal, botId);
     if (cardId) return { type: 'play', cardId };

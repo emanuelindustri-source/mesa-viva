@@ -123,8 +123,16 @@ export function TableScreen() {
   const me = match?.seats[0];
   const profileViewerId = me?.id ?? view?.youId ?? '';
   const isMyTurn = Boolean(view && view.turnId && view.youId === view.turnId);
+  const activeSeat = match?.seats.find((seat) => seat.id === view?.turnId);
+  const botThinking = Boolean(match && !match.isOver && view?.phase === 'play' && activeSeat?.isBot && !privacy);
+  const cardGame = meta?.category === 'cartas';
   const lastEvents = useMemo(() => (view?.log ?? []).slice(-5).reverse(), [view?.log, version]);
   const round = Number(view?.extra?.round ?? view?.extra?.handNo ?? 0);
+  const roundLabel = view && round > 0
+    ? view.gameId === 'caida'
+      ? t('table.handNo', { n: round })
+      : t('table.round', { n: round })
+    : t('table.matchCode', { code: match?.seed.toString(36).slice(-4).toUpperCase() ?? '' });
 
   useEffect(() => {
     if (!error) return;
@@ -155,11 +163,29 @@ export function TableScreen() {
 
   useEffect(() => {
     if (!match || match.isOver || privacy) return;
+    const lastKey = view?.log?.[view.log.length - 1]?.key ?? '';
+    const slowCaida = view?.gameId === 'caida' && [
+      'log.caida',
+      'log.caidaMesa',
+      'log.canto',
+      'log.deliveryOk',
+      'log.deliveryFail',
+      'log.handEnd',
+    ].includes(lastKey);
+    const delay = view?.gameId === 'caida' ? 1500 + (slowCaida ? 700 : 0) : 720;
     const timer = window.setTimeout(() => {
       botStep();
-    }, 720);
+    }, delay);
     return () => window.clearTimeout(timer);
-  }, [match, version, privacy, botStep]);
+  }, [match, version, privacy, botStep, view?.gameId, view?.log?.length]);
+
+  useEffect(() => {
+    if (!match || match.isOver || view?.phase !== 'handEnd' || privacy) return;
+    const timer = window.setTimeout(() => {
+      dispatch({ type: 'nextHand' });
+    }, 900);
+    return () => window.clearTimeout(timer);
+  }, [match, view?.phase, view?.extra?.handNo, privacy]);
 
   useEffect(() => {
     if (!view || !match) return;
@@ -186,12 +212,15 @@ export function TableScreen() {
         else if (isCaptureEvent(event.key)) haptic('capture');
         else haptic('tap');
       }
-      if (!settings.reduceMotion) {
-        const kind = burstKind(event.key);
+    }
+    if (!settings.reduceMotion) {
+      const burstEvent = [...relevant].reverse().find((event) => isCaptureEvent(event.key) || isWinEvent(event.key)) ?? relevant[relevant.length - 1];
+      if (burstEvent) {
+        const kind = burstKind(burstEvent.key);
         burstFromElement(tableRef.current, kind, {
           colors: [festival.accent, festival.accent2, '#fff4d6'],
-          count: kind === 'confetti' ? 50 : kind === 'spark' ? 22 : 12,
-          power: kind === 'confetti' ? 1.15 : 1,
+          count: kind === 'confetti' ? 28 : kind === 'spark' ? 14 : 8,
+          power: kind === 'confetti' ? 1 : 0.9,
         });
       }
     }
@@ -274,8 +303,15 @@ export function TableScreen() {
 
   function dispatch(action: GameAction, intensity = 1) {
     if (!match || !view || busy) return;
-    setBusy(true);
     const actorId = view.youId && view.youId !== 'spectator' ? view.youId : match.seats[0]?.id ?? '';
+    if (action.type === 'play' || action.type === 'canto') {
+      const current = match.view(actorId);
+      if (current.turnId !== actorId || current.phase !== 'play') {
+        toast(t('table.turnChanged'), 'warn');
+        return;
+      }
+    }
+    setBusy(true);
     const ok = actRaw(actorId, action);
     if (!ok) {
       haptic('error');
@@ -347,9 +383,7 @@ export function TableScreen() {
           <div className="table-title">
             <span className="eyebrow">{t(`tag.${meta.tagKeys[0]?.replace('tag.', '') ?? 'clasico'}`) || meta.category}</span>
             <h1>{gameName}</h1>
-            <span className="table-round">
-              {round > 0 ? t('table.round', { n: round }) : t('table.matchCode', { code: match.seed.toString(36).slice(-4).toUpperCase() })}
-            </span>
+            <span className="table-round">{roundLabel}</span>
           </div>
         </div>
         <div className="table-top-actions">
@@ -372,7 +406,7 @@ export function TableScreen() {
         {view.players.map((player) => (
           <div
             key={player.id}
-            className={`opponent ${player.isYou ? 'is-you' : ''} ${player.isTurn ? 'is-turn' : ''} ${!player.active ? 'is-out' : ''}`}
+            className={`opponent ${player.isYou ? 'is-you' : ''} ${player.isTurn ? 'is-turn' : ''} ${!player.active ? 'is-out' : ''} ${player.isTurn && botThinking ? 'is-thinking' : ''}`}
           >
             <div className="opponent-avatar-wrap">
               <Avatar id={player.avatar} size={38} ring={player.isTurn} />
@@ -383,12 +417,13 @@ export function TableScreen() {
               <span className="opponent-name">{player.name}</span>
               <span className="opponent-meta">
                 {player.team !== undefined ? <span className="team-dot">P{player.team + 1}</span> : null}
-                {player.cardsLeft !== undefined ? `${player.cardsLeft} 🃏` : null}
-                {player.diceLeft !== undefined ? `${player.diceLeft} 🎲` : null}
-                <strong>{player.score}</strong>
+                <span className="opponent-points"><strong>{player.score}</strong><small>{t('table.pointsShort')}</small></span>
+                {player.cardsLeft !== undefined ? <span className="opponent-cards">🃏 {player.cardsLeft}</span> : null}
+                {player.diceLeft !== undefined ? <span className="opponent-cards">🎲 {player.diceLeft}</span> : null}
               </span>
             </div>
-            {player.isTurn ? <span className="turn-pulse" aria-label={t('table.yourTurn')} /> : null}
+            {player.isTurn ? <span className="turn-pulse" aria-label={botThinking ? t('table.thinking') : t('table.yourTurn')} /> : null}
+            {player.isTurn && botThinking ? <span className="thinking-dots" aria-hidden="true"><i /><i /><i /></span> : null}
           </div>
         ))}
       </div>
@@ -408,21 +443,19 @@ export function TableScreen() {
         <GameSurface view={view} act={dispatch} busy={busy} />
       </div>
 
-      {view.actions.length > 0 ? (
-        <div className="action-bar">
-          {view.actions.map((action) => (
-            <Button
-              key={action.id}
-              variant={action.tone === 'primary' ? 'primary' : action.tone === 'danger' ? 'danger' : action.tone === 'ghost' ? 'ghost' : 'secondary'}
-              icon={action.icon ? ACTION_ICONS[action.icon] : undefined}
-              disabled={action.disabled || busy}
-              onClick={() => dispatch(action.action)}
-            >
-              {t(action.labelKey, action.labelParams)}
-            </Button>
-          ))}
-        </div>
-      ) : null}
+      <div className={`action-bar ${view.actions.length === 0 ? 'is-empty' : ''}`} aria-hidden={view.actions.length === 0}>
+        {view.actions.map((action) => (
+          <Button
+            key={action.id}
+            variant={action.tone === 'primary' ? 'primary' : action.tone === 'danger' ? 'danger' : action.tone === 'ghost' ? 'ghost' : 'secondary'}
+            icon={action.icon ? ACTION_ICONS[action.icon] : undefined}
+            disabled={action.disabled || busy}
+            onClick={() => dispatch(action.action)}
+          >
+            {t(action.labelKey, action.labelParams)}
+          </Button>
+        ))}
+      </div>
 
       <section className="table-log-ticker">
         <div className="log-ticker-head">
@@ -439,10 +472,12 @@ export function TableScreen() {
         </div>
       </section>
 
-      <div className="table-hints">
-        <span>{t('table.playHint')}</span>
-        <span>{settings.reduceMotion ? t('table.animationOff') : t('table.animationOn')}</span>
-      </div>
+      {!cardGame ? (
+        <div className="table-hints">
+          <span>{t('table.playHint')}</span>
+          <span>{settings.reduceMotion ? t('table.animationOff') : t('table.animationOn')}</span>
+        </div>
+      ) : null}
 
       <Modal open={logOpen} onClose={() => setLogOpen(false)} title={t('table.fullLog')} subtitle={t('table.fullLogHint')} size="lg" variant="bottom">
         <div className="full-log">
@@ -515,7 +550,7 @@ export function TableScreen() {
         {typeof view.extra?.target === 'number' ? <span><Crown size={13} /> {t('table.target', { n: view.extra.target })}</span> : null}
         <span><WifiOff size={13} /> {t('common.local')}</span>
         <span>{t('table.matchTime')}: {formatDuration(match.durationMs)}</span>
-        {shake.supported ? <span>{t('table.shakeHint')}</span> : null}
+        {shake.supported && !cardGame ? <span>{t('table.shakeHint')}</span> : null}
       </div>
     </div>
   );

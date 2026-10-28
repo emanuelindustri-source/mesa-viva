@@ -1,6 +1,14 @@
 # Roadmap
 
-## v0.7.0 · La estrella (actual)
+## v0.7.1 · Caída, mesa legible (actual)
+
+- [x] Ritmo de bots, entrega visible, capturas animadas y mano estable.
+- [x] Canto antes de la primera carta; reglas y meta documentadas.
+- [x] 25 pruebas.
+- [ ] Póker y Compose fase 1 (v0.8.0).
+- [ ] Prueba de sala LAN en teléfono físico.
+
+## v0.7.0 · La estrella
 
 - [x] Damas Chinas con 121 hoyos, 2–6 jugadores, saltos y bots.
 - [x] 23 pruebas de motores.

@@ -41,30 +41,63 @@ function CaidaSurface({ view, act, busy }: SurfaceProps) {
   const ex = extra(view);
   const table = view.center.cards ?? [];
   const deckCount = view.center.piles?.find((p) => p.id === 'deck')?.count ?? 0;
-  const target = num(ex.target, 24);
+  const target = num(ex.target, 40);
   const handNo = num(ex.handNo, 1);
   const teams = Boolean(ex.teams);
   const captured = (ex.captured ?? {}) as Record<string, number>;
   const teamScores = (ex.teamScores ?? null) as Record<string, number> | null;
   const lastCapture = ex.lastCapture as { playerId: string; cards: CardView[]; points: number; mesa: boolean } | null;
+  const delivery = ex.delivery as { cards: CardView[]; ok: boolean; points: number; toPlayer: string } | null;
+  const lastPlayed = ex.lastPlayed as { playerId: string; card: CardView } | null;
+  const handSummary = ex.handSummary as Array<{ playerId: string; name: string; cards: number; points: number; score: number }> | null;
   const [flash, setFlash] = useState<string | null>(null);
+  const [deliveryFlash, setDeliveryFlash] = useState<typeof delivery>(null);
   const lastRef = useRef<string>('');
+  const deliveryRef = useRef<string>('');
 
   useEffect(() => {
-    if (!lastCapture) return;
-    const key = `${lastCapture.playerId}-${lastCapture.points}-${lastCapture.cards.length}`;
+    if (!lastCapture) {
+      lastRef.current = '';
+      setFlash(null);
+      return;
+    }
+    const key = `${handNo}-${lastCapture.playerId}-${lastCapture.points}-${lastCapture.cards.length}`;
     if (lastRef.current === key) return;
     lastRef.current = key;
-    setFlash(`${t('table.caidaFlash', { points: lastCapture.points })} · ${lastCapture.cards.length} ${t('table.cards')}`);
-    const timer = window.setTimeout(() => setFlash(null), 2000);
+    const cardsLabel = lastCapture.cards.length === 1
+      ? t('table.oneCard')
+      : t('table.manyCards', { n: lastCapture.cards.length });
+    setFlash(`${t('table.caidaFlash', { points: lastCapture.points })} · ${cardsLabel}`);
+    const timer = window.setTimeout(() => setFlash(null), 1800);
     return () => window.clearTimeout(timer);
-  }, [lastCapture, t]);
+  }, [lastCapture, handNo, t]);
+
+  useEffect(() => {
+    if (!delivery) {
+      deliveryRef.current = '';
+      setDeliveryFlash(null);
+      return;
+    }
+    const key = `${handNo}-${delivery.cards.map((card) => card.id).join('-')}-${delivery.ok ? 'ok' : 'fail'}`;
+    if (deliveryRef.current === key) return;
+    deliveryRef.current = key;
+    setDeliveryFlash(delivery);
+    const timer = window.setTimeout(() => setDeliveryFlash(null), 2400);
+    return () => window.clearTimeout(timer);
+  }, [delivery, handNo]);
+
+  const playerName = (id: string) => view.players.find((player) => player.id === id)?.name ?? '—';
+  const cardsLabel = view.hand.length === 1
+    ? t('table.oneCard')
+    : t('table.manyCards', { n: view.hand.length });
+  const deliveryLabel = delivery?.ok
+    ? t('table.deliveryOk')
+    : t('table.deliveryFail', { to: playerName(delivery?.toPlayer ?? '') });
+  const recentId = lastPlayed?.card.id ?? '';
 
   return (
     <div className="surface surface-caida">
       <div className="table-meta">
-        <span>{t('table.handNo', { n: handNo })}</span>
-        <span>·</span>
         <span>{t('table.target', { n: target })}</span>
         {teams && teamScores ? (
           <span className="team-mini">
@@ -85,8 +118,22 @@ function CaidaSurface({ view, act, busy }: SurfaceProps) {
         </div>
 
         <div className="table-cards" ref={(el) => { if (el) el.dataset.drop = 'caida'; }}>
-          <AnimatePresence initial={false}>
-            {table.length === 0 ? (
+          <AnimatePresence mode="popLayout" initial={false}>
+            {deliveryFlash ? (
+              <motion.div
+                key={`delivery-${handNo}`}
+                className={cx('delivery-show', deliveryFlash.ok ? 'is-ok' : 'is-fail')}
+                initial={{ opacity: 0, y: 16, scale: 0.94 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -12, scale: 0.96 }}
+              >
+                <span className="delivery-label">{deliveryLabel}</span>
+                <div className="delivery-cards">
+                  {deliveryFlash.cards.map((card) => <SpanishCard key={card.id} card={card} small />)}
+                </div>
+                <span className="delivery-points">+{deliveryFlash.points}</span>
+              </motion.div>
+            ) : table.length === 0 ? (
               <motion.div key="empty" className="empty-table" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 <Sparkles size={18} />
                 <span>{t('table.logEmpty')}</span>
@@ -95,7 +142,8 @@ function CaidaSurface({ view, act, busy }: SurfaceProps) {
               table.map((card, i) => (
                 <motion.div
                   key={card.id}
-                  className="table-card"
+                  className={cx('table-card', recentId === card.id && 'is-recent')}
+                  layout
                   initial={{ opacity: 0, y: 28, rotate: (i % 3) - 1 }}
                   animate={{ opacity: 1, y: 0, rotate: ((i * 7) % 11) - 5 }}
                   exit={{ opacity: 0, scale: 0.8 }}
@@ -110,18 +158,29 @@ function CaidaSurface({ view, act, busy }: SurfaceProps) {
       </div>
 
       <AnimatePresence>
-        {flash ? (
-          <motion.div className="capture-flash" initial={{ opacity: 0, scale: 0.8, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
-            {flash}
+        {flash && lastCapture ? (
+          <motion.div
+            className="capture-ghost"
+            initial={{ opacity: 0, y: 10, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -18, scale: 0.96 }}
+          >
+            <span className="capture-ghost-label">{flash}</span>
+            <div className="capture-ghost-cards">
+              {lastCapture.cards.slice(-4).map((card) => <SpanishCard key={card.id} card={card} small />)}
+            </div>
+            <span className="capture-ghost-arrow">→ {playerName(lastCapture.playerId)}</span>
           </motion.div>
         ) : null}
       </AnimatePresence>
 
       <div className="captures-row">
+        <span className="captures-label">{t('table.capturedHand', { n: handNo })}</span>
         {view.players.map((p) => (
           <span key={p.id} className={cx('capture-chip', p.isTurn && 'is-turn')}>
             <span className="capture-name">{p.name}</span>
             <span>{captured[p.id] ?? 0} 🃏</span>
+            {flash && lastCapture?.playerId === p.id ? <span className="score-float">+{lastCapture.points}</span> : null}
           </span>
         ))}
       </div>
@@ -129,34 +188,46 @@ function CaidaSurface({ view, act, busy }: SurfaceProps) {
       <div className="hand-area">
         <div className="hand-label">
           <span>{t('table.yourHand')}</span>
-          <span>{view.hand.length} · {t('table.target', { n: target })}</span>
+          <span>{cardsLabel}</span>
         </div>
         <div className={cx('hand', view.hand.length > 5 && 'is-crowded')}>
-          <AnimatePresence initial={false}>
-            {view.hand.map((card, i) => (
-              <motion.div
-                key={card.id}
-                className="hand-card"
-                initial={{ opacity: 0, y: 40, rotate: 0 }}
-                animate={{ opacity: 1, y: 0, rotate: ((i - (view.hand.length - 1) / 2) * 3) }}
-                exit={{ opacity: 0, y: -50, scale: 0.85 }}
-                style={{ zIndex: i }}
-              >
-                <SpanishCard
-                  card={card}
-                  playable={card.playable && !busy}
-                  onClick={card.playable && !busy ? (event) => {
-                    burstFromElement(event.currentTarget, 'dust', { count: 10 });
-                    haptic('card', true);
-                    sfx('card');
-                    act({ type: 'play', cardId: card.id });
-                  } : undefined}
-                />
-              </motion.div>
-            ))}
-          </AnimatePresence>
+          {view.hand.map((card, i) => (
+            <motion.div
+              key={card.id}
+              className="hand-card"
+              initial={{ opacity: 0, y: 6, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1, rotate: ((i - (view.hand.length - 1) / 2) * 3) }}
+              style={{ zIndex: i }}
+            >
+              <SpanishCard
+                card={card}
+                playable={card.playable && !busy}
+                onClick={card.playable && !busy ? (event) => {
+                  burstFromElement(event.currentTarget, 'dust', { count: 6 });
+                  haptic('card', true);
+                  sfx('card');
+                  act({ type: 'play', cardId: card.id });
+                } : undefined}
+              />
+            </motion.div>
+          ))}
         </div>
       </div>
+
+      {view.phase === 'handEnd' && handSummary ? (
+        <div className="hand-summary">
+          <strong>{t('table.handSummary')}</strong>
+          <div className="hand-summary-list">
+            {handSummary.map((row) => (
+              <span key={row.playerId} className={cx('hand-summary-row', row.playerId === view.youId && 'is-you')}>
+                <span>{row.name}</span>
+                <b>{row.points > 0 ? `+${row.points}` : '0'} {t('table.pointsShort')}</b>
+                <small>{row.cards} 🃏</small>
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -88,6 +88,8 @@ interface AppState {
 const initialLocale = detectLocale();
 
 function defaultSettings(): Settings {
+  const nav = typeof navigator !== 'undefined' ? navigator as Navigator & { deviceMemory?: number } : null;
+  const lowPower = Boolean(nav && ((nav.deviceMemory ?? 8) <= 4 || nav.hardwareConcurrency <= 4));
   return {
     language: initialLocale,
     country: detectCountry(initialLocale),
@@ -99,7 +101,7 @@ function defaultSettings(): Settings {
     sfx: true,
     haptics: true,
     volume: 0.6,
-    reduceMotion: false,
+    reduceMotion: lowPower,
     highContrast: false,
     festival: 'auto',
     dynamicColor: true,

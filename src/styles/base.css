@@ -757,9 +757,10 @@ html[data-theme='light'] .segmented > button.is-active { color: #fffaf0; }
 .particle-canvas {
   position: fixed;
   inset: 0;
-  z-index: 120;
+  z-index: 1;
   pointer-events: none;
 }
+body:has(.table-screen) .toast-host { bottom: calc(78px + var(--safe-b)); }
 
 /* ---------------------------------------------------------------- fatal page */
 

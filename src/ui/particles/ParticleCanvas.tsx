@@ -58,7 +58,7 @@ export function ParticleCanvas({ ambient, colors }: { ambient?: BurstKind; color
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const dpr = Math.min(1.5, window.devicePixelRatio || 1);
     const resize = () => {
       canvas.width = Math.floor(window.innerWidth * dpr);
       canvas.height = Math.floor(window.innerHeight * dpr);
@@ -75,7 +75,7 @@ export function ParticleCanvas({ ambient, colors }: { ambient?: BurstKind; color
     document.addEventListener('visibilitychange', onVisibility);
 
     const spawn = (event: BurstEvent) => {
-      const count = Math.min(90, event.count);
+      const count = Math.min(40, event.count, Math.max(0, 40 - particles.current.length));
       for (let i = 0; i < count; i += 1) {
         const angle = Math.random() * Math.PI * 2;
         const speed = (event.kind === 'confetti' ? 3.5 : event.kind === 'spark' ? 4.5 : 1.6) * event.power * (0.4 + Math.random());
@@ -112,7 +112,7 @@ export function ParticleCanvas({ ambient, colors }: { ambient?: BurstKind; color
       const kind = ambientRef.current;
       if (kind && kind !== 'dust' && kind !== 'spark') {
         const config = AMBIENT_SPAWN[kind];
-        if (config.rate > 0 && now - lastAmbient.current > config.rate && particles.current.length < 42) {
+        if (config.rate > 0 && now - lastAmbient.current > config.rate && particles.current.length < 40) {
           lastAmbient.current = now;
           const x = Math.random() * window.innerWidth;
           const y = kind === 'ember' ? window.innerHeight + 10 : -10;
