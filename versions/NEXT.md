@@ -4,12 +4,12 @@
 
 ## Estado actual
 
-- **Versión publicada en el repo local:** 0.8.0 (aún no subida a GitHub en esta sesión).
+- **Versión publicada:** 0.8.0.
 - **Juegos jugables:** 15.
 - **Repositorio:** <https://github.com/emanuelindustri-source/mesa-viva>
 - **Portada:** <https://emanuelindustri-source.github.io/mesa-viva/>
 - **Juego web:** <https://emanuelindustri-source.github.io/mesa-viva/play/>
-- **Release esperada:** <https://github.com/emanuelindustri-source/mesa-viva/releases/tag/v0.8.0>
+- **Release:** <https://github.com/emanuelindustri-source/mesa-viva/releases/tag/v0.8.0>
 - **VERSION:** `0.8.0`
 - **Android:** `versionCode=10`, `versionName=0.8.0`, compileSdk/targetSdk 36.
 
