@@ -26,8 +26,8 @@
 ### Android real
 
 - Dispositivo: `23117RA68G` (`gaxoozj7q44ldeyp`).
-- APK firmado instalado y `MainActivity` abierta sin `FATAL EXCEPTION`.
-- Pendiente: completar onboarding, jugar una partida y probar sala LAN en el teléfono.
+- APK firmado instalado y `MainActivity` abierta sin `FATAL EXCEPTION`; partida real de **Caída** visible en el teléfono.
+- Pendiente: partida completa, sala LAN y sensores en el teléfono.
 
 ## Dónde está cada cosa
 
