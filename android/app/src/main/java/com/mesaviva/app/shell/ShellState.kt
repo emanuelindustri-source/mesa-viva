@@ -16,6 +16,9 @@ enum class ShellScreen {
     Profile,
     Settings,
     Snakes,
+    Domino,
+    Chess,
+    Room,
 }
 
 data class Festival(
@@ -91,7 +94,7 @@ class ShellState(context: Context) {
 
     val festival: Festival = festivalFor()
 
-    fun t(key: String): String = ShellStrings.t(language, key)
+    fun t(key: String, params: Map<String, Any?> = emptyMap()): String = ShellStrings.t(language, key, params)
 
     fun refresh() {
         language = prefs.getString("language", language) ?: language

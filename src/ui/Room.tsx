@@ -59,6 +59,7 @@ export function RoomScreen() {
     }
     const fromUrl = route.params.get('code');
     if (fromUrl) setCode(normalizeCode(fromUrl));
+    if (route.params.get('scan') === '1') setScanOpen(true);
   }, [route.params, nativeLan]);
 
   useEffect(() => {

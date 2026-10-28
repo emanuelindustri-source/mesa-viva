@@ -4,61 +4,66 @@
 
 ## Estado actual
 
-- **Versión publicada:** 0.8.0.
+- **Versión publicada:** 0.9.0.
 - **Juegos jugables:** 15.
+- **Juegos 100 % Compose:** 3 (Serpientes y Escaleras, Dominó, Ajedrez).
 - **Repositorio:** <https://github.com/emanuelindustri-source/mesa-viva>
 - **Portada:** <https://emanuelindustri-source.github.io/mesa-viva/>
 - **Juego web:** <https://emanuelindustri-source.github.io/mesa-viva/play/>
-- **Release:** <https://github.com/emanuelindustri-source/mesa-viva/releases/tag/v0.8.0>
-- **VERSION:** `0.8.0`
-- **Android:** `versionCode=10`, `versionName=0.8.0`, compileSdk/targetSdk 36.
+- **Release:** <https://github.com/emanuelindustri-source/mesa-viva/releases/tag/v0.9.0>
+- **VERSION:** `0.9.0`
+- **Android:** `versionCode=11`, `versionName=0.9.0`, compileSdk/targetSdk 36.
 
 ### Calidad
 
-- 30/30 pruebas de motores (5 nuevas de Póker).
+- 30/30 pruebas de motores web.
+- 9/9 pruebas Kotlin de Dominó y Ajedrez.
+- **39 pruebas en total.**
 - TypeScript sin errores.
 - Web compilada con Vite 6.4.5.
 - APK debug y APK release firmado compilados.
-- Emulador Android 14 (API 34): cáscara Compose, catálogo, Serpientes, WebView y PWA verificados con capturas.
-- Teléfono real `23117RA68G`: **instalación bloqueada por MIUI** (`INSTALL_FAILED_USER_RESTRICTED`). Hay que activar “Instalar vía USB” en Opciones de desarrollador; el APK anterior se desinstaló durante la prueba.
-- Para instalar en el teléfono: Ajustes → Sobre el teléfono → tocar “Versión de MIUI” 7 veces → Opciones de desarrollador → activar “Depuración USB (Ajustes de seguridad)” e “Instalar vía USB”. Luego abrir el enlace de descarga del release o ejecutar `adb install -r artifacts/mesa-viva-0.8.0-release.apk`.
+- Emulador Android 14: Home, Dominó, Ajedrez, Sala, QR y WebView en español verificados con capturas.
+- Teléfono real `23117RA68G`: no estaba conectado en esta sesión. Sigue pendiente “Instalar vía USB” de MIUI.
 
-### Checksums v0.8.0
+### Checksums v0.9.0
 
-- APK release firmado: `A46B1DAEBCEED2742882FC146E2398976F72679B4A4CEE9AD7E3C43BD4B7E955` · 9.544.193 bytes.
-- APK debug (CI): `AAD5FA3889B75A37E20F3A6644563C8FB6053D967F8DE67321640BFCC80DB503` · 12.534.884 bytes.
-- Artefactos locales: `artifacts/mesa-viva-0.8.0-release.apk` y `artifacts/mesa-viva-0.8.0-debug.apk`.
+- APK release firmado: `14C86F385D74EDD33AA92DB1FE4E246085842C3FB3D534B93BE0F641F8896E3B` · 9.872.109 bytes.
+- APK debug: lo publica el workflow de CI; consultar el release. El build local previo fue `F31890B69BE3BC203CFC5D9D592F73F061C7438C0722D1C3150EF0BF83B12DAC`.
+- Artefactos locales: `artifacts/mesa-viva-0.9.0-release.apk` y `artifacts/mesa-viva-0.9.0-debug.apk`.
 
 ## Compose
 
-- **Cáscara nativa completa:** inicio, catálogo, niveles, ajustes, navegación y back handling.
-- **Serpientes y Escaleras 100 % Compose** con tablero 10×10, escaleras/serpientes dibujadas, dado animado, bots y vibración.
-- **Mesa compartida:** `GameWebActivity` hospeda la PWA; conserva cámara, PDF, sensores, Material You y relay LAN.
-- **Tema:** Material 3, acento de festividad y superficies dinámicas; `ShellSync` importa el perfil de `localStorage` al volver.
-- **Pendiente:** Domó y Ajedrez nativos, lobby/QR nativo, sincronización bidireccional y retirada del WebView juego por juego.
+- **Cáscara nativa completa:** inicio, catálogo, niveles, ajustes, sala y navegación.
+- **Serpientes y Escaleras 100 % Compose.**
+- **Dominó 100 % Compose:** doble 6, parejas, pozo, tranca, bots y meta.
+- **Ajedrez 100 % Compose:** reglas completas, promoción elegible, historial SAN y bot alfa-beta.
+- **Sala nativa:** crear/unirse, QR local ZXing, escaneo y selector de ronda.
+- **Sincronización:** la cáscara pasa idioma/música/efectos/vibración/movimiento a la web; `ShellSync` devuelve el perfil.
+- **Pendiente:** salas nativas, 12 juegos restantes en WebView y retirada del WebView.
 
-## Siguiente versión: 0.9.0
+## Siguiente versión: 1.0.0
 
-Ver [`v0.9.0.md`](./v0.9.0.md). Incluye:
+Ver [`v1.0.0.md`](./v1.0.0.md). Incluye:
 
-1. Domó y Ajedrez nativos en Compose.
-2. Lobby/QR nativo.
-3. Perfil y ajustes bidireccionales.
-4. Prueba en teléfono real y sala LAN.
-5. Accesibilidad, AAB y checklist de publicación.
+1. Salas nativas para Dominó y Ajedrez.
+2. Ludo, Mancala y Backgammon nativos.
+3. Prueba en teléfono físico y LAN.
+4. Accesibilidad, AAB y checklist de tienda.
+5. Retirada progresiva del WebView.
 
 ## Dónde está cada cosa
 
 | Ruta | Contenido |
 |---|---|
-| `src/games/` | 15 motores, incluido `poker.ts` |
-| `src/ui/GameSurface.tsx` | Superficies de juego web, incluida `PokerSurface` |
+| `src/games/` | 15 motores web, incluido `poker.ts` |
+| `src/ui/GameSurface.tsx` | Superficies web, incluida `PokerSurface` |
 | `src/core/` | Tipos, registro, Match autoritativo, niveles |
 | `src/net/room.ts` | Salas, host/invitado y reconexión |
 | `server/room-server.mjs` | Relay Node |
 | `android/.../MainActivity.kt` | Cáscara Compose |
-| `android/.../GameWebActivity.kt` | Mesa compartida WebView + puentes nativos |
-| `android/.../shell/` | Estado, textos, tema, pantallas y Serpientes nativo |
+| `android/.../GameWebActivity.kt` | Mesa compartida WebView + puentes + params nativos |
+| `android/.../games/` | Motores Kotlin de Dominó y Ajedrez |
+| `android/.../shell/` | Estado, textos, tema, pantallas, sala y QR |
 | `landing/` | Portada estática con historial de versiones |
 | `tools/build-pages.mjs` | Portada + juego en `dist-site/` |
 | `versions/` | Evidencia inmutable por versión |
@@ -74,6 +79,7 @@ npm run test:relay          # requiere npm run rooms
 npm run build
 npm run build:pages         # portada + juego en dist-site/
 npm run android:sync
+cd android && gradlew.bat testDebugUnitTest
 cd android && gradlew.bat assembleRelease
 ```
 
@@ -82,6 +88,7 @@ cd android && gradlew.bat assembleRelease
 - El token de GitHub compartido en el chat debe revocarse.
 - El keystore y la contraseña viven en `C:\Users\Sr.Hidalgo\.mesa-viva\`; no se copian al repositorio.
 - `android/keystore.properties` está ignorado por git.
+- El QR se genera localmente con ZXing; no se envía a un servicio.
 - El diagnóstico se envía solo si el usuario abre el correo a `emanuel.industri@gmail.com`.
 
 ## Reglas de continuidad
@@ -90,5 +97,5 @@ cd android && gradlew.bat assembleRelease
 2. Cada versión nueva crea su propio `vX.Y.Z.md`.
 3. Mantener este `NEXT.md` actualizado, sin eliminarlo.
 4. No guardar tokens, contraseñas ni keystores en el repositorio.
-5. Antes de publicar: typecheck, tests, build web, APK, CI/Pages/Android.
+5. Antes de publicar: typecheck, tests web, tests Kotlin, build web, APK, CI/Pages/Android.
 6. No afirmar “100 % Compose” hasta retirar el WebView de los 15 juegos.

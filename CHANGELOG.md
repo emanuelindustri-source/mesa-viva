@@ -1,5 +1,38 @@
 # Changelog
 
+## 0.9.0 · 2026-10-28
+
+La mesa nativa.
+
+### Añadido
+
+- **Dominó nativo en Compose**: doble 6, 2–4 jugadores, parejas, pozo, tranca, cierre de mano, meta 100/150/200, bots y fichas con pips dibujadas.
+- **Ajedrez nativo en Compose**: enroque, captura al paso, promoción elegible, jaque, mate, ahogado, 50 movimientos, triple repetición, material insuficiente, historial SAN y bot alfa-beta.
+- **Sala nativa**: crear sala, unirse por código, escanear QR, QR local con ZXing y selector de ronda de juegos.
+- **Sincronización de ajustes**: la cáscara pasa idioma, música, efectos, vibración y movimiento reducido a la web; `ShellSync` devuelve el perfil.
+- 9 pruebas Kotlin de Dominó y Ajedrez.
+- Evidencia visual en `docs/evidence/v0.9.0/`.
+
+### Cambiado
+
+- Android: `versionCode=11`, `versionName=0.9.0`, dependencia ZXing y JUnit.
+- El catálogo nativo marca Serpientes, Dominó y Ajedrez como “Nativo Compose”.
+- La navegación inferior añade Sala y el inicio muestra la sección “100 % Compose”.
+- Póker, Caída y los demás juegos siguen compartiendo el motor web.
+
+### Corregido
+
+- Las piezas blancas de ajedrez se ven con contraste alto sobre cualquier casilla.
+- El tablero de dominó ocupa el espacio disponible con una mesa de fieltro.
+- La tirada de dados de Serpientes ya no muestra un punto cuando el dado está en cero.
+- El QR de sala se genera localmente y no depende de un servicio externo.
+
+### Pendiente
+
+- Salas online nativas para Dominó y Ajedrez.
+- Retirar el WebView de los 12 juegos restantes.
+- Probar la APK y la sala LAN en el teléfono físico (el dispositivo no estaba conectado en esta sesión).
+
 ## 0.8.0 · 2026-10-28
 
 Póker y cáscara Compose.

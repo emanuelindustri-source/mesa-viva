@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.sp
 fun CatalogScreen(
     state: ShellState,
     onOpenWeb: (String) -> Unit,
-    onNative: () -> Unit,
+    onOpenNative: (String) -> Unit,
 ) {
     var query by remember { mutableStateOf("") }
     var filter by remember { mutableStateOf("all") }
@@ -117,7 +117,7 @@ fun CatalogScreen(
             }
         }
         items(filtered, key = { it.id }) { game ->
-            GameCard(state, game, onOpenWeb, onNative)
+            GameCard(state, game, onOpenWeb, onOpenNative)
         }
         item {
             Text(
@@ -135,7 +135,7 @@ private fun GameCard(
     state: ShellState,
     game: ShellGame,
     onOpenWeb: (String) -> Unit,
-    onNative: () -> Unit,
+    onOpenNative: (String) -> Unit,
 ) {
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.32f)),
@@ -157,7 +157,22 @@ private fun GameCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                StatusBadge(state, game.status)
+                Column(horizontalAlignment = Alignment.End) {
+                    StatusBadge(state, game.status)
+                    if (game.native) {
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.16f),
+                        ) {
+                            Text(
+                                state.t("native.badge"),
+                                modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.tertiary,
+                            )
+                        }
+                    }
+                }
             }
             if (game.note.isNotBlank()) {
                 Text(
@@ -169,7 +184,7 @@ private fun GameCard(
             if (game.status == "playable") {
                 Button(
                     onClick = {
-                        if (game.id == "serpientes") onNative() else onOpenWeb("/setup/${game.id}")
+                        if (game.native) onOpenNative(game.id) else onOpenWeb("/setup/${game.id}")
                     },
                     modifier = Modifier.fillMaxWidth(),
                 ) {

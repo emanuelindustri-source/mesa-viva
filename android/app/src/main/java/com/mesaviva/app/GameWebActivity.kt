@@ -69,8 +69,16 @@ class GameWebActivity : ComponentActivity() {
 
     private val baseUrl: String
         get() {
-            val route = intent.getStringExtra("route").orEmpty()
-            val suffix = if (route.isBlank()) "" else "#${if (route.startsWith("/")) route else "/$route"}"
+            val route = intent.getStringExtra("route").orEmpty().ifBlank { "/" }
+            val prefs = getSharedPreferences("mesa_viva_shell", MODE_PRIVATE)
+            val lang = prefs.getString("language", "es") ?: "es"
+            val music = if (prefs.getBoolean("music", true)) "1" else "0"
+            val sfx = if (prefs.getBoolean("sfx", true)) "1" else "0"
+            val haptics = if (prefs.getBoolean("haptics", true)) "1" else "0"
+            val motion = if (prefs.getBoolean("reduceMotion", false)) "0" else "1"
+            val query = "native=1&lang=$lang&music=$music&sfx=$sfx&haptics=$haptics&motion=$motion"
+            val separator = if (route.contains("?")) "&" else "?"
+            val suffix = "#${if (route.startsWith("/")) route else "/$route"}$separator$query"
             return "https://appassets.androidplatform.net/assets/www/index.html$suffix"
         }
 

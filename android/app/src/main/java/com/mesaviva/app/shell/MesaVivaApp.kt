@@ -22,9 +22,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -72,6 +73,7 @@ fun MesaVivaApp(
                 NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
                     NavItem(state, ShellScreen.Home, "nav.home", Icons.Filled.Home)
                     NavItem(state, ShellScreen.Catalog, "nav.catalog", Icons.AutoMirrored.Filled.List)
+                    NavItem(state, ShellScreen.Room, "nav.room", Icons.Filled.Share)
                     NavItem(state, ShellScreen.Profile, "nav.profile", Icons.Filled.Star)
                     NavItem(state, ShellScreen.Settings, "nav.settings", Icons.Filled.Settings)
                 }
@@ -91,13 +93,24 @@ fun MesaVivaApp(
                 )
                 .padding(padding),
         ) {
+            val openNative: (String) -> Unit = { id ->
+                state.screen = when (id) {
+                    "serpientes" -> ShellScreen.Snakes
+                    "domino" -> ShellScreen.Domino
+                    "ajedrez" -> ShellScreen.Chess
+                    else -> ShellScreen.Catalog
+                }
+            }
             Crossfade(targetState = state.screen, label = "shell-screen") { screen ->
                 when (screen) {
-                    ShellScreen.Home -> HomeScreen(state, onOpenWeb, onOpenUrl) { state.screen = ShellScreen.Snakes }
-                    ShellScreen.Catalog -> CatalogScreen(state, onOpenWeb) { state.screen = ShellScreen.Snakes }
+                    ShellScreen.Home -> HomeScreen(state, onOpenWeb, onOpenUrl, openNative)
+                    ShellScreen.Catalog -> CatalogScreen(state, onOpenWeb, openNative)
                     ShellScreen.Profile -> ProfileScreen(state)
                     ShellScreen.Settings -> SettingsScreen(state, onOpenWeb)
+                    ShellScreen.Room -> RoomScreen(state, onOpenWeb)
                     ShellScreen.Snakes -> SnakesGameScreen(state) { state.screen = ShellScreen.Home }
+                    ShellScreen.Domino -> DominoScreen(state) { state.screen = ShellScreen.Home }
+                    ShellScreen.Chess -> ChessScreen(state) { state.screen = ShellScreen.Home }
                 }
             }
         }
@@ -121,7 +134,7 @@ private fun HomeScreen(
     state: ShellState,
     onOpenWeb: (String) -> Unit,
     onOpenUrl: (String) -> Unit,
-    onNative: () -> Unit,
+    onNative: (String) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -143,9 +156,22 @@ private fun HomeScreen(
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     QuickCard("📱", state.t("home.room"), state.t("common.online"), Modifier.weight(1f)) {
-                        onOpenWeb("/room")
+                        state.screen = ShellScreen.Room
                     }
-                    QuickCard("🐍", state.t("home.native"), state.t("snakes.subtitle"), Modifier.weight(1f), onNative)
+                    QuickCard("🐍", state.t("home.native"), state.t("snakes.subtitle"), Modifier.weight(1f)) {
+                        onNative("serpientes")
+                    }
+                }
+            }
+        }
+        item { SectionTitle(state.t("home.nativeGames")) }
+        item {
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                QuickCard("🁫", state.t("domino.title"), state.t("domino.subtitle"), Modifier.weight(1f)) {
+                    onNative("domino")
+                }
+                QuickCard("♟️", state.t("chess.title"), state.t("chess.subtitle"), Modifier.weight(1f)) {
+                    onNative("ajedrez")
                 }
             }
         }
@@ -203,7 +229,7 @@ private fun HomeHeader(state: ShellState) {
 }
 
 @Composable
-private fun HeroCard(state: ShellState, onOpenWeb: (String) -> Unit, onNative: () -> Unit) {
+private fun HeroCard(state: ShellState, onOpenWeb: (String) -> Unit, onNative: (String) -> Unit) {
     val accent = Color(state.festival.accent)
     val accent2 = Color(state.festival.accent2)
     Box(
@@ -236,7 +262,7 @@ private fun HeroCard(state: ShellState, onOpenWeb: (String) -> Unit, onNative: (
                 Button(onClick = { onOpenWeb("/") }) {
                     Text("▶  ${state.t("home.playNow")}")
                 }
-                OutlinedButton(onClick = onNative) {
+                OutlinedButton(onClick = { onNative("serpientes") }) {
                     Text("🐍 ${state.t("home.native")}")
                 }
             }
@@ -328,9 +354,9 @@ private fun NewsCard(state: ShellState) {
     ) {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(state.t("home.news"), style = MaterialTheme.typography.titleMedium)
-            NewsRow("♠️", state.t("home.newsPoker"))
-            NewsRow("🎨", state.t("home.newsCompose"))
-            NewsRow("🐍", state.t("home.newsSnakes"))
+            NewsRow("🁫", state.t("home.newsDomino"))
+            NewsRow("♟️", state.t("home.newsChess"))
+            NewsRow("📷", state.t("home.newsRoom"))
         }
     }
 }

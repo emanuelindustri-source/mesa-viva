@@ -1,6 +1,19 @@
 # Roadmap
 
-## v0.8.0 · Póker y cáscara Compose (actual)
+## v0.9.0 · La mesa nativa (actual)
+
+- [x] Dominó nativo en Compose: doble 6, 2–4 jugadores, parejas, pozo, tranca, meta y bots.
+- [x] Ajedrez nativo en Compose: reglas completas, promoción elegible, historial SAN y bot alfa-beta.
+- [x] Sala nativa: crear/unirse, QR local con ZXing, escaneo y selector de ronda.
+- [x] Sincronización nativa → web de idioma, música, efectos, vibración y movimiento reducido.
+- [x] 9 pruebas Kotlin + 30 pruebas web = 39.
+- [x] Fichas de dominó y piezas de ajedrez dibujadas en Compose.
+- [x] APK release firmado y evidencia visual en `docs/evidence/v0.9.0/`.
+- [ ] Salas online nativas para Dominó y Ajedrez (hoy la sala nativa abre la mesa web).
+- [ ] Retirar el WebView de los 12 juegos restantes.
+- [ ] Probar la APK y la sala LAN en el teléfono físico.
+
+## v0.8.0 · Póker y cáscara Compose
 
 - [x] Póker Texas Hold'em 2–6 jugadores sin dinero real: ciegas, calles, subidas, all-in, botes laterales, showdown y bots.
 - [x] Evaluador de la mejor mano de 5 entre 7 y 5 pruebas nuevas (30 en total).
@@ -101,15 +114,14 @@ Pulido de onboarding, cartas/fichas, coordenadas de tablero y CI Android. La bas
 - [x] Diagnóstico y envío por correo.
 - [x] PWA instalable y offline.
 
-## v0.9.0 · La mesa nativa
+## v1.0.0 · La mesa completa
 
-- [ ] Domó y Ajedrez nativos en Compose (pilotos de tablero).
-- [ ] Lobby de sala y QR nativos, con reconexión visible.
-- [ ] Perfil y ajustes sincronizados en ambos sentidos con la web.
+- [ ] Salas nativas para los tres juegos Compose y reconexión visible.
 - [ ] Reproducción de partidas con semilla.
 - [ ] Accesibilidad: lector de pantalla completo, control por teclado y tamaños de texto.
-- [ ] Prueba en teléfono físico y publicación del APK.
+- [ ] Prueba en teléfono físico y publicación del APK/AAB.
 - [ ] Mahjong americano, Riichi y Mahjong con naipes.
+- [ ] Retirada progresiva del WebView hasta la paridad total.
 
 ## v0.4.0 · La fiesta completa (histórico)
 

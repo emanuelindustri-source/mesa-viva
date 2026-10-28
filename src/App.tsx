@@ -10,7 +10,8 @@ import {
   Users,
 } from 'lucide-react';
 import { useRoute, navigate } from './app/router';
-import { useAppStore } from './store/appStore';
+import { useAppStore, type Settings as AppSettings } from './store/appStore';
+import { isLocale } from './i18n';
 import { useFestivalTheme } from './theme/useTheme';
 import { useT } from './i18n/useT';
 import { usePwa } from './services/pwa';
@@ -47,6 +48,28 @@ export default function App() {
   const t = useT();
   const level = levelForXp(profile.xp);
   useScrollTop(route.path);
+
+  // La cáscara nativa pasa idioma y preferencias al abrir la mesa. La web
+  // devuelve el perfil al volver mediante ShellSync.
+  useEffect(() => {
+    const hash = window.location.hash;
+    const queryIndex = hash.indexOf('?');
+    if (queryIndex < 0) return;
+    const params = new URLSearchParams(hash.slice(queryIndex + 1));
+    if (params.get('native') !== '1') return;
+    const patch: Partial<AppSettings> = {};
+    const lang = params.get('lang');
+    if (lang && isLocale(lang)) patch.language = lang;
+    const music = params.get('music');
+    if (music === '0' || music === '1') patch.music = music === '1';
+    const sfx = params.get('sfx');
+    if (sfx === '0' || sfx === '1') patch.sfx = sfx === '1';
+    const haptics = params.get('haptics');
+    if (haptics === '0' || haptics === '1') patch.haptics = haptics === '1';
+    const motion = params.get('motion');
+    if (motion === '0' || motion === '1') patch.reduceMotion = motion === '0';
+    if (Object.keys(patch).length > 0) useAppStore.getState().setSettings(patch);
+  }, []);
 
   useEffect(() => {
     setAudioSettings({ music: settings.music, sfx: settings.sfx, volume: settings.volume });

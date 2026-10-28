@@ -5,6 +5,7 @@ Capturas de las versiones publicadas. Se conservan para auditoría y para que cu
 | Versión | Carpeta | Contenido |
 |---|---|---|
 | v0.8.0 | [`v0.8.0/`](./v0.8.0/) | Cáscara Compose, catálogo, póker, Serpientes nativo, WebView y QR del APK |
+| v0.9.0 | [`v0.9.0/`](./v0.9.0/) | Dominó y Ajedrez nativos, sala con QR, Home y web en español |
 
 Reglas:
 
