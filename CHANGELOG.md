@@ -16,6 +16,7 @@ La mesa clásica.
 - Catálogo: Ludo y Backgammon pasan a jugables.
 - Portada, README y contadores: de 10 a 12 juegos.
 - Versión de app y service worker a 0.3.0.
+- Android: `compileSdk`/`targetSdk` 36 y workflow con SDK 36.
 
 ## 0.2.0 · 2026-10-28
 

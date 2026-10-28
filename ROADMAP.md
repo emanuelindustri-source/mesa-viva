@@ -8,7 +8,7 @@ Ludo, Backgammon y Android moderno.
 - [x] Ludo 2–4 jugadores con capturas, casillas seguras y meta exacta.
 - [x] Backgammon con barra, capturas, dobles y bear-off.
 - [x] 21 pruebas de motores.
-- [x] APK con target Android 16 (API 36) si la compilación lo confirma.
+- [x] APK con target Android 16 (API 36).
 - [ ] Reconexión de invitados a mitad de partida y bots que cubran asientos desconectados.
 - [ ] Torneos y ligas de sala.
 - [ ] Validación de la sala LAN en teléfono físico.
