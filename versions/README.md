@@ -12,6 +12,12 @@ Cada versión de Mesa Viva tiene su propio archivo en esta carpeta. **No se borr
 | 0.3.0 | 2026-10-28 | Publicada | [`v0.3.0.md`](./v0.3.0.md) |
 | 0.4.0 | 2026-10-28 | Publicada | [`v0.4.0.md`](./v0.4.0.md) |
 | 0.5.0 | 2026-10-28 | Publicada | [`v0.5.0.md`](./v0.5.0.md) |
+| 0.6.0 | 2026-10-28 | Pendiente | [`v0.6.0.md`](./v0.6.0.md) |
+
+## Relevo
+
+- [`NEXT.md`](./NEXT.md) — estado actual, pendientes y contexto para cualquier IA o persona. **No se borra.**
+- [`../docs/COMPOSE_MIGRATION.md`](../docs/COMPOSE_MIGRATION.md) — plan de migración a Compose.
 
 ## Reglas
 
