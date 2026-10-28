@@ -3,7 +3,7 @@
 ## v0.8.0 · Póker y cáscara Compose (actual)
 
 - [x] Póker Texas Hold'em 2–6 jugadores sin dinero real: ciegas, calles, subidas, all-in, botes laterales, showdown y bots.
-- [x] Evaluador de la mejor mano de 5 entre 7 y 6 pruebas nuevas (30 en total).
+- [x] Evaluador de la mejor mano de 5 entre 7 y 5 pruebas nuevas (30 en total).
 - [x] Cáscara nativa Jetpack Compose: inicio, catálogo, niveles, ajustes y navegación.
 - [x] Serpientes y Escaleras 100 % Compose con dado, escaleras, serpientes, bots y vibración.
 - [x] Compose BOM 2025.10.00, Kotlin 2.4.21, AGP 8.13.2 y Gradle 8.13.

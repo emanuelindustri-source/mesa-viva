@@ -12,7 +12,7 @@ Póker y cáscara Compose.
 - **Cáscara nativa Jetpack Compose**: inicio, catálogo de 15 juegos, niveles, ajustes, navegación inferior y tema Material 3 con acento de festividad + color dinámico.
 - **Serpientes y Escaleras 100 % Compose**: tablero 10×10, escaleras/serpientes dibujadas, dado animado, bots, vibración y diálogo de victoria.
 - `GameWebActivity` separada para la mesa compartida; el perfil de la web se importa a la cáscara al volver.
-- 6 pruebas nuevas de póker (30 en total).
+- 5 pruebas nuevas de póker (30 en total).
 
 ### Cambiado
 

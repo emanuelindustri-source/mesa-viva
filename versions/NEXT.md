@@ -15,7 +15,7 @@
 
 ### Calidad
 
-- 30/30 pruebas de motores (6 nuevas de Póker).
+- 30/30 pruebas de motores (5 nuevas de Póker).
 - TypeScript sin errores.
 - Web compilada con Vite 6.4.5.
 - APK debug y APK release firmado compilados.
