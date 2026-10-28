@@ -199,6 +199,91 @@ export function SpanishCard({
   );
 }
 
+const POKER_SYMBOL: Record<string, string> = {
+  clubs: '♣',
+  diamonds: '♦',
+  hearts: '♥',
+  spades: '♠',
+};
+
+const POKER_NAMES: Record<string, string> = {
+  clubs: 'tréboles',
+  diamonds: 'diamantes',
+  hearts: 'corazones',
+  spades: 'picas',
+};
+
+export function pokerRankLabel(rank: number): string {
+  if (rank === 14) return 'A';
+  if (rank === 13) return 'K';
+  if (rank === 12) return 'Q';
+  if (rank === 11) return 'J';
+  return String(rank);
+}
+
+export function PokerCard({
+  card,
+  faceDown,
+  playable,
+  selected,
+  small,
+  onClick,
+  className,
+  style,
+  disabled,
+}: SpanishCardProps) {
+  const t = useT();
+  const red = card.suit === 'hearts' || card.suit === 'diamonds';
+  const symbol = POKER_SYMBOL[card.suit] ?? '♠';
+  const rank = pokerRankLabel(card.rank);
+  const label = faceDown ? t('table.deck') : `${rank} de ${POKER_NAMES[card.suit] ?? card.suit}`;
+  const classes = cx(
+    'poker-card',
+    red && 'is-red',
+    small && 'is-small',
+    faceDown && 'is-back',
+    playable && 'is-playable',
+    selected && 'is-selected',
+    className,
+  );
+  const content = faceDown ? (
+    <CardBack />
+  ) : (
+    <>
+      <span className="poker-corner poker-corner-tl">
+        <b>{rank}</b>
+        <i>{symbol}</i>
+      </span>
+      <span className="poker-card-center">
+        <b>{rank}</b>
+        <i>{symbol}</i>
+      </span>
+      <span className="poker-corner poker-corner-br">
+        <b>{rank}</b>
+        <i>{symbol}</i>
+      </span>
+    </>
+  );
+  if (!onClick || disabled) {
+    return <div className={classes} style={style} aria-label={label}>{content}</div>;
+  }
+  return (
+    <motion.button
+      type="button"
+      className={classes}
+      style={style}
+      onClick={onClick}
+      aria-label={label}
+      aria-pressed={selected}
+      whileHover={{ y: -8, scale: 1.03 }}
+      whileTap={{ scale: 0.97 }}
+      layout
+    >
+      {content}
+    </motion.button>
+  );
+}
+
 export function CardBack({ small }: { small?: boolean }) {
   return (
     <span className={cx('card-back-art', small && 'is-small')} aria-hidden="true">

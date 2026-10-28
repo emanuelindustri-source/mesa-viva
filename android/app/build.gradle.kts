@@ -21,8 +21,8 @@ android {
         applicationId = "com.mesaviva.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 9
-        versionName = "0.7.1"
+        versionCode = 10
+        versionName = "0.8.0"
 
         vectorDrawables {
             useSupportLibrary = true
@@ -55,10 +55,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -66,14 +62,20 @@ android {
     }
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+
 dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.webkit:webkit:1.11.0")
-    implementation(platform("androidx.compose:compose-bom:2024.12.01"))
-    implementation("androidx.activity:activity-compose:1.9.3")
+    implementation(platform("androidx.compose:compose-bom:2025.10.00"))
+    implementation("androidx.activity:activity-compose:1.10.1")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.foundation:foundation")
+    implementation("androidx.compose.material:material-icons-core")
     implementation("androidx.compose.material3:material3")
     implementation("org.java-websocket:Java-WebSocket:1.5.7")
     implementation("org.slf4j:slf4j-nop:2.0.13")
 }
+

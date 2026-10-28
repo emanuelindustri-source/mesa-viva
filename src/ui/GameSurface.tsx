@@ -1,10 +1,10 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Dices, MousePointerClick, Sparkles } from 'lucide-react';
+import { Coins, Dices, MousePointerClick, Sparkles } from 'lucide-react';
 import type { CardView, GameAction, GameView, TileView } from '../core/types';
 import { useT } from '../i18n/useT';
 import { cx } from '../core/utils';
-import { SpanishCard, FuriaCard, CardBack } from './cards';
+import { SpanishCard, FuriaCard, CardBack, PokerCard } from './cards';
 import { DominoChain, DominoTile } from './domino';
 import { BigDie, DiceRow, Die } from './dice';
 import { Board } from './board';
@@ -579,6 +579,267 @@ function DadosSurface({ view, act, busy }: SurfaceProps) {
           </Button>
         </div>
       ) : null}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------- Póker */
+
+interface PokerSeatInfo {
+  id: string;
+  chips: number;
+  bet: number;
+  totalBet: number;
+  folded: boolean;
+  allIn: boolean;
+  out: boolean;
+  lastMove: { kind: string; amount?: number; allIn?: boolean } | null;
+  holeCount: number;
+}
+
+interface PokerShowdown {
+  rows: Array<{
+    playerId: string;
+    name: string;
+    hole: CardView[];
+    handKey: string;
+    best: CardView[];
+    folded: boolean;
+    won: number;
+  }>;
+  pots: Array<{ amount: number; winners: string[] }>;
+  totalPot: number;
+}
+
+function PokerSurface({ view, act, busy }: SurfaceProps) {
+  const t = useT();
+  const ex = extra(view);
+  const info = (ex.playersInfo ?? []) as PokerSeatInfo[];
+  const showdown = (ex.showdown ?? null) as PokerShowdown | null;
+  const handWinner = ex.handWinner as { playerId: string; amount: number; folded: boolean } | null;
+  const community = view.center.cards ?? [];
+  const hole = view.hand;
+  const pot = num(ex.pot);
+  const chips = num(ex.chips);
+  const currentBet = num(ex.currentBet);
+  const minTarget = num(ex.minTarget);
+  const maxTarget = num(ex.maxTarget);
+  const toCall = num(ex.toCall);
+  const callAmount = num(ex.callAmount);
+  const street = str(ex.street);
+  const dealerId = str(ex.dealerId);
+  const isTurn = Boolean(ex.isTurn) && !busy;
+  const canRaise = Boolean(ex.canRaise) && isTurn && maxTarget > currentBet && chips > 0;
+  const [raiseTarget, setRaiseTarget] = useState(Math.max(minTarget, currentBet + 1));
+  const [raiseOpen, setRaiseOpen] = useState(false);
+  const surfaceRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setRaiseTarget(Math.max(minTarget, currentBet + 1));
+  }, [minTarget, currentBet, view.extra?.handNo, view.turnId]);
+
+  useEffect(() => {
+    if (!canRaise) setRaiseOpen(false);
+  }, [canRaise]);
+
+  const seatInfo = (id: string) => info.find((entry) => entry.id === id);
+  const nameOf = (id: string) => view.players.find((player) => player.id === id)?.name ?? '—';
+  const others = view.players.filter((player) => player.id !== view.youId);
+  const heroInfo = seatInfo(view.youId);
+  const streetLabel = street === 'preflop' || street === 'flop' || street === 'turn' || street === 'river'
+    ? t(`poker.${street}`)
+    : street === 'showdown'
+      ? t('poker.showdown')
+      : street === 'matchEnd'
+        ? t('prompt.matchEnd')
+        : t('poker.handEnd');
+  const raiseValue = Math.min(maxTarget, Math.max(Math.max(minTarget, currentBet + 1), raiseTarget));
+  const quick = (fraction: number) => {
+    const raw = currentBet + Math.max(num(ex.minRaise, 20), Math.round((pot + callAmount) * fraction));
+    setRaiseTarget(Math.min(maxTarget, Math.max(Math.max(minTarget, currentBet + 1), Math.round(raw / 10) * 10)));
+  };
+
+  return (
+    <div className="surface surface-poker" ref={surfaceRef}>
+      <div className="poker-meta">
+        <span className="poker-meta-chip">🂡 {t('table.handNo', { n: num(ex.handNo) })}</span>
+        <span className="poker-meta-chip">{t('poker.blinds', { sb: num(ex.smallBlind), bb: num(ex.bigBlind) })}</span>
+        <span className="poker-meta-chip is-street">{streetLabel}</span>
+        <span className="poker-meta-note">{t('poker.realMoney')}</span>
+        {canRaise ? (
+          <button type="button" className="poker-raise-trigger" onClick={() => setRaiseOpen(true)}>
+            {t('action.raise')}
+          </button>
+        ) : null}
+      </div>
+
+      <div className="poker-table">
+        <div className="poker-opponents">
+          {others.map((player) => {
+            const entry = seatInfo(player.id);
+            return (
+              <div
+                key={player.id}
+                className={cx(
+                  'poker-seat',
+                  player.isTurn && 'is-turn',
+                  entry?.folded && 'is-folded',
+                  entry?.allIn && 'is-all-in',
+                  entry?.out && 'is-out',
+                )}
+              >
+                <div className="poker-seat-head">
+                  <span className="poker-avatar">{player.isBot ? '🤖' : '👤'}</span>
+                  <div>
+                    <strong>{player.name}</strong>
+                    <span>{t('poker.chips')}: {entry?.chips ?? player.score}</span>
+                  </div>
+                  {player.id === dealerId ? <span className="poker-dealer">{t('poker.dealerShort')}</span> : null}
+                </div>
+                <div className="poker-seat-cards">
+                  {Array.from({ length: Math.min(2, entry?.holeCount ?? 2) }).map((_, index) => (
+                    <PokerCard key={index} card={{ id: `hidden-${player.id}-${index}`, suit: 'spades', rank: 2 }} faceDown small />
+                  ))}
+                </div>
+                <div className="poker-seat-foot">
+                  {entry?.folded ? <span className="poker-badge is-folded">{t('poker.folded')}</span> : null}
+                  {entry?.allIn ? <span className="poker-badge is-allin">{t('poker.allInShort')}</span> : null}
+                  {entry && entry.bet > 0 ? <span className="poker-bet">🪙 {entry.bet}</span> : null}
+                </div>
+                {entry?.lastMove ? (
+                  <span className="poker-last-move">{t(`poker.move.${entry.lastMove.kind}`, { amount: entry.lastMove.amount ?? 0 })}</span>
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="poker-center">
+          <div className="poker-pot">
+            <Coins size={18} />
+            <strong>{pot}</strong>
+            <span>{t('poker.pot')}</span>
+          </div>
+          <div className="poker-board" aria-label={t('poker.showdown')}>
+            {Array.from({ length: 5 }).map((_, index) => {
+              const card = community[index];
+              return (
+                <motion.div
+                  key={card?.id ?? `slot-${index}`}
+                  className={cx('poker-board-slot', !card && 'is-empty')}
+                  initial={card ? { opacity: 0, y: -18, rotate: -4 } : false}
+                  animate={{ opacity: 1, y: 0, rotate: 0 }}
+                >
+                  {card ? <PokerCard card={card} /> : <span className="poker-slot-dot" />}
+                </motion.div>
+              );
+            })}
+          </div>
+          {community.length > 0 ? (
+            <span className="poker-board-caption">{t('poker.bestFive')}: {t(str(ex.heroHandKey) || 'poker.hand.high')}</span>
+          ) : (
+            <span className="poker-board-caption">{t('poker.preflop')}</span>
+          )}
+        </div>
+
+        <div className={cx('poker-hero', isTurn && 'is-turn')}>
+          <div className="poker-hero-head">
+            <div>
+              <strong>{t('common.you')}</strong>
+              <span>{t('poker.chips')}: {heroInfo?.chips ?? chips}</span>
+            </div>
+            {view.youId === dealerId ? <span className="poker-dealer">{t('poker.dealerShort')}</span> : null}
+            {heroInfo?.folded ? <span className="poker-badge is-folded">{t('poker.folded')}</span> : null}
+            {heroInfo?.allIn ? <span className="poker-badge is-allin">{t('poker.allInShort')}</span> : null}
+          </div>
+          <div className="poker-hole">
+            {hole.length === 0 ? <span className="poker-empty-hand">{t('poker.waiting')}</span> : hole.map((card, index) => (
+              <motion.div
+                key={card.id}
+                initial={{ opacity: 0, y: 24, rotate: index === 0 ? -5 : 5 }}
+                animate={{ opacity: 1, y: 0, rotate: index === 0 ? -3 : 3 }}
+              >
+                <PokerCard card={card} />
+              </motion.div>
+            ))}
+          </div>
+          <div className="poker-hero-foot">
+            <span>{toCall > 0 ? t('poker.toCall', { amount: callAmount }) : t('poker.check')}</span>
+            <span className="poker-hand-name">
+              {community.length >= 3 ? t(str(ex.heroHandKey) || 'poker.hand.high') : t('poker.preflop')}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {showdown ? (
+        <div className="poker-showdown">
+          <div className="poker-showdown-head">
+            <strong>{t('poker.showdown')}</strong>
+            <span>{t('poker.pot')}: {showdown.totalPot}</span>
+          </div>
+          <div className="poker-showdown-rows">
+            {showdown.rows.map((row) => (
+              <div key={row.playerId} className={cx('poker-showdown-row', row.folded && 'is-folded', row.won > 0 && 'is-winner')}>
+                <span className="poker-showdown-name">{row.name}</span>
+                <div className="poker-showdown-cards">
+                  {row.hole.map((card) => <PokerCard key={card.id} card={card} small />)}
+                </div>
+                <span className="poker-showdown-hand">{t(row.handKey)}</span>
+                <span className="poker-showdown-won">{row.folded ? t('poker.folded') : row.won > 0 ? `+${row.won}` : '—'}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : handWinner ? (
+        <div className="poker-winner-banner">
+          <Sparkles size={18} />
+          <span>{t('poker.potWon', { name: nameOf(handWinner.playerId), amount: handWinner.amount })}</span>
+        </div>
+      ) : null}
+
+      <Modal
+        open={raiseOpen && canRaise}
+        onClose={() => setRaiseOpen(false)}
+        title={t('action.raise')}
+        subtitle={t('poker.raiseTo', { amount: raiseValue })}
+        variant="bottom"
+        size="sm"
+      >
+        <div className="poker-raise-panel is-modal">
+          <div className="poker-raise-head">
+            <span>{t('poker.raiseTo', { amount: raiseValue })}</span>
+            <span className="poker-raise-min">{t('poker.minRaise', { amount: minTarget })}</span>
+          </div>
+          <input
+            type="range"
+            min={Math.max(minTarget, currentBet + 1)}
+            max={maxTarget}
+            step={10}
+            value={raiseValue}
+            onChange={(event) => setRaiseTarget(Number(event.target.value))}
+            aria-label={t('action.raise')}
+          />
+          <div className="poker-raise-actions">
+            <button type="button" onClick={() => quick(0.5)}>½ {t('poker.pot')}</button>
+            <button type="button" onClick={() => quick(1)}>{t('poker.pot')}</button>
+            <button type="button" onClick={() => setRaiseTarget(maxTarget)}>{t('poker.allIn')}</button>
+            <Button
+              variant="primary"
+              size="sm"
+              disabled={busy || raiseValue <= currentBet}
+              onClick={() => {
+                act({ type: 'raise', amount: raiseValue });
+                setRaiseOpen(false);
+                haptic('canto', true);
+                sfx('card');
+              }}
+            >
+              {t('action.raise')}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
@@ -1367,6 +1628,8 @@ export function GameSurface({ view, act, busy }: SurfaceProps) {
       return <XiangqiSurface view={view} act={act} busy={busy} />;
     case 'chino':
       return <ChinoSurface view={view} act={act} busy={busy} />;
+    case 'poker':
+      return <PokerSurface view={view} act={act} busy={busy} />;
     default:
       return (
         <div className="surface surface-fallback">

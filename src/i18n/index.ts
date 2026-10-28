@@ -162,6 +162,12 @@ export function formatLog(event: LogEvent, tr: (key: string, params?: Record<str
   if (typeof params.end === 'string') {
     params.end = params.end === 'left' ? tr('table.leftEnd') : params.end === 'right' ? tr('table.rightEnd') : params.end;
   }
+  if (typeof params.street === 'string' && params.street.startsWith('street.')) {
+    params.street = tr(params.street);
+  }
+  if (typeof params.hand === 'string' && params.hand.startsWith('poker.hand.')) {
+    params.hand = tr(params.hand);
+  }
   const pluralKeys: Record<string, [string, string]> = {
     'log.drew': ['log.drewOne', 'log.drewMany'],
     'log.cardsCounted': ['log.cardsCountedOne', 'log.cardsCountedMany'],

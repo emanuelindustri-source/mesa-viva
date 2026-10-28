@@ -1,6 +1,18 @@
 # Roadmap
 
-## v0.7.1 · Caída, mesa legible (actual)
+## v0.8.0 · Póker y cáscara Compose (actual)
+
+- [x] Póker Texas Hold'em 2–6 jugadores sin dinero real: ciegas, calles, subidas, all-in, botes laterales, showdown y bots.
+- [x] Evaluador de la mejor mano de 5 entre 7 y 6 pruebas nuevas (30 en total).
+- [x] Cáscara nativa Jetpack Compose: inicio, catálogo, niveles, ajustes y navegación.
+- [x] Serpientes y Escaleras 100 % Compose con dado, escaleras, serpientes, bots y vibración.
+- [x] Compose BOM 2025.10.00, Kotlin 2.4.21, AGP 8.13.2 y Gradle 8.13.
+- [x] Vuelta nativa del perfil desde la web con `localStorage` (`mesa-viva-v1`).
+- [x] APK firmado y verificación en emulador Android 14.
+- [ ] Prueba de sala LAN en teléfono físico (bloqueada por la restricción de instalación MIUI del equipo).
+- [ ] Retirada completa del WebView y migración de los 14 juegos restantes (v0.9.0+).
+
+## v0.7.1 · Caída, mesa legible
 
 - [x] Ritmo de bots, entrega visible, capturas animadas y mano estable.
 - [x] Canto antes de la primera carta; reglas y meta documentadas.
@@ -89,7 +101,17 @@ Pulido de onboarding, cartas/fichas, coordenadas de tablero y CI Android. La bas
 - [x] Diagnóstico y envío por correo.
 - [x] PWA instalable y offline.
 
-## v0.4.0 · La fiesta completa
+## v0.9.0 · La mesa nativa
+
+- [ ] Domó y Ajedrez nativos en Compose (pilotos de tablero).
+- [ ] Lobby de sala y QR nativos, con reconexión visible.
+- [ ] Perfil y ajustes sincronizados en ambos sentidos con la web.
+- [ ] Reproducción de partidas con semilla.
+- [ ] Accesibilidad: lector de pantalla completo, control por teclado y tamaños de texto.
+- [ ] Prueba en teléfono físico y publicación del APK.
+- [ ] Mahjong americano, Riichi y Mahjong con naipes.
+
+## v0.4.0 · La fiesta completa (histórico)
 
 - [ ] Mahjong americano, Riichi y Mahjong con naipes.
 - [ ] Aeroplane Chess, Ajedrez para tres y Soroban interactivo.

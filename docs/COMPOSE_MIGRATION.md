@@ -4,7 +4,7 @@
 
 Mesa Viva es una app Android **Kotlin nativa con WebView**. La lógica de juego, las pantallas y los 13 juegos están en React/TypeScript dentro de `android/app/src/main/assets/www`. La app usa Kotlin para cámara, sensores, vibración, PDF, Material You y el relay LAN.
 
-Desde **v0.6.0**, `MainActivity` es `ComponentActivity` y usa `setContent` + `AndroidView` para hospedar la mesa. Es la **fase 0** de Compose, no una migración completa: la interfaz de los juegos sigue en WebView.
+Desde **v0.8.0**, `MainActivity` es una cáscara nativa completa en Compose (inicio, catálogo, niveles, ajustes y navegación) y `GameWebActivity` hospeda la mesa compartida en WebView. **Serpientes y Escaleras** ya es 100 % Compose. Es la **fase 1** completada; la migración de los 14 juegos restantes sigue pendiente.
 
 “Compose por completo” significa reescribir en Kotlin/Compose:
 
@@ -23,23 +23,26 @@ Es un proyecto de varias versiones, no un commit.
 - [x] Fijar versiones estables: Kotlin 2.0.21, Compose BOM 2024.12.01, activity-compose 1.9.3.
 - [x] Añadir `ComponentActivity` + `setContent` + `AndroidView`.
 - [x] Mantener el WebView actual como respaldo.
-- [ ] Actualizar Kotlin/AGP en una fase posterior.
+- [x] Actualizar Kotlin/AGP en v0.8.0: Kotlin 2.4.21, AGP 8.13.2, Gradle 8.13, Compose BOM 2025.10.00.
 - [ ] Pruebas instrumentadas mínimas y CI de compilación.
 
-### Fase 1 · Cáscara Compose
+### Fase 1 · Cáscara Compose (completada en v0.8.0)
 
-- `ComponentActivity` + `setContent`.
-- Splash, inicio, ajustes, “Acerca de”, niveles y lobby en Compose.
-- El botón “Jugar” abre el WebView existente mediante `AndroidView` o una Activity dedicada.
-- Tema Material 3, tipografía y colores.
-- Paridad de idioma y Material You.
+- [x] `ComponentActivity` + `setContent`.
+- [x] Inicio, catálogo, niveles y ajustes en Compose.
+- [x] Navegación y back handling.
+- [x] Tema Material 3, acento de festividad y superficies dinámicas.
+- [x] `GameWebActivity` dedicada para la mesa.
+- [x] Primer juego 100 % Compose: Serpientes y Escaleras.
+- [ ] Lobby nativo y QR (v0.9.0).
+- [ ] Paridad completa de los 11 idiomas en la cáscara (hoy es/en).
 
 ### Fase 2 · Juegos piloto
 
-Elegir dos juegos con estado simple y mucha visibilidad:
+Serpientes y Escaleras ya está completado. Para v0.9.0:
 
-1. **Serpientes y Escaleras** (tablero y dado).
-2. **Damas** o **Backgammon** (tablero y fichas).
+1. **Dominó** (fichas, parejas y pozo).
+2. **Ajedrez** (reglas completas y bot).
 
 - Motores compartidos entre web y Compose: extraer la lógica a un contrato/JSON o reimplementar en Kotlin con pruebas.
 - Cada juego Compose se activa por bandera; el WebView sigue disponible.
@@ -88,6 +91,6 @@ android/app/src/main/java/com/mesaviva/app/
 5. Portar **Inicio** y **Ajustes** a Compose.
 6. Medir y decidir el primer juego piloto.
 
-## Decisión pendiente
+## Decisión
 
-No se debe empezar la fase 2 sin cerrar la fase 1. La opción de menor riesgo es **híbrida**: cáscara Compose + WebView para juegos, portando uno por uno. La opción de mayor riesgo es reescribir todo antes de publicar otra versión.
+La fase 1 está cerrada en v0.8.0 con estrategia **híbrida**: cáscara Compose + WebView para la mesa compartida, portando un juego a la vez. Serpientes y Escaleras demuestra la viabilidad. No se afirmará “100 % Compose” hasta retirar el WebView de los 15 juegos.

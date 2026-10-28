@@ -1,5 +1,38 @@
 # Changelog
 
+## 0.8.0 · 2026-10-28
+
+Póker y cáscara Compose.
+
+### Añadido
+
+- **Póker de la casa**: Texas Hold'em 2–6 jugadores sin dinero real, ciegas 10/20, preflop/flop/turn/river, subidas con mínimo, all-in, botes laterales, devolución de apuestas no igualadas, showdown y eliminación por stack.
+- Evaluador de la mejor mano de 5 entre 7 cartas y bots con tres dificultades.
+- Interfaz de póker con fichas, bote, cartas comunitarias, ciegas, botón de reparto, ciegas por jugador, modal de subida, showdown y últimos movimientos.
+- **Cáscara nativa Jetpack Compose**: inicio, catálogo de 15 juegos, niveles, ajustes, navegación inferior y tema Material 3 con acento de festividad + color dinámico.
+- **Serpientes y Escaleras 100 % Compose**: tablero 10×10, escaleras/serpientes dibujadas, dado animado, bots, vibración y diálogo de victoria.
+- `GameWebActivity` separada para la mesa compartida; el perfil de la web se importa a la cáscara al volver.
+- 6 pruebas nuevas de póker (30 en total).
+
+### Cambiado
+
+- Android: Kotlin 2.4.21, AGP 8.13.2, Gradle 8.13, Compose BOM 2025.10.00 y `activity-compose` 1.10.1.
+- `versionCode=10` y `versionName=0.8.0`.
+- Catálogo: 15 juegos jugables; la portada, el onboarding y el README pasan de 14 a 15.
+- El póker reemplaza su estado “próximamente” por jugable en la web y la APK.
+- La página principal muestra la versión 0.8.0 y la nueva entrada del historial.
+
+### Corregido
+
+- El tablero de póker ya no se recorta: la mesa se organiza en modo compacto y la subida se abre en modal.
+- Las cartas comunitarias, el bote y la mano propia caben en la superficie de juego.
+- El perfil de la cáscara se refresca al volver de la mesa.
+
+### Pendiente
+
+- Prueba en teléfono físico y sala LAN; el equipo MIUI bloqueó la instalación por USB durante esta sesión.
+- Migración de los 14 juegos restantes a Compose (v0.9.0+).
+
 ## 0.7.1 · 2026-10-28
 
 Caída, mesa legible.

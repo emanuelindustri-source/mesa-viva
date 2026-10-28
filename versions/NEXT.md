@@ -4,59 +4,61 @@
 
 ## Estado actual
 
-- **Versión publicada:** 0.7.1
-- **Juego:** 14 juegos jugables.
+- **Versión publicada en el repo local:** 0.8.0 (aún no subida a GitHub en esta sesión).
+- **Juegos jugables:** 15.
 - **Repositorio:** <https://github.com/emanuelindustri-source/mesa-viva>
 - **Portada:** <https://emanuelindustri-source.github.io/mesa-viva/>
 - **Juego web:** <https://emanuelindustri-source.github.io/mesa-viva/play/>
-- **Release:** <https://github.com/emanuelindustri-source/mesa-viva/releases/tag/v0.7.1>
-- **VERSION:** `0.7.1`
-- **Commit de release:** `572041c`
+- **Release esperada:** <https://github.com/emanuelindustri-source/mesa-viva/releases/tag/v0.8.0>
+- **VERSION:** `0.8.0`
+- **Android:** `versionCode=10`, `versionName=0.8.0`, compileSdk/targetSdk 36.
 
 ### Calidad
 
-- 22/22 pruebas de motores.
+- 30/30 pruebas de motores (6 nuevas de Póker).
 - TypeScript sin errores.
-- Web, APK debug y APK firmado compilados.
-- CI, Pages y Android verdes.
-- APK firmado v0.7.1: `E1A5A73702BA243664BBA61C5ECAF4A54B068387A3C8C2A0FEA846BA5F14E3BA`.
-- APK firmado más grande (8.19 MB) por Compose.
+- Web compilada con Vite 6.4.5.
+- APK debug y APK release firmado compilados.
+- Emulador Android 14 (API 34): cáscara Compose, catálogo, Serpientes, WebView y PWA verificados con capturas.
+- Teléfono real `23117RA68G`: **instalación bloqueada por MIUI** (`INSTALL_FAILED_USER_RESTRICTED`). Hay que activar “Instalar vía USB” en Opciones de desarrollador; el APK anterior se desinstaló durante la prueba.
 
-### Android real
+### Checksums v0.8.0
 
-- Dispositivo: `23117RA68G` (`gaxoozj7q44ldeyp`).
-- APK firmado instalado; `MainActivity` en foco.
-- Inicio y mesa de **Caída** renderizan; sin `FATAL EXCEPTION`.
-- Pendiente: partida completa, sala LAN y sensores.
+- APK release firmado: `A46B1DAEBCEED2742882FC146E2398976F72679B4A4CEE9AD7E3C43BD4B7E955` · 9.544.193 bytes.
+- APK debug: `E924C5AEA5CC3A9C0A21009970D4CB652ECE58AE18675282CB8B8CDBE36B3F8C` · 12.784.580 bytes.
+- Artefactos locales: `artifacts/mesa-viva-0.8.0-release.apk` y `artifacts/mesa-viva-0.8.0-debug.apk`.
 
 ## Compose
 
-- **Fase 0 completada:** `MainActivity` es `ComponentActivity`, `setContent` + `AndroidView` hospeda la mesa WebView.
-- **La mesa sigue en WebView.** No es una migración completa.
-- Plan: `docs/COMPOSE_MIGRATION.md`.
-- Próxima fase: inicio, ajustes, niveles y lobby nativos.
+- **Cáscara nativa completa:** inicio, catálogo, niveles, ajustes, navegación y back handling.
+- **Serpientes y Escaleras 100 % Compose** con tablero 10×10, escaleras/serpientes dibujadas, dado animado, bots y vibración.
+- **Mesa compartida:** `GameWebActivity` hospeda la PWA; conserva cámara, PDF, sensores, Material You y relay LAN.
+- **Tema:** Material 3, acento de festividad y superficies dinámicas; `ShellSync` importa el perfil de `localStorage` al volver.
+- **Pendiente:** Domó y Ajedrez nativos, lobby/QR nativo, sincronización bidireccional y retirada del WebView juego por juego.
 
-## Siguiente versión: 0.8.0
+## Siguiente versión: 0.9.0
 
-Ver [`v0.7.0.md`](./v0.7.0.md). Incluye:
+Ver [`v0.9.0.md`](./v0.9.0.md). Incluye:
 
-1. Compose fase 1 (pantallas nativas).
-2. Damas Chinas.
-3. Póker sin dinero real.
-4. Actualización de Kotlin/AGP.
-5. Pruebas en teléfono real.
+1. Domó y Ajedrez nativos en Compose.
+2. Lobby/QR nativo.
+3. Perfil y ajustes bidireccionales.
+4. Prueba en teléfono real y sala LAN.
+5. Accesibilidad, AAB y checklist de publicación.
 
 ## Dónde está cada cosa
 
 | Ruta | Contenido |
 |---|---|
-| `src/games/` | Motores de los 13 juegos |
-| `src/ui/GameSurface.tsx` | Superficies de juego web |
+| `src/games/` | 15 motores, incluido `poker.ts` |
+| `src/ui/GameSurface.tsx` | Superficies de juego web, incluida `PokerSurface` |
 | `src/core/` | Tipos, registro, Match autoritativo, niveles |
 | `src/net/room.ts` | Salas, host/invitado y reconexión |
 | `server/room-server.mjs` | Relay Node |
-| `android/` | APK Kotlin, Compose host, WebView, relay LAN |
-| `landing/` | Portada estática |
+| `android/.../MainActivity.kt` | Cáscara Compose |
+| `android/.../GameWebActivity.kt` | Mesa compartida WebView + puentes nativos |
+| `android/.../shell/` | Estado, textos, tema, pantallas y Serpientes nativo |
+| `landing/` | Portada estática con historial de versiones |
 | `tools/build-pages.mjs` | Portada + juego en `dist-site/` |
 | `versions/` | Evidencia inmutable por versión |
 
@@ -79,6 +81,7 @@ cd android && gradlew.bat assembleRelease
 - El token de GitHub compartido en el chat debe revocarse.
 - El keystore y la contraseña viven en `C:\Users\Sr.Hidalgo\.mesa-viva\`; no se copian al repositorio.
 - `android/keystore.properties` está ignorado por git.
+- El diagnóstico se envía solo si el usuario abre el correo a `emanuel.industri@gmail.com`.
 
 ## Reglas de continuidad
 
@@ -87,3 +90,4 @@ cd android && gradlew.bat assembleRelease
 3. Mantener este `NEXT.md` actualizado, sin eliminarlo.
 4. No guardar tokens, contraseñas ni keystores en el repositorio.
 5. Antes de publicar: typecheck, tests, build web, APK, CI/Pages/Android.
+6. No afirmar “100 % Compose” hasta retirar el WebView de los 15 juegos.

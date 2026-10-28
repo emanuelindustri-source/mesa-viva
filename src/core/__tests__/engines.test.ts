@@ -16,6 +16,7 @@ import { ludoModule } from '../../games/ludo';
 import { backgammonModule } from '../../games/backgammon';
 import { xiangqiModule } from '../../games/xiangqi';
 import { chinoModule } from '../../games/chino';
+import { compareHands, evaluateHand, pokerDeck, pokerModule } from '../../games/poker';
 import { Match } from '../match';
 import type { Seat } from '../types';
 import { easterSunday, resolveFestival } from '../../theme/festivals';
@@ -363,5 +364,107 @@ describe('Backgammon', () => {
     expect(result.state.off.w).toBe(15);
     expect(result.state.phase).toBe('matchEnd');
     expect(result.state.result?.winnerIds).toEqual(['p0']);
+  });
+});
+
+describe('Póker', () => {
+  const card = (suit: string, rank: number) => ({ id: `${suit}-${rank}`, suit, rank });
+
+  it('usa una baraja francesa de 52 cartas sin duplicados', () => {
+    const deck = pokerDeck();
+    expect(deck.length).toBe(52);
+    expect(new Set(deck.map((c) => c.id)).size).toBe(52);
+  });
+
+  it('evalúa las categorías de mano y la escalera baja', () => {
+    const royal = evaluateHand([
+      card('hearts', 10), card('hearts', 11), card('hearts', 12), card('hearts', 13), card('hearts', 14),
+    ]);
+    expect(royal.category).toBe(8);
+    expect(royal.ranks[0]).toBe(14);
+
+    const wheel = evaluateHand([
+      card('hearts', 14), card('spades', 2), card('clubs', 3), card('diamonds', 4), card('hearts', 5),
+    ]);
+    expect(wheel.category).toBe(4);
+    expect(wheel.ranks).toEqual([5, 4, 3, 2, 1]);
+
+    const quads = evaluateHand([
+      card('hearts', 9), card('spades', 9), card('clubs', 9), card('diamonds', 9), card('hearts', 2),
+    ]);
+    expect(quads.category).toBe(7);
+
+    const full = evaluateHand([
+      card('hearts', 7), card('spades', 7), card('clubs', 7), card('diamonds', 3), card('hearts', 3),
+    ]);
+    expect(full.category).toBe(6);
+
+    const twoPair = evaluateHand([
+      card('hearts', 7), card('spades', 7), card('clubs', 3), card('diamonds', 3), card('hearts', 14),
+    ]);
+    expect(twoPair.category).toBe(2);
+    expect(twoPair.ranks[0]).toBe(7);
+    expect(compareHands(twoPair, full)).toBeLessThan(0);
+  });
+
+  it('reparte, iguala la ciega y avanza al flop', () => {
+    const match = new Match({ gameId: 'poker', seats: seats(2), options: { target: 800 }, difficulty: 'normal', seed: 11 });
+    const preflop = match.view('p0');
+    expect(preflop.hand.length).toBe(2);
+    expect(preflop.players.every((p) => p.cardsLeft === 2)).toBe(true);
+    expect(preflop.players[0]?.score).toBe(790);
+    expect(preflop.turnId).toBe('p0');
+    const call = match.act('p0', { type: 'call' });
+    expect(call.ok).toBe(true);
+    const afterCall = match.view('p1');
+    expect(afterCall.turnId).toBe('p1');
+    const check = match.act('p1', { type: 'check' });
+    expect(check.ok).toBe(true);
+    const flop = match.view('p0');
+    expect(flop.phase).toBe('flop');
+    expect(flop.center.cards?.length).toBe(3);
+    expect(flop.extra?.pot as number).toBe(40);
+    expect(flop.turnId).toBe('p1');
+  });
+
+  it('paga botes laterales y conserva todas las fichas', () => {
+    const match = new Match({ gameId: 'poker', seats: seats(3), options: { target: 200 }, difficulty: 'normal', seed: 19 });
+    const state = match.state as ReturnType<typeof pokerModule.create>;
+    state.players[1]!.chips = 90;
+    expect(match.act('p0', { type: 'allin' }).ok).toBe(true);
+    expect(match.act('p1', { type: 'call' }).ok).toBe(true);
+    expect(match.act('p2', { type: 'fold' }).ok).toBe(true);
+    const end = match.view('p0');
+    const chips = end.players.reduce((total, player) => total + player.score, 0);
+    expect(chips + Number(end.center.piles?.[0]?.count ?? 0)).toBe(500);
+    expect(end.phase === 'handEnd' || end.phase === 'matchEnd').toBe(true);
+    const showdown = end.extra?.showdown as { rows: unknown[]; pots: unknown[] } | null;
+    expect(showdown?.rows.length).toBe(3);
+    expect(showdown?.pots.length).toBe(2);
+  });
+
+  it('los bots juegan manos completas y la partida termina', () => {
+    const bots: Seat[] = Array.from({ length: 4 }, (_, i) => ({
+      id: `b${i}`,
+      name: `Bot ${i + 1}`,
+      avatar: 'jaguar',
+      isBot: true,
+    }));
+    const match = new Match({ gameId: 'poker', seats: bots, options: { target: 200 }, difficulty: 'normal', seed: 23 });
+    for (let step = 0; step < 4000 && !match.isOver; step += 1) {
+      const view = match.view('b0');
+      if (view.phase === 'handEnd') {
+        match.act('b0', { type: 'nextHand' });
+        continue;
+      }
+      if (!match.botStep()) {
+        expect.fail(`La mesa se quedó sin acción en la fase ${view.phase}`);
+      }
+    }
+    expect(match.isOver).toBe(true);
+    const result = match.result;
+    expect(result?.winnerIds.length).toBeGreaterThan(0);
+    const total = Object.values(result?.scores ?? {}).reduce((sum, value) => sum + value, 0);
+    expect(total).toBe(800);
   });
 });

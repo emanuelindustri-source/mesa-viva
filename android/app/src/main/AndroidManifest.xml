@@ -33,6 +33,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".GameWebActivity"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|uiMode"
+            android:exported="false"
+            android:launchMode="singleTop"
+            android:screenOrientation="unspecified"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>

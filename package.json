@@ -1,7 +1,7 @@
 {
   "name": "mesa-viva",
   "private": true,
-  "version": "0.7.1",
+  "version": "0.8.0",
   "type": "module",
   "description": "Mesa Viva: juego de cartas y mesa con alma venezolana. Offline-first, multijugador, multilingüe.",
   "license": "MIT",
@@ -51,3 +51,4 @@
     "node": ">=20"
   }
 }
+

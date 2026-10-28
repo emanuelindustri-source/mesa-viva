@@ -71,7 +71,7 @@ export function SetupScreen({ gameId, initialMode }: { gameId: string; initialMo
   );
   const [difficulty, setDifficulty] = useState<Difficulty>('normal');
   const [teams, setTeams] = useState(meta?.id === 'domino');
-  const [target, setTarget] = useState(meta?.id === 'caida' ? 100 : 100);
+  const [target, setTarget] = useState(meta?.id === 'caida' ? 100 : meta?.id === 'poker' ? 800 : 100);
   const [doubleTwelve, setDoubleTwelve] = useState(false);
   const [boardSize, setBoardSize] = useState(9);
   const [rulesOpen, setRulesOpen] = useState(false);
@@ -81,7 +81,13 @@ export function SetupScreen({ gameId, initialMode }: { gameId: string; initialMo
   const maxPlayers = meta?.maxPlayers ?? 4;
   const categoryLabel = meta?.category === 'cartas' ? t('catalog.cards') : meta?.category === 'tablero' ? t('catalog.board') : t('catalog.dice');
   const canTeams = Boolean(meta && (meta.id === 'caida' || meta.id === 'domino') && count === 4);
-  const targetOptions = meta?.id === 'caida' ? [40, 70, 100] : meta?.id === 'domino' ? [50, 100, 150] : [];
+  const targetOptions = meta?.id === 'caida'
+    ? [40, 70, 100]
+    : meta?.id === 'domino'
+      ? [50, 100, 150]
+      : meta?.id === 'poker'
+        ? [500, 800, 1500]
+        : [];
 
   useEffect(() => {
     setSeats((previous) => {
@@ -103,7 +109,7 @@ export function SetupScreen({ gameId, initialMode }: { gameId: string; initialMo
   }, [count, mode, profile.name, profile.avatar, profile.id, t]);
 
   const options = useMemo<GameOptions>(() => ({
-    ...(meta?.id === 'caida' || meta?.id === 'domino' ? { target } : {}),
+    ...(meta?.id === 'caida' || meta?.id === 'domino' || meta?.id === 'poker' ? { target } : {}),
     ...(canTeams ? { teams } : {}),
     ...(meta?.id === 'domino' ? { doubleTwelve } : {}),
     ...(meta?.id === 'go' ? { boardSize } : {}),
@@ -299,7 +305,7 @@ export function SetupScreen({ gameId, initialMode }: { gameId: string; initialMo
             ) : null}
             {targetOptions.length > 0 ? (
               <div className="option-row">
-                <span>{t('setup.target')}</span>
+                <span>{meta.id === 'poker' ? t('poker.startingChips') : t('setup.target')}</span>
                 <div className="segmented">
                   {targetOptions.map((value) => (
                     <button key={value} type="button" className={target === value ? 'is-active' : ''} onClick={() => setTarget(value)}>{value}</button>

@@ -14,7 +14,8 @@ export type GameId =
   | 'ludo'
   | 'backgammon'
   | 'xiangqi'
-  | 'chino';
+  | 'chino'
+  | 'poker';
 
 export type Difficulty = 'easy' | 'normal' | 'hard';
 export type GameCategory = 'cartas' | 'tablero' | 'dados';

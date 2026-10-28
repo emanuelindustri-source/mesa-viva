@@ -11,7 +11,7 @@ UI React ──► Match (host) ──► GameModule (reglas puras)
    │
    ├── local: sesión en memoria
    ├── sala: relay WebSocket ──► invitados
-   └── Android: WebView + puentes nativos
+   └── Android: cáscara Compose + GameWebActivity (mesa compartida)
 ```
 
 ## Capas
@@ -39,7 +39,7 @@ Los motores son funciones puras sobre el estado (con el RNG explícito). Las vis
 ### `src/ui`
 - `Table`: mesa local con hotseat, privacidad al pasar el teléfono, bots y sonido.
 - `RemoteTable`: mesa para salas; recibe vistas del host y envía acciones.
-- `GameSurface`: superficies por tipo de juego (cartas, fichas, dados, tablero, mancala).
+- `GameSurface`: superficies por tipo de juego (cartas, fichas, dados, tablero, mancala y póker).
 - `Result`: crónica, XP, PDF y revancha.
 - `ParticleCanvas`: partículas con Canvas 2D; respeta movimiento reducido.
 
@@ -54,7 +54,7 @@ Los motores son funciones puras sobre el estado (con el RNG explícito). Las vis
 - `i18n`: español como base, inglés completo, 9 locales adicionales con fallback en inglés.
 
 ### `android`
-Shell nativo Kotlin con `WebViewAssetLoader`. Carga la web desde un origen HTTPS seguro, inyecta `MesaViva` para vibración, sensores, color del sistema y PDF; gestiona cámara y selector de archivos.
+Cáscara nativa en **Jetpack Compose** (`MainActivity`, `shell/`): inicio, catálogo, niveles, ajustes, navegación, tema Material 3 y Serpientes y Escaleras nativo. `GameWebActivity` hospeda la mesa compartida con `WebViewAssetLoader`, desde un origen HTTPS seguro, e inyecta `MesaViva` para vibración, sensores, color del sistema y PDF; gestiona cámara y selector de archivos. `ShellSync` importa el perfil de `localStorage` al volver de la mesa.
 
 ### `server`
 Relay Node + `ws`. En producción debe ir detrás de TLS (`wss`). El estado de la partida no se guarda: si el host se desconecta, la sala se cierra.
@@ -76,6 +76,7 @@ Relay Node + `ws`. En producción debe ir detrás de TLS (`wss`). El estado de l
 | Trampas | Validación en el motor y host autoritativo |
 | Información filtrada | `view()` redacta manos/dados ajenos; pruebas unitarias lo verifican |
 | WebView insegura | AssetLoader HTTPS, permisos explícitos, sin file:// |
+| Doble mantenimiento Compose/WebView | Cáscara nativa + motores compartidos; portar juegos uno por uno con pruebas |
 | PDF en Android | Puente nativo a MediaStore; fallback web |
 | Token/secretos | `.env.local` y `local.properties` ignorados; SECURITY.md |
 

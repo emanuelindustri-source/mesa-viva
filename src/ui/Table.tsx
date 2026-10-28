@@ -124,12 +124,19 @@ export function TableScreen() {
   const profileViewerId = me?.id ?? view?.youId ?? '';
   const isMyTurn = Boolean(view && view.turnId && view.youId === view.turnId);
   const activeSeat = match?.seats.find((seat) => seat.id === view?.turnId);
-  const botThinking = Boolean(match && !match.isOver && view?.phase === 'play' && activeSeat?.isBot && !privacy);
+  const pokerBetting = Boolean(view?.gameId === 'poker' && ['preflop', 'flop', 'turn', 'river'].includes(view.phase));
+  const botThinking = Boolean(
+    match
+      && !match.isOver
+      && (view?.gameId === 'poker' ? pokerBetting : view?.phase === 'play')
+      && activeSeat?.isBot
+      && !privacy,
+  );
   const cardGame = meta?.category === 'cartas';
   const lastEvents = useMemo(() => (view?.log ?? []).slice(-5).reverse(), [view?.log, version]);
   const round = Number(view?.extra?.round ?? view?.extra?.handNo ?? 0);
   const roundLabel = view && round > 0
-    ? view.gameId === 'caida'
+    ? view.gameId === 'caida' || view.gameId === 'poker'
       ? t('table.handNo', { n: round })
       : t('table.round', { n: round })
     : t('table.matchCode', { code: match?.seed.toString(36).slice(-4).toUpperCase() ?? '' });
@@ -148,7 +155,10 @@ export function TableScreen() {
       previousTurn.current = view.turnId;
       return;
     }
-    if (view.phase !== 'play' || !view.turnId) {
+    const hiddenPhase = view.gameId === 'poker'
+      ? ['preflop', 'flop', 'turn', 'river'].includes(view.phase)
+      : view.phase === 'play';
+    if (!hiddenPhase || !view.turnId) {
       setPrivacy(null);
       previousTurn.current = view.turnId;
       return;
