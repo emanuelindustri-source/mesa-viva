@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.5.0 · 2026-10-28
+
+El general y el río.
+
+### Añadido
+
+- **Xiangqi**: tablero 9×10, palacio, río, elefante con ojo, caballo con pata, cañón con pantalla, soldados y generales enfrentados.
+- Jaque, jaque mate, ahogado, rendición y bot alfa-beta.
+- 22 pruebas de motores.
+- Portada y versión 0.5.0.
+
+### Pendiente
+
+- Damas Chinas y Póker pasan a v0.6.0.
+- Prueba de sala LAN en teléfono físico.
+
 ## 0.4.0 · 2026-10-28
 
 Mesa resistente y Android 16.

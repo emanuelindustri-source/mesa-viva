@@ -12,7 +12,8 @@ export type GameId =
   | 'go'
   | 'jungle'
   | 'ludo'
-  | 'backgammon';
+  | 'backgammon'
+  | 'xiangqi';
 
 export type Difficulty = 'easy' | 'normal' | 'hard';
 export type GameCategory = 'cartas' | 'tablero' | 'dados';

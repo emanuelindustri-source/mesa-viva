@@ -833,6 +833,63 @@ function JungleSurface({ view, act, busy }: SurfaceProps) {
   );
 }
 
+/* ------------------------------------------------------------------ Xiangqi */
+
+function XiangqiSurface({ view, act, busy }: SurfaceProps) {
+  const t = useT();
+  const { legal, selected, setSelected, ex } = useBoardSelection(view);
+  const board = view.center.board;
+  if (!board) return null;
+  const cells = board.cells.map((cell) => ({ ...cell }));
+  for (const move of legal) {
+    if (cells[move.to]) {
+      cells[move.to] = { ...cells[move.to], highlight: cells[move.to]?.glyph ? 'capture' : 'move' };
+    }
+  }
+  if (selected !== null && cells[selected]) cells[selected] = { ...cells[selected], highlight: 'selected' };
+  const last = ex.lastMove as { from: number; to: number } | null;
+  if (last) {
+    for (const index of [last.from, last.to]) {
+      if (cells[index] && !['selected', 'move', 'capture'].includes(cells[index]?.highlight ?? '')) {
+        cells[index] = { ...cells[index], highlight: 'last' };
+      }
+    }
+  }
+  if (ex.check) {
+    const turn = str(ex.turn);
+    const king = cells.findIndex((cell) => cell.pieceId === `${turn}K`);
+    if (king >= 0 && cells[king]) cells[king] = { ...cells[king], highlight: 'check' };
+  }
+  const onCell = (index: number) => {
+    if (busy) return;
+    if (selected !== null) {
+      const move = legal.find((candidate) => candidate.from === selected && candidate.to === index);
+      if (move) {
+        act({ type: 'move', from: selected, to: index });
+        setSelected(null);
+        haptic('card', true);
+        sfx('card');
+        return;
+      }
+    }
+    if (legal.some((candidate) => candidate.from === index)) {
+      setSelected(index);
+      haptic('select', true);
+      sfx('tap');
+    } else {
+      setSelected(null);
+    }
+  };
+  return (
+    <div className="surface surface-board surface-xiangqi">
+      <div className="board-frame board-frame-xiangqi">
+        <Board board={{ ...board, cells }} onCell={onCell} interactive />
+      </div>
+      <p className="board-hint">{selected !== null ? t('table.selectDestination') : t('prompt.xiangqiYourTurn')}</p>
+    </div>
+  );
+}
+
 /* ------------------------------------------------------------------ Ludo */
 
 type LudoTokenView = LudoToken & { coord: [number, number]; finished: boolean };
@@ -1139,6 +1196,8 @@ export function GameSurface({ view, act, busy }: SurfaceProps) {
       return <LudoSurface view={view} act={act} busy={busy} />;
     case 'backgammon':
       return <BackgammonSurface view={view} act={act} busy={busy} />;
+    case 'xiangqi':
+      return <XiangqiSurface view={view} act={act} busy={busy} />;
     default:
       return (
         <div className="surface surface-fallback">

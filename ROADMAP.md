@@ -1,6 +1,17 @@
 # Roadmap
 
-## v0.4.0 · Mesa resistente (actual)
+## v0.5.0 · El general y el río (actual)
+
+Xiangqi y consolidación de la mesa.
+
+- [x] Xiangqi 9×10 con palacio, río, cañón, caballo bloqueado y generales enfrentados.
+- [x] Jaque, jaque mate, ahogado y bot alfa-beta.
+- [x] 22 pruebas de motores.
+- [ ] Damas Chinas y Póker (v0.6.0).
+- [ ] Prueba de sala LAN en teléfono físico.
+- [ ] Torneos y ligas de sala.
+
+## v0.4.0 · Mesa resistente
 
 Reconexión de invitados, Android 16 y APK firmado.
 

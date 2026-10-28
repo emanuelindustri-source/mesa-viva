@@ -13,6 +13,7 @@ import { goModule } from '../../games/go';
 import { jungleModule } from '../../games/jungle';
 import { ludoModule } from '../../games/ludo';
 import { backgammonModule } from '../../games/backgammon';
+import { xiangqiModule } from '../../games/xiangqi';
 import { Match } from '../match';
 import type { Seat } from '../types';
 import { easterSunday, resolveFestival } from '../../theme/festivals';
@@ -242,6 +243,22 @@ describe('Ludo', () => {
     expect(result.state.captures.p0).toBe(1);
     expect(result.state.turn).toBe(0);
     expect(result.state.phase).toBe('roll');
+  });
+});
+
+describe('Xiangqi', () => {
+  it('inicia con 32 piezas y acepta un avance de soldado', () => {
+    const match = new Match({ gameId: 'xiangqi', seats: seats(2), options: {}, difficulty: 'normal', seed: 47 });
+    const view = match.view('p0');
+    expect(view.center.board?.cols).toBe(9);
+    expect(view.center.board?.rows).toBe(10);
+    expect((view.extra?.pieces as { r: number; b: number }).r).toBe(16);
+    expect((view.extra?.pieces as { r: number; b: number }).b).toBe(16);
+    const moves = (view.extra?.legalMoves ?? []) as Array<{ from: number; to: number }>;
+    expect(moves.length).toBeGreaterThan(0);
+    expect(match.act('p0', { type: 'move', from: 54, to: 45 }).ok).toBe(true);
+    expect(match.view('p1').turnId).toBe('p1');
+    expect(xiangqiModule.meta.maxPlayers).toBe(2);
   });
 });
 
