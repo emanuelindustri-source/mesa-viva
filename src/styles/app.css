@@ -1032,7 +1032,7 @@ html[data-theme='light'] .log-line.log-magic .log-text { color: #63339e; }
   .diag-grid { grid-template-columns: 1fr 1fr; }
   .about-grid { grid-template-columns: 1fr 1fr; }
   .room-grid { grid-template-columns: 1fr 1fr; }
-  .avatar-grid { grid-template-columns: repeat(10, 1fr); }
+  .avatar-grid { grid-template-columns: repeat(5, 1fr); }
   .avatar-grid-settings { grid-template-columns: repeat(10, 1fr); }
   .home-room-banner { flex-direction: row; align-items: center; min-height: 180px; padding-right: 220px; }
   .room-banner-art { right: 4%; }
