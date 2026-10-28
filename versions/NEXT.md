@@ -11,7 +11,7 @@
 - **Juego web:** <https://emanuelindustri-source.github.io/mesa-viva/play/>
 - **Release:** <https://github.com/emanuelindustri-source/mesa-viva/releases/tag/v0.7.1>
 - **VERSION:** `0.7.1`
-- **Commit de release:** pendiente
+- **Commit de release:** `572041c`
 
 ### Calidad
 
