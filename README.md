@@ -122,4 +122,8 @@ docs/            arquitectura, roadmap, privacidad y seguridad
 
 Código bajo licencia **MIT** (ver `LICENSE`). El arte, los textos, la música y los personajes originales de Mesa Viva se publican bajo **CC BY-SA 4.0** salvo que se indique lo contrario. Las marcas y juegos comerciales mencionados pertenecen a sus titulares y se usan solo como referencia cultural; no se incluye arte ni reglamento propietario.
 
+## Evidencia por versión
+
+Cada release tiene un archivo inmutable en [`versions/`](./versions/README.md) con alcance, pruebas, enlaces, checksums y problemas conocidos. No se borran las versiones anteriores.
+
 Hecho con cariño para Venezuela y el mundo.
