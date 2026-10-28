@@ -64,7 +64,14 @@ fun MesaVivaApp(
         state.screen = ShellScreen.Home
     }
 
-    val showBar = state.screen !in setOf(ShellScreen.Snakes, ShellScreen.Domino, ShellScreen.Chess)
+    val showBar = state.screen !in setOf(
+        ShellScreen.Snakes,
+        ShellScreen.Domino,
+        ShellScreen.Chess,
+        ShellScreen.Ludo,
+        ShellScreen.Mancala,
+        ShellScreen.Backgammon,
+    )
     Scaffold(
         containerColor = Color.Transparent,
         contentWindowInsets = WindowInsets.safeDrawing,
@@ -98,6 +105,9 @@ fun MesaVivaApp(
                     "serpientes" -> ShellScreen.Snakes
                     "domino" -> ShellScreen.Domino
                     "ajedrez" -> ShellScreen.Chess
+                    "ludo" -> ShellScreen.Ludo
+                    "mancala" -> ShellScreen.Mancala
+                    "backgammon" -> ShellScreen.Backgammon
                     else -> ShellScreen.Catalog
                 }
             }
@@ -111,6 +121,9 @@ fun MesaVivaApp(
                     ShellScreen.Snakes -> SnakesGameScreen(state) { state.screen = ShellScreen.Home }
                     ShellScreen.Domino -> DominoScreen(state) { state.screen = ShellScreen.Home }
                     ShellScreen.Chess -> ChessScreen(state) { state.screen = ShellScreen.Home }
+                    ShellScreen.Ludo -> LudoScreen(state) { state.screen = ShellScreen.Home }
+                    ShellScreen.Mancala -> MancalaScreen(state) { state.screen = ShellScreen.Home }
+                    ShellScreen.Backgammon -> BackgammonScreen(state) { state.screen = ShellScreen.Home }
                 }
             }
         }
@@ -166,12 +179,30 @@ private fun HomeScreen(
         }
         item { SectionTitle(state.t("home.nativeGames")) }
         item {
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                QuickCard("🁫", state.t("domino.title"), state.t("domino.subtitle"), Modifier.weight(1f)) {
-                    onNative("domino")
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    QuickCard("🁫", state.t("domino.title"), state.t("domino.subtitle"), Modifier.weight(1f)) {
+                        onNative("domino")
+                    }
+                    QuickCard("♟️", state.t("chess.title"), state.t("chess.subtitle"), Modifier.weight(1f)) {
+                        onNative("ajedrez")
+                    }
                 }
-                QuickCard("♟️", state.t("chess.title"), state.t("chess.subtitle"), Modifier.weight(1f)) {
-                    onNative("ajedrez")
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    QuickCard("🎯", state.t("ludo.title"), state.t("ludo.subtitle"), Modifier.weight(1f)) {
+                        onNative("ludo")
+                    }
+                    QuickCard("🫘", state.t("mancala.title"), state.t("mancala.subtitle"), Modifier.weight(1f)) {
+                        onNative("mancala")
+                    }
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    QuickCard("🎲", state.t("bg.title"), state.t("bg.subtitle"), Modifier.weight(1f)) {
+                        onNative("backgammon")
+                    }
+                    QuickCard("🐍", state.t("home.native"), state.t("snakes.subtitle"), Modifier.weight(1f)) {
+                        onNative("serpientes")
+                    }
                 }
             }
         }
@@ -354,9 +385,9 @@ private fun NewsCard(state: ShellState) {
     ) {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(state.t("home.news"), style = MaterialTheme.typography.titleMedium)
-            NewsRow("🁫", state.t("home.newsDomino"))
-            NewsRow("♟️", state.t("home.newsChess"))
-            NewsRow("📷", state.t("home.newsRoom"))
+            NewsRow("🎯", state.t("home.newsDomino"))
+            NewsRow("🫘", state.t("home.newsChess"))
+            NewsRow("🎲", state.t("home.newsRoom"))
         }
     }
 }

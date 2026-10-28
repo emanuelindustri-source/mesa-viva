@@ -1,5 +1,39 @@
 # Changelog
 
+## 1.0.0 · 2026-10-28
+
+La mesa completa.
+
+### Añadido
+
+- **Ludo nativo en Compose**: 2–4 jugadores, cuatro fichas, salida con 6, capturas, casillas seguras, tres seises, turno extra y meta exacta. Tablero 15×15, bots y modo pasar el teléfono.
+- **Mancala nativo en Compose**: siembra, captura, turno extra, almacenes, bots y modo local.
+- **Backgammon nativo en Compose**: barra, capturas, dobles, bear-off, pips y bots.
+- **Seis juegos 100 % Compose**: Serpientes, Dominó, Ajedrez, Ludo, Mancala y Backgammon.
+- 8 pruebas Kotlin nuevas; **47 pruebas en total** (30 web + 17 nativas).
+- **AAB de release firmado**, además del APK.
+
+### Cambiado
+
+- Android: `versionCode=12`, `versionName=1.0.0`.
+- El catálogo nativo marca Ludo, Mancala y Backgammon como “Nativo Compose”.
+- El inicio muestra los seis juegos nativos y las novedades de 1.0.0.
+- La portada y el README pasan a 1.0.0 y a seis juegos nativos.
+
+### Corregido
+
+- El tablero de Mancala usa hoyos ovalados y no columnas estiradas.
+- El dado de Backgammon conserva la última tirada después de mover.
+- La barra inferior se oculta en Ludo, Mancala y Backgammon para dejar espacio a la mesa.
+- Los juegos nativos conservan el historial de las últimas jugadas en pantalla.
+
+### Pendiente
+
+- Salas online nativas y reconexión.
+- Retirar el WebView de los 9 juegos restantes.
+- Probar APK/AAB y LAN en el teléfono físico.
+- Accesibilidad avanzada y checklist de tienda.
+
 ## 0.9.0 · 2026-10-28
 
 La mesa nativa.

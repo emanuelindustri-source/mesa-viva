@@ -18,6 +18,9 @@ enum class ShellScreen {
     Snakes,
     Domino,
     Chess,
+    Ludo,
+    Mancala,
+    Backgammon,
     Room,
 }
 

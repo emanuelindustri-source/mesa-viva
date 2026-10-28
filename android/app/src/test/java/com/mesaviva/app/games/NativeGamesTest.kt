@@ -131,6 +131,105 @@ class NativeGamesTest {
     }
 
     @Test
+    fun `ludo creates four tokens per color and legal exits`() {
+        val game = LudoGame(playerCount = 4, allHumans = false, seed = 4)
+        val state = game.newMatch()
+        assertEquals(16, state.tokens.size)
+        assertEquals(4, state.players.size)
+        val redBase = state.tokens.filter { it.color == LudoColor.Red }
+        assertTrue(redBase.all { it.progress == -1 })
+        val withSix = state.copy(dice = 6, phase = LudoPhase.Move)
+        assertEquals(4, game.legalMoves(withSix).size)
+    }
+
+    @Test
+    fun `ludo bot rolls and returns a legal move`() {
+        val game = LudoGame(playerCount = 2, allHumans = false, seed = 8)
+        val state = game.newMatch().copy(turn = 1)
+        assertEquals(LudoAction.Roll, game.botAction(state))
+        val rolled = game.roll(state).state
+        if (rolled.phase == LudoPhase.Move) {
+            val action = game.botAction(rolled)
+            assertTrue(action is LudoAction.Move)
+        }
+    }
+
+    @Test
+    fun `mancala starts with four seeds and extra turn in store`() {
+        val game = MancalaGame(seed = 5)
+        val state = game.newMatch()
+        assertEquals(48, state.pits.sum())
+        val result = game.sow(state, 2) // 4 seeds: 3,4,5,store
+        assertEquals(MancalaSide.White, result.state.turn)
+        assertEquals(1, result.state.whiteStore)
+    }
+
+    @Test
+    fun `mancala captures the opposite pit`() {
+        val game = MancalaGame(seed = 6)
+        val base = game.newMatch()
+        val pits = base.pits.toMutableList()
+        pits[0] = 1
+        pits[1] = 0
+        pits[11] = 5
+        val state = base.copy(pits = pits.toList(), turn = MancalaSide.White)
+        val captured = game.sow(state, 0).state
+        assertEquals(6, captured.whiteStore)
+        assertEquals(0, captured.pits[11])
+    }
+
+    @Test
+    fun `mancala bot returns a valid pit`() {
+        val game = MancalaGame(seed = 9)
+        val state = game.newMatch().copy(turn = MancalaSide.Black)
+        val pit = game.botPit(state, "normal")
+        assertNotNull(pit)
+        assertTrue(pit!! in MancalaGame.BLACK_PITS)
+        assertTrue(state.pits[pit] > 0)
+    }
+
+    @Test
+    fun `backgammon starts with fifteen checkers per side`() {
+        val game = BackgammonGame(seed = 3)
+        val state = game.newMatch()
+        assertEquals(15, state.points.sumOf { if (it > 0) it else 0 })
+        assertEquals(-15, state.points.sumOf { if (it < 0) it else 0 })
+        assertEquals(BgPhase.Roll, state.phase)
+        assertEquals(167, BackgammonGame.pipCount(state, BgSide.White))
+    }
+
+    @Test
+    fun `backgammon rolls and produces legal moves`() {
+        val game = BackgammonGame(seed = 11)
+        val rolled = game.roll(game.newMatch()).state
+        assertEquals(BgPhase.Move, rolled.phase)
+        assertTrue(rolled.movesLeft.isNotEmpty())
+        val move = game.legalMoves(rolled).firstOrNull()
+        assertNotNull(move)
+        val moved = game.move(rolled, move!!.from, move.to).state
+        assertTrue(moved.phase == BgPhase.Move || moved.phase == BgPhase.Roll)
+    }
+
+    @Test
+    fun `backgammon bears off from home`() {
+        val game = BackgammonGame(seed = 12)
+        val base = game.newMatch()
+        val points = MutableList(24) { 0 }
+        points[0] = 15
+        val state = base.copy(
+            points = points,
+            phase = BgPhase.Move,
+            turn = BgSide.White,
+            dice = 1 to 2,
+            movesLeft = listOf(1),
+        )
+        val move = game.legalMoves(state).firstOrNull { it.to == 24 }
+        assertNotNull(move)
+        val after = game.move(state, move!!.from, move.to).state
+        assertEquals(1, after.offWhite)
+    }
+
+    @Test
     fun `chess bot returns a legal move`() {
         val game = ChessGame()
         val state = game.initialState()

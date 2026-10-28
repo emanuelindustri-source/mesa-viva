@@ -87,7 +87,7 @@ main { width: min(100%, 1240px); margin: 0 auto; padding: 0 clamp(18px, 4vw, 56p
 .spark { position: absolute; color: var(--gold-soft); font-size: 1rem; opacity: 0.8; }
 .s1 { left: 8%; top: 8%; }.s2 { right: 14%; top: 22%; font-size: 1.5rem; }.s3 { left: 60%; bottom: 8%; }
 
-.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 18px 0 8px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 18px 0 8px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .stats div { padding: 8px 10px; }
 .stats strong { display: block; font-family: var(--serif); color: var(--gold-soft); font-size: clamp(1.4rem, 2.5vw, 2rem); line-height: 1; }
 .stats span { color: var(--muted); font-size: 0.66rem; letter-spacing: 0.04em; text-transform: uppercase; }

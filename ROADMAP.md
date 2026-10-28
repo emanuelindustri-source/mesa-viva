@@ -1,6 +1,20 @@
 # Roadmap
 
-## v0.9.0 · La mesa nativa (actual)
+## v1.0.0 · La mesa completa (actual)
+
+- [x] Ludo nativo en Compose: 2–4 jugadores, cuatro fichas, capturas, casillas seguras, turno extra y meta exacta.
+- [x] Mancala nativo en Compose: siembra, captura, turno extra y bots.
+- [x] Backgammon nativo en Compose: barra, dobles, bear-off, pips y bots.
+- [x] Seis juegos 100 % Compose: Serpientes, Dominó, Ajedrez, Ludo, Mancala y Backgammon.
+- [x] 17 pruebas Kotlin + 30 web = 47.
+- [x] APK release firmado y AAB de release.
+- [x] Evidencia visual en `docs/evidence/v1.0.0/`.
+- [ ] Salas online nativas para los seis juegos Compose.
+- [ ] Retirar el WebView de los 9 juegos restantes.
+- [ ] Probar la APK, el AAB y la sala LAN en teléfono físico.
+- [ ] Accesibilidad avanzada y checklist de tienda.
+
+## v0.9.0 · La mesa nativa
 
 - [x] Dominó nativo en Compose: doble 6, 2–4 jugadores, parejas, pozo, tranca, meta y bots.
 - [x] Ajedrez nativo en Compose: reglas completas, promoción elegible, historial SAN y bot alfa-beta.
@@ -114,9 +128,9 @@ Pulido de onboarding, cartas/fichas, coordenadas de tablero y CI Android. La bas
 - [x] Diagnóstico y envío por correo.
 - [x] PWA instalable y offline.
 
-## v1.0.0 · La mesa completa
+## v1.1.0 · La mesa conectada
 
-- [ ] Salas nativas para los tres juegos Compose y reconexión visible.
+- [ ] Salas nativas para los seis juegos Compose y reconexión visible.
 - [ ] Reproducción de partidas con semilla.
 - [ ] Accesibilidad: lector de pantalla completo, control por teclado y tamaños de texto.
 - [ ] Prueba en teléfono físico y publicación del APK/AAB.

@@ -4,7 +4,7 @@
 
 Mesa Viva es una app Android **Kotlin nativa con WebView**. La lógica de juego, las pantallas y los 13 juegos están en React/TypeScript dentro de `android/app/src/main/assets/www`. La app usa Kotlin para cámara, sensores, vibración, PDF, Material You y el relay LAN.
 
-Desde **v0.9.0**, `MainActivity` es una cáscara nativa completa en Compose (inicio, catálogo, niveles, ajustes, sala y navegación) y `GameWebActivity` hospeda la mesa compartida en WebView. **Serpientes y Escaleras, Dominó y Ajedrez** son 100 % Compose. Es la **fase 2** completada; quedan 12 juegos en WebView.
+Desde **v1.0.0**, `MainActivity` es una cáscara nativa completa en Compose (inicio, catálogo, niveles, ajustes, sala y navegación) y `GameWebActivity` hospeda la mesa compartida en WebView. **Serpientes y Escaleras, Dominó, Ajedrez, Ludo, Mancala y Backgammon** son 100 % Compose. Es la **fase 2** completada; quedan 9 juegos en WebView.
 
 “Compose por completo” significa reescribir en Kotlin/Compose:
 
@@ -42,15 +42,18 @@ Es un proyecto de varias versiones, no un commit.
 - [x] **Serpientes y Escaleras** (tablero y dado).
 - [x] **Dominó** (fichas, parejas, pozo y tranca).
 - [x] **Ajedrez** (reglas completas, promoción e IA alfa-beta).
-- [ ] Salas online nativas para los tres juegos (v1.0.0).
+- [x] **Ludo** (fichas, capturas, seguros y meta).
+- [x] **Mancala** (siembra, captura y turno extra).
+- [x] **Backgammon** (barra, dobles y bear-off).
+- [ ] Salas online nativas para los seis juegos (v1.1.0).
 
 - Motores compartidos entre web y Compose: extraer la lógica a un contrato/JSON o reimplementar en Kotlin con pruebas.
 - Cada juego Compose se activa por bandera; el WebView sigue disponible.
 - Comparar rendimiento, accesibilidad y tamaño.
 
-### Fase 3 · Resto de juegos (v1.0.0+)
+### Fase 3 · Resto de juegos (v1.1.0+)
 
-- Caída, Furia, Dados, Mancala, Go, Jungle, Ludo, Backgammon, Xiangqi, Damas Chinas y Póker.
+- Caída, Furia, Dados, Damas, Go, Jungle, Xiangqi, Damas Chinas y Póker.
 - Animaciones nativas con `Canvas`, `animate*AsState`, partículas y háptica.
 - Mesa compartida, chat y salas nativas.
 
@@ -93,4 +96,4 @@ android/app/src/main/java/com/mesaviva/app/
 
 ## Decisión
 
-La fase 2 está cerrada en v0.9.0 con estrategia **híbrida**: cáscara Compose + WebView para la mesa compartida, portando un juego a la vez. Serpientes, Dominó y Ajedrez demuestran la viabilidad. No se afirmará “100 % Compose” hasta retirar el WebView de los 15 juegos.
+La fase 2 está cerrada en v1.0.0 con estrategia **híbrida**: cáscara Compose + WebView para la mesa compartida, portando un juego a la vez. Seis juegos demuestran la viabilidad. No se afirmará “100 % Compose” global hasta retirar el WebView de los 15 juegos.
