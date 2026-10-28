@@ -23,7 +23,7 @@
 - [x] Vuelta nativa del perfil desde la web con `localStorage` (`mesa-viva-v1`).
 - [x] APK firmado y verificación en emulador Android 14.
 - [ ] Prueba de sala LAN en teléfono físico (bloqueada por la restricción de instalación MIUI del equipo).
-- [ ] Retirada completa del WebView y migración de los 14 juegos restantes (v0.9.0+).
+- [ ] Retirada completa del WebView y migración de los 12 juegos restantes (v1.0.0+).
 
 ## v0.7.1 · Caída, mesa legible
 

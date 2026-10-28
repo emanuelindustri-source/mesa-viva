@@ -64,7 +64,7 @@ fun MesaVivaApp(
         state.screen = ShellScreen.Home
     }
 
-    val showBar = state.screen != ShellScreen.Snakes
+    val showBar = state.screen !in setOf(ShellScreen.Snakes, ShellScreen.Domino, ShellScreen.Chess)
     Scaffold(
         containerColor = Color.Transparent,
         contentWindowInsets = WindowInsets.safeDrawing,
