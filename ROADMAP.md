@@ -1,6 +1,15 @@
 # Roadmap
 
-## v0.5.0 · El general y el río (actual)
+## v0.6.0 · Compose, primera piedra (actual)
+
+- [x] `ComponentActivity` + `setContent` + `AndroidView`.
+- [x] Compose BOM, activity-compose, ui, foundation y material3.
+- [x] APK firmado probado en teléfono real.
+- [ ] Compose fase 1: inicio, ajustes, niveles y lobby nativos (v0.7.0).
+- [ ] Damas Chinas y Póker (v0.7.0).
+- [ ] Retirada completa del WebView (v0.8.0+).
+
+## v0.5.0 · El general y el río
 
 Xiangqi y consolidación de la mesa.
 

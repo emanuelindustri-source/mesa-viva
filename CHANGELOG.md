@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.6.0 · 2026-10-28
+
+Compose, primera piedra.
+
+### Añadido
+
+- `MainActivity` migrada a `ComponentActivity` y `setContent` con `AndroidView`.
+- Compose BOM 2024.12.01, activity-compose, ui, foundation y material3.
+- Plugin de Compose para Kotlin 2.0.21.
+- APK v0.6.0 probado e instalado en el teléfono real `23117RA68G`; inicio y Caída renderizan sin cierres.
+
+### Notas
+
+- La mesa sigue en WebView; **no es una migración completa a Compose**.
+- Damas Chinas y Póker pasan a v0.7.0.
+- El APK sube a 8.19 MB por el runtime de Compose.
+
 ## 0.5.0 · 2026-10-28
 
 El general y el río.
