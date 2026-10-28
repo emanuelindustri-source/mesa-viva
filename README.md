@@ -2,7 +2,7 @@
 
 **Mesa Viva** es una aplicación de juegos de cartas y mesa con alma venezolana. Funciona sin conexión para jugar solo, contra bots o pasando el teléfono; y tiene salas en línea con código y QR para jugar con amigos. La web y el APK Android comparten el mismo motor de juego.
 
-> Estado actual: **v0.8.0**. Quince juegos jugables, **Póker Texas Hold'em sin dinero real** con bots, ciegas, all-in, botes laterales y showdown; **cáscara nativa en Jetpack Compose** (inicio, catálogo, niveles, ajustes y lobby) y **Serpientes y Escaleras 100 % Compose**. Android 16 (API 36), APK firmado y PWA offline.
+> Estado actual: **v0.8.0**. Quince juegos jugables, **Póker Texas Hold'em sin dinero real** con bots, ciegas, all-in, botes laterales y showdown; **cáscara nativa en Jetpack Compose** (inicio, catálogo, niveles, ajustes y acceso a salas) y **Serpientes y Escaleras 100 % Compose**. Android 16 (API 36), APK firmado y PWA offline.
 
 ---
 

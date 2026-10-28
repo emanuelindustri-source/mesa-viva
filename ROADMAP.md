@@ -17,7 +17,7 @@
 - [x] Ritmo de bots, entrega visible, capturas animadas y mano estable.
 - [x] Canto antes de la primera carta; reglas y meta documentadas.
 - [x] 25 pruebas.
-- [ ] Póker y Compose fase 1 (v0.8.0).
+- [ ] Póker (v0.8.0) y lobby nativo (v0.9.0).
 - [ ] Prueba de sala LAN en teléfono físico.
 
 ## v0.7.0 · La estrella
@@ -26,7 +26,7 @@
 - [x] 23 pruebas de motores.
 - [x] 14 juegos jugables.
 - [ ] Póker (v0.8.0).
-- [ ] Compose fase 1: inicio, ajustes, niveles y lobby (v0.8.0).
+- [ ] Compose fase 1: inicio, ajustes y niveles (v0.8.0); lobby nativo (v0.9.0).
 - [ ] Partida completa y LAN en teléfono real.
 
 ## v0.6.0 · Compose, primera piedra
@@ -34,7 +34,7 @@
 - [x] `ComponentActivity` + `setContent` + `AndroidView`.
 - [x] Compose BOM, activity-compose, ui, foundation y material3.
 - [x] APK firmado probado en teléfono real.
-- [ ] Compose fase 1: inicio, ajustes, niveles y lobby nativos (v0.7.0).
+- [ ] Compose fase 1: inicio, ajustes y niveles nativos (v0.8.0); lobby nativo (v0.9.0).
 - [ ] Damas Chinas y Póker (v0.7.0).
 - [ ] Retirada completa del WebView (v0.8.0+).
 
