@@ -374,17 +374,26 @@ fun ChessScreen(state: ShellState, onBack: () -> Unit) {
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(state.t("chess.choosePromotion"))
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        listOf(
-                            ChessPieceType.Queen to state.t("chess.queen"),
-                            ChessPieceType.Rook to state.t("chess.rook"),
-                            ChessPieceType.Bishop to state.t("chess.bishop"),
-                            ChessPieceType.Knight to state.t("chess.knight"),
-                        ).forEach { (type, label) ->
-                            Button(onClick = {
-                                val pair = promotion ?: return@Button
-                                apply(pair.first, pair.second, type)
-                            }) { Text(label) }
+                    val options = listOf(
+                        ChessPieceType.Queen to state.t("chess.queen"),
+                        ChessPieceType.Rook to state.t("chess.rook"),
+                        ChessPieceType.Bishop to state.t("chess.bishop"),
+                        ChessPieceType.Knight to state.t("chess.knight"),
+                    )
+                    for (row in 0..1) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            for (column in 0..1) {
+                                val (type, label) = options[row * 2 + column]
+                                Button(
+                                    onClick = {
+                                        val pair = promotion ?: return@Button
+                                        apply(pair.first, pair.second, type)
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                ) {
+                                    Text(label, maxLines = 1)
+                                }
+                            }
                         }
                     }
                 }
@@ -437,8 +446,8 @@ fun ChessScreen(state: ShellState, onBack: () -> Unit) {
     if (resultOpen && board.phase == ChessPhase.MatchEnd) {
         val outcome = board.outcome
         val title = when {
-            outcome?.winner == ChessColor.White -> state.t("chess.you")
-            outcome?.winner == ChessColor.Black -> state.t("chess.bot")
+            outcome?.winner == ChessColor.White -> state.t("chess.youWon")
+            outcome?.winner == ChessColor.Black -> state.t("chess.botWon")
             else -> state.t("chess.draw")
         }
         AlertDialog(
