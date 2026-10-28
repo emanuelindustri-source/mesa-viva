@@ -535,6 +535,8 @@ html[data-theme='light'] .table-surface-wrap {
 .board-cell.tone-piece-b .cell-glyph { color: #1a2a22; text-shadow: 0 1px 1px rgba(255, 255, 255, 0.2); }
 .board-cell.tone-dark .cell-glyph, .board-cell.tone-light .cell-glyph { color: #16221c; }
 .cell-label { position: absolute; left: 3px; top: 2px; font-size: 0.4rem; color: rgba(20, 35, 27, 0.38); z-index: 1; }
+.board-frame .cell-label { display: none; }
+.board-frame-snakes .cell-label { display: block; }
 .cell-sub { position: absolute; right: 3px; bottom: 2px; z-index: 3; font-size: 0.5rem; font-weight: 700; color: rgba(20, 35, 27, 0.7); }
 .board-cell.tone-dark .cell-sub { color: rgba(255, 255, 255, 0.8); }
 .board-hint { color: rgba(255, 255, 255, 0.55); font-size: 0.62rem; text-align: center; margin-top: 3px; }

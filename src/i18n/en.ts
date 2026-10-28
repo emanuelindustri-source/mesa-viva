@@ -910,6 +910,7 @@ export const en: Partial<Record<TranslationKey, string>> = {
 
   'table.deckCount': '{n} in the deck',
   'table.cards': 'cards',
+  'table.tilesLeft': '{n} tiles',
   'table.caidaFlash': 'Catch +{points}',
   'table.ladders': 'Ladders',
   'table.snakes': 'Snakes',

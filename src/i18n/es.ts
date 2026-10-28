@@ -433,6 +433,7 @@ export const es = {
   'settings.sound': 'Sonido',
   'settings.volume': 'Volumen',
   'table.cards': 'cartas',
+  'table.tilesLeft': '{n} fichas',
   'table.caidaFlash': 'Caída +{points}',
   'table.ladders': 'Escaleras',
   'table.snakes': 'Serpientes',

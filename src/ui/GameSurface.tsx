@@ -236,7 +236,7 @@ function FuriaSurface({ view, act, busy }: SurfaceProps) {
       <div className="hand-area">
         <div className="hand-label">
           <span>{t('table.yourHand')}</span>
-          <span>{view.hand.length} {t('common.points')}</span>
+          <span>{t('table.cardsLeft', { n: view.hand.length })}</span>
         </div>
         <div className={cx('hand', view.hand.length > 6 && 'is-crowded')}>
           <AnimatePresence initial={false}>
@@ -360,7 +360,7 @@ function DominoSurface({ view, act, busy }: SurfaceProps) {
       <div className="hand-area">
         <div className="hand-label">
           <span>{t('table.yourHand')}</span>
-          <span>{hand.length} {t('common.points')}</span>
+          <span>{t('table.tilesLeft', { n: hand.length })}</span>
         </div>
         <div className="domino-hand">
           <AnimatePresence initial={false}>
@@ -670,6 +670,10 @@ function MancalaSurface({ view, act, busy }: SurfaceProps) {
   const top = [12, 11, 10, 9, 8, 7];
   const bottom = [0, 1, 2, 3, 4, 5];
   const isWhite = turn === 'w';
+  const whitePlayer = view.players[0];
+  const blackPlayer = view.players[1];
+  const whiteLabel = view.youId === whitePlayer?.id ? t('common.you') : (whitePlayer?.name.split(' ')[0] ?? 'B');
+  const blackLabel = view.youId === blackPlayer?.id ? t('common.you') : (blackPlayer?.name.split(' ')[0] ?? 'N');
 
   const Pit = ({ index, side }: { index: number; side: 'w' | 'b' }) => {
     const seeds = pits[index] ?? 0;
@@ -701,7 +705,7 @@ function MancalaSurface({ view, act, busy }: SurfaceProps) {
     <div className="surface surface-mancala">
       <div className={cx('mancala-board', isWhite ? 'turn-white' : 'turn-black')}>
         <div className="mancala-store store-black">
-          <span className="store-label">B</span>
+          <span className="store-label">{blackLabel.slice(0, 5)}</span>
           <strong>{pits[13] ?? 0}</strong>
         </div>
         <div className="mancala-pits">
@@ -717,7 +721,7 @@ function MancalaSurface({ view, act, busy }: SurfaceProps) {
           </div>
         </div>
         <div className="mancala-store store-white">
-          <span className="store-label">W</span>
+          <span className="store-label">{whiteLabel.slice(0, 5)}</span>
           <strong>{pits[6] ?? 0}</strong>
         </div>
       </div>

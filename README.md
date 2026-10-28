@@ -2,7 +2,7 @@
 
 **Mesa Viva** es una aplicación de juegos de cartas y mesa con alma venezolana. Funciona sin conexión para jugar solo, contra bots o pasando el teléfono; y tiene salas en línea con código y QR para jugar con amigos. La web y el APK Android comparten el mismo motor de juego.
 
-> Estado actual: **v0.1.0**. Ocho juegos jugables, sala en línea por relay WebSocket, 11 idiomas de interfaz, temas de festividad, perfil con 10 niveles y exportación de crónicas a PDF.
+> Estado actual: **v0.1.1**. Ocho juegos jugables, sala en línea por relay WebSocket, 11 idiomas de interfaz, temas de festividad, perfil con 10 niveles y exportación de crónicas a PDF.
 
 ---
 

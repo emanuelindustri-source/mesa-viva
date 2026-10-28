@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.1 · 2026-10-28
+
+Pulido de mesa y CI.
+
+### Corregido
+
+- Furia y Dominó muestran “7 cartas” / “6 fichas” en vez de “puntos” en la mano.
+- Los tableros de ajedrez y damas ya no muestran coordenadas en cada casilla; las coordenadas quedan como etiquetas accesibles.
+- Mancala identifica los almacenes con el nombre del jugador o “Tú”, no con B/W.
+- El workflow Android usa el SDK preinstalado del runner (la acción antigua intentaba instalar un paquete `tools` eliminado).
+- Onboarding: rejilla de avatares en 5 columnas para no recortarse.
+
 ## 0.1.0 · 2026-10-27
 
 Primera mesa funcional.
