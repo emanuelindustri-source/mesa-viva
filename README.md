@@ -48,6 +48,21 @@ npm run build
 npm run preview
 ```
 
+## Sitio público
+
+- **Portada / presentación:** <https://emanuelindustri-source.github.io/mesa-viva/>
+- **Juego / PWA:** <https://emanuelindustri-source.github.io/mesa-viva/play/>
+- **Versiones y APK:** <https://github.com/emanuelindustri-source/mesa-viva/releases>
+
+La portada es HTML estático en `landing/`. El juego se compila en `dist/` y el sitio completo de Pages se arma con:
+
+```bash
+npm run build:pages
+python -m http.server 4180 --directory dist-site
+```
+
+El APK de release firmado se genera con `cd android && gradlew.bat assembleRelease`; requiere `android/keystore.properties` y el keystore fuera del repositorio.
+
 ## Sala en línea
 
 Las salas usan un **relay WebSocket** incluido en `server/room-server.mjs`. El host mantiene el estado autoritativo de la partida; el relay solo enruta mensajes entre el host y los invitados y no guarda partidas.
@@ -121,6 +136,7 @@ python tools/check_i18n.py   # claves usadas vs. catálogo español
 src/core/        tipos, azar, niveles, registro, Match autoritativo
 src/games/       motores de los 12 juegos
 src/ui/          pantallas, mesa, cartas, dados, tablero, resultados
+landing/         portada estática de presentación, versiones y descargas
 src/net/         protocolo de sala y relay WebSocket
 src/theme/       festividades, Semana Santa/Carnaval, paletas y Material You
 src/i18n/        catálogos y formateo de crónicas

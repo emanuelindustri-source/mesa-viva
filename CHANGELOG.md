@@ -11,6 +11,7 @@ Mesa resistente y Android 16.
 - Avisos de “reconectando” y “volviste a la mesa”.
 - **Android 16**: edge-to-edge con insets de barras/teclado y back predictivo integrado con el WebView.
 - **APK de release firmado** (RSA 4096) además del APK de depuración.
+- **Portada web** de presentación en la raíz de Pages, con historial de versiones y descargas; el juego queda en `/play/`.
 - Prueba de protocolo de reconexión con relay real.
 
 ### Cambiado

@@ -6,6 +6,7 @@ node_modules/
 # Build
 dist/
 dist-ssr/
+dist-site/
 *.local
 coverage/
 i18n-report.txt

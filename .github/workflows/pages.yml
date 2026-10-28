@@ -26,7 +26,7 @@ jobs:
       - name: Instalar
         run: npm ci
       - name: Build
-        run: npm run build
+        run: npm run build:pages
         env:
           VITE_ROOM_WS_URL: ${{ vars.VITE_ROOM_WS_URL }}
       - name: Configurar Pages
@@ -34,7 +34,7 @@ jobs:
       - name: Subir artefacto
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: dist-site
 
   deploy:
     needs: build
