@@ -890,6 +890,102 @@ function XiangqiSurface({ view, act, busy }: SurfaceProps) {
   );
 }
 
+/* ------------------------------------------------------------ Damas Chinas */
+
+function ChinoSurface({ view, act, busy }: SurfaceProps) {
+  const t = useT();
+  const ex = extra(view);
+  const cells = (ex.cells ?? []) as Array<{ index: number; triangle: number | null; x: number; y: number; piece: number | null }>;
+  const legal = (ex.legalMoves ?? []) as Array<{ from: number; to: number; jumps: number }>;
+  const colors = (ex.colors ?? []) as string[];
+  const starts = (ex.starts ?? []) as number[];
+  const targets = (ex.targets ?? []) as number[];
+  const progress = (ex.targetProgress ?? []) as number[];
+  const [selected, setSelected] = useState<number | null>(null);
+  const isTurn = view.turnId === view.youId;
+  const sources = new Set(legal.map((move) => move.from));
+  const destinations = new Set(legal.map((move) => move.to));
+
+  useEffect(() => {
+    if (selected !== null && !sources.has(selected)) setSelected(null);
+  }, [legal, selected, sources]);
+
+  const onCell = (index: number) => {
+    if (busy || !isTurn) return;
+    if (selected !== null) {
+      const move = legal.find((candidate) => candidate.from === selected && candidate.to === index);
+      if (move) {
+        act({ type: 'move', from: selected, to: index });
+        setSelected(null);
+        haptic('card', true);
+        sfx('card');
+        return;
+      }
+    }
+    if (sources.has(index)) {
+      setSelected(index);
+      haptic('select', true);
+      sfx('tap');
+    } else {
+      setSelected(null);
+    }
+  };
+
+  return (
+    <div className="surface surface-chino">
+      <div className="chino-board-wrap">
+        <div className="chino-board" role="grid" aria-label={t('chino.board')}>
+          {cells.map((cell) => {
+            const owner = cell.piece;
+            const color = owner !== null ? colors[owner % colors.length] : '';
+            const isStart = cell.triangle !== null && starts.includes(cell.triangle);
+            const isTarget = cell.triangle !== null && targets.includes(cell.triangle);
+            const startSeat = cell.triangle !== null ? starts.indexOf(cell.triangle) : -1;
+            const targetSeat = cell.triangle !== null ? targets.indexOf(cell.triangle) : -1;
+            return (
+              <button
+                key={cell.index}
+                type="button"
+                className={cx(
+                  'chino-cell',
+                  cell.triangle !== null && `chino-triangle-${cell.triangle}`,
+                  isStart && startSeat >= 0 && `chino-start-${colors[startSeat]}`,
+                  isTarget && 'is-target',
+                  selected === cell.index && 'is-selected',
+                  destinations.has(cell.index) && 'is-destination',
+                  sources.has(cell.index) && 'is-source',
+                )}
+                style={{
+                  left: `${3 + ((cell.x + 6) / 12) * 94}%`,
+                  top: `${3 + ((cell.y + 6.928) / 13.856) * 94}%`,
+                }}
+                onClick={() => onCell(cell.index)}
+                disabled={busy || !isTurn}
+                aria-label={`${t('chino.hole')} ${cell.index + 1}`}
+              >
+                {owner !== null ? <span className={cx('chino-piece', `chino-piece-${color}`)} /> : null}
+                {targetSeat >= 0 && owner === null ? <span className="chino-target-mark" /> : null}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      <div className="chino-legend">
+        {view.players.map((player, index) => (
+          <span key={player.id} className={cx('chino-legend-item', player.isTurn && 'is-turn')}>
+            <span className={cx('chino-dot', `chino-piece-${colors[starts[index] ?? index] ?? 'red'}`)} />
+            <span>{player.name}</span>
+            <b>{progress[index] ?? 0}/10</b>
+          </span>
+        ))}
+      </div>
+      <p className="board-hint">
+        {!isTurn ? t('chino.waiting') : selected !== null ? t('table.selectDestination') : t('prompt.chinoYourTurn')}
+      </p>
+    </div>
+  );
+}
+
 /* ------------------------------------------------------------------ Ludo */
 
 type LudoTokenView = LudoToken & { coord: [number, number]; finished: boolean };
@@ -1198,6 +1294,8 @@ export function GameSurface({ view, act, busy }: SurfaceProps) {
       return <BackgammonSurface view={view} act={act} busy={busy} />;
     case 'xiangqi':
       return <XiangqiSurface view={view} act={act} busy={busy} />;
+    case 'chino':
+      return <ChinoSurface view={view} act={act} busy={busy} />;
     default:
       return (
         <div className="surface surface-fallback">

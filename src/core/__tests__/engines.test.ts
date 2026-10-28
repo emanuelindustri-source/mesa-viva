@@ -14,6 +14,7 @@ import { jungleModule } from '../../games/jungle';
 import { ludoModule } from '../../games/ludo';
 import { backgammonModule } from '../../games/backgammon';
 import { xiangqiModule } from '../../games/xiangqi';
+import { chinoModule } from '../../games/chino';
 import { Match } from '../match';
 import type { Seat } from '../types';
 import { easterSunday, resolveFestival } from '../../theme/festivals';
@@ -259,6 +260,22 @@ describe('Xiangqi', () => {
     expect(match.act('p0', { type: 'move', from: 54, to: 45 }).ok).toBe(true);
     expect(match.view('p1').turnId).toBe('p1');
     expect(xiangqiModule.meta.maxPlayers).toBe(2);
+  });
+});
+
+describe('Damas Chinas', () => {
+  it('genera la estrella de 121 hoyos y mueve una ficha', () => {
+    const state = chinoModule.create(seats(2), {}, () => 0.5);
+    const view = chinoModule.view(state, 'p0');
+    expect((view.extra?.cells as unknown[]).length).toBe(121);
+    expect((view.extra?.pieces as Array<number | null>).filter((piece) => piece === 0).length).toBe(10);
+    expect((view.extra?.pieces as Array<number | null>).filter((piece) => piece === 1).length).toBe(10);
+    const moves = (view.extra?.legalMoves ?? []) as Array<{ from: number; to: number }>;
+    expect(moves.length).toBeGreaterThan(0);
+    const moved = chinoModule.act(state, { type: 'move', from: moves[0]!.from, to: moves[0]!.to }, 'p0', () => 0.5);
+    expect(moved.error).toBeUndefined();
+    expect(moved.state.turn).toBe(1);
+    expect(chinoModule.meta.maxPlayers).toBe(6);
   });
 });
 

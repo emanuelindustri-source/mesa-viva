@@ -2,7 +2,7 @@
 
 **Mesa Viva** es una aplicación de juegos de cartas y mesa con alma venezolana. Funciona sin conexión para jugar solo, contra bots o pasando el teléfono; y tiene salas en línea con código y QR para jugar con amigos. La web y el APK Android comparten el mismo motor de juego.
 
-> Estado actual: **v0.6.0**. Trece juegos jugables, Compose fase 0 en Android, reconexión automática de invitados, sala LAN sin internet por QR, APK firmado y Android 16 (API 36), 11 idiomas, temas de festividad, 10 niveles y crónicas PDF.
+> Estado actual: **v0.7.0**. Catorce juegos jugables, Damas Chinas, Compose fase 0 en Android, reconexión automática de invitados, sala LAN sin internet por QR, APK firmado y Android 16 (API 36), 11 idiomas, temas de festividad, 10 niveles y crónicas PDF.
 
 ---
 
@@ -20,6 +20,7 @@
 - **Ludo** 2–4 jugadores con cuatro fichas, capturas, casillas seguras, dado y meta exacta.
 - **Backgammon** con barra, capturas, dobles, bear-off y 15 fichas por bando.
 - **Xiangqi** con palacio, río, caballo bloqueado, cañón, soldados y generales enfrentados.
+- **Damas Chinas** con estrella de 121 hoyos, saltos encadenados y meta en el triángulo opuesto.
 - **Modos**: solo contra bots, pasar el teléfono (humanos y bots mezclados), sala en línea con rondas y chat, **sala LAN sin internet** en Android y **reconexión automática** del invitado si se cae la conexión.
 - **Progresión**: 10 niveles, XP por partida, victoria, dificultad, puntos y racha; recompensas desbloqueables.
 - **Crónica de partida**: últimos 5 movimientos visibles, historial completo, descarga PDF con infografía.
@@ -31,7 +32,7 @@
 
 ## Catálogo y roadmap
 
-El catálogo dentro de la app muestra la visión completa de **30 juegos** con su estado y enlaces de reglas. La primera ola jugable son los 13 anteriores. Damas Chinas, Shogi, Janggi, Luzhanqi, Ur, Tren Mexicano, Chickenfoot, Aeroplane Chess, Póker, Mahjong, Riichi, Mahjong con naipes, Ajedrez para tres y Soroban están marcados como próximos o en investigación. No se usan marcas, arte ni reglamentos propietarios de terceros: los nombres comerciales del catálogo son referencias culturales.
+El catálogo dentro de la app muestra la visión completa de **30 juegos** con su estado y enlaces de reglas. La primera ola jugable son los 14 anteriores. Shogi, Janggi, Luzhanqi, Ur, Tren Mexicano, Chickenfoot, Aeroplane Chess, Póker, Mahjong, Riichi, Mahjong con naipes, Ajedrez para tres y Soroban están marcados como próximos o en investigación. No se usan marcas, arte ni reglamentos propietarios de terceros: los nombres comerciales del catálogo son referencias culturales.
 
 ## Arranque rápido (web)
 
@@ -135,7 +136,7 @@ python tools/check_i18n.py   # claves usadas vs. catálogo español
 
 ```
 src/core/        tipos, azar, niveles, registro, Match autoritativo
-src/games/       motores de los 13 juegos
+src/games/       motores de los 14 juegos
 src/ui/          pantallas, mesa, cartas, dados, tablero, resultados
 landing/         portada estática de presentación, versiones y descargas
 src/net/         protocolo de sala y relay WebSocket

@@ -698,6 +698,70 @@ html[data-theme='light'] .table-surface-wrap {
 .jungle-legend { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; color: rgba(255, 255, 255, 0.6); font-size: 0.55rem; }
 .jungle-legend span { padding: 2px 5px; border-radius: 6px; background: rgba(0, 0, 0, 0.2); }
 
+/* ------------------------------------------------------------ damas chinas */
+
+.surface-chino { align-items: center; }
+.chino-board-wrap {
+  width: min(100%, 560px, 55vh);
+  padding: 9px;
+  border-radius: 18px;
+  background: linear-gradient(145deg, #5d4a78, #2b2141);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+.chino-board { position: relative; width: 100%; aspect-ratio: 12 / 13.856; }
+.chino-cell {
+  position: absolute;
+  width: 7.1%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid rgba(74, 49, 20, 0.45);
+  background: radial-gradient(circle at 35% 30%, #f7e7c7, #dec49a 70%);
+  padding: 0;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.6), 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+.chino-cell:disabled { cursor: default; }
+.chino-cell.is-target { box-shadow: 0 0 0 2px rgba(242, 198, 107, 0.7), inset 0 1px 2px rgba(255, 255, 255, 0.6); }
+.chino-cell.is-destination::after {
+  content: '';
+  width: 28%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #6f4bb5;
+  box-shadow: 0 0 8px rgba(111, 75, 181, 0.7);
+}
+.chino-cell.is-selected { box-shadow: 0 0 0 3px #ffd479, 0 0 12px rgba(255, 212, 121, 0.6); }
+.chino-cell.chino-start-red { background: radial-gradient(circle at 35% 30%, #ffd8d2, #e08a80 70%); }
+.chino-cell.chino-start-blue { background: radial-gradient(circle at 35% 30%, #d4e4ff, #7fa6df 70%); }
+.chino-cell.chino-start-green { background: radial-gradient(circle at 35% 30%, #d6f5df, #7cc794 70%); }
+.chino-cell.chino-start-yellow { background: radial-gradient(circle at 35% 30%, #fff0c3, #e8c86a 70%); }
+.chino-cell.chino-start-purple { background: radial-gradient(circle at 35% 30%, #e8d8ff, #b28ce0 70%); }
+.chino-cell.chino-start-orange { background: radial-gradient(circle at 35% 30%, #ffe0c4, #e6a06a 70%); }
+.chino-piece {
+  display: block;
+  width: 78%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.55), inset 1px 2px 2px rgba(255, 255, 255, 0.45);
+}
+.chino-piece-red { background: radial-gradient(circle at 32% 26%, #ff9b90, #d64b40 65%, #8e211a); }
+.chino-piece-blue { background: radial-gradient(circle at 32% 26%, #a9c8ff, #4c7fd0 65%, #21477f); }
+.chino-piece-green { background: radial-gradient(circle at 32% 26%, #a8e8b6, #4a9e64 65%, #1e5e36); }
+.chino-piece-yellow { background: radial-gradient(circle at 32% 26%, #ffe8a2, #d8b23f 65%, #8b6712); }
+.chino-piece-purple { background: radial-gradient(circle at 32% 26%, #dcc4ff, #8e63c8 65%, #4e2d80); }
+.chino-piece-orange { background: radial-gradient(circle at 32% 26%, #ffd0a4, #d47b36 65%, #834016); }
+.chino-target-mark { width: 18%; aspect-ratio: 1; border-radius: 50%; border: 1px solid rgba(111, 75, 181, 0.5); }
+.chino-legend { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; color: rgba(255, 255, 255, 0.68); font-size: 0.58rem; }
+.chino-legend-item { display: inline-flex; align-items: center; gap: 4px; padding: 3px 7px; border-radius: 99px; background: rgba(0, 0, 0, 0.18); border: 1px solid rgba(255, 255, 255, 0.1); }
+.chino-legend-item.is-turn { border-color: rgba(242, 198, 107, 0.55); color: #f5ead7; }
+.chino-legend-item b { color: #f5ead7; }
+.chino-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+
 /* ---------------------------------------------------------------- xiangqi */
 
 .surface-xiangqi { align-items: center; }

@@ -12,6 +12,7 @@ import { jungleModule } from '../games/jungle';
 import { ludoModule } from '../games/ludo';
 import { backgammonModule } from '../games/backgammon';
 import { xiangqiModule } from '../games/xiangqi';
+import { chinoModule } from '../games/chino';
 
 export const GAME_MODULES: Record<GameId, GameModule<unknown>> = {
   caida: caidaModule as unknown as GameModule<unknown>,
@@ -27,6 +28,7 @@ export const GAME_MODULES: Record<GameId, GameModule<unknown>> = {
   ludo: ludoModule as unknown as GameModule<unknown>,
   backgammon: backgammonModule as unknown as GameModule<unknown>,
   xiangqi: xiangqiModule as unknown as GameModule<unknown>,
+  chino: chinoModule as unknown as GameModule<unknown>,
 };
 
 export const GAMES: GameMeta[] = Object.values(GAME_MODULES).map((m) => m.meta);
@@ -64,7 +66,7 @@ export const CATALOG: CatalogEntry[] = [
   { id: 'mancala', name: 'Mancala', category: 'tablero', status: 'playable', players: '2', emoji: '🫘', url: 'https://www.ymimports.com/pages/how-to-play-mancala' },
   { id: 'ludo', name: 'Ludo', category: 'tablero', status: 'playable', players: '2–4', emoji: '🎲', url: 'https://www.ymimports.com/pages/how-to-play-ludo', note: 'Cuatro fichas, capturas, casillas seguras y meta exacta.' },
   { id: 'backgammon', name: 'Backgammon', category: 'tablero', status: 'playable', players: '2', emoji: '🎯', url: 'https://www.ymimports.com/pages/how-to-play-backgammon', note: 'Barra, capturas, dobles y bear-off.' },
-  { id: 'chino', name: 'Damas Chinas', category: 'tablero', status: 'soon', players: '2–6', emoji: '✡️', url: 'https://www.ymimports.com/pages/how-to-play-chinese-checkers' },
+  { id: 'chino', name: 'Damas Chinas', category: 'tablero', status: 'playable', players: '2–6', emoji: '✡️', url: 'https://www.ymimports.com/pages/how-to-play-chinese-checkers', note: 'Estrella de 121 hoyos, saltos encadenados y meta opuesta.' },
   { id: 'go', name: 'Go', category: 'tablero', status: 'playable', players: '2', emoji: '⚪', url: 'https://www.ymimports.com/pages/how-to-play-go', note: '9×9 y 13×13, capturas, ko y komi 6.5.' },
   { id: 'xiangqi', name: 'Xiangqi', category: 'tablero', status: 'playable', players: '2', emoji: '🀄', url: 'https://www.ymimports.com/pages/how-to-play-xiangqi-chinese-chess', note: 'Palacio, río, cañón y generales enfrentados.' },
   { id: 'shogi', name: 'Shogi', category: 'tablero', status: 'soon', players: '2', emoji: '☗', url: 'https://www.ymimports.com/pages/how-to-play-shogi' },

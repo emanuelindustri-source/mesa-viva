@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.7.0 · 2026-10-28
+
+La estrella.
+
+### Añadido
+
+- **Damas Chinas** con tablero estrella de 121 hoyos y coordenadas axiales.
+- 2–6 jugadores, 10 fichas, saltos encadenados y meta en el triángulo opuesto.
+- Bot por cercanía a la meta y saltos.
+- 23 pruebas de motores.
+
+### Cambiado
+
+- Catálogo: 14 juegos jugables.
+- Versión de app, service worker y Android a 0.7.0; `versionCode=8`.
+
+### Pendiente
+
+- Póker y Compose fase 1 pasan a v0.8.0.
+
 ## 0.6.0 · 2026-10-28
 
 Compose, primera piedra.

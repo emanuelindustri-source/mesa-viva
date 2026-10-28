@@ -1,7 +1,7 @@
 /* Mesa Viva · service worker
    Estrategia: app shell cache-first, navegación network-first con fallback
    offline y runtime cache stale-while-revalidate para los assets. */
-const VERSION = 'mesa-viva-v0.6.0';
+const VERSION = 'mesa-viva-v0.7.0';
 const SHELL = `${VERSION}-shell`;
 const RUNTIME = `${VERSION}-runtime`;
 const SHELL_ASSETS = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png'];

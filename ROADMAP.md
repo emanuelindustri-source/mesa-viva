@@ -1,6 +1,15 @@
 # Roadmap
 
-## v0.6.0 · Compose, primera piedra (actual)
+## v0.7.0 · La estrella (actual)
+
+- [x] Damas Chinas con 121 hoyos, 2–6 jugadores, saltos y bots.
+- [x] 23 pruebas de motores.
+- [x] 14 juegos jugables.
+- [ ] Póker (v0.8.0).
+- [ ] Compose fase 1: inicio, ajustes, niveles y lobby (v0.8.0).
+- [ ] Partida completa y LAN en teléfono real.
+
+## v0.6.0 · Compose, primera piedra
 
 - [x] `ComponentActivity` + `setContent` + `AndroidView`.
 - [x] Compose BOM, activity-compose, ui, foundation y material3.
