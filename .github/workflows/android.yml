@@ -13,6 +13,9 @@ jobs:
   apk:
     name: Compilar APK
     runs-on: ubuntu-latest
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,11 +26,12 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-      - uses: android-actions/setup-android@v3
-      - name: Aceptar licencias del SDK
-        run: yes | sdkmanager --licenses || true
-      - name: Instalar plataforma
-        run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
+      - name: Configurar Android SDK
+        run: |
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -name sdkmanager -type f | head -n1)"
+          echo "sdkmanager=$SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" "platforms;android-34" "build-tools;34.0.0"
       - name: Dependencias web
         run: npm ci
       - name: Build web
