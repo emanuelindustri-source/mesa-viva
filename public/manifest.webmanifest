@@ -20,6 +20,7 @@
     { "src": "./icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
+    { "name": "Póker de la casa", "short_name": "Póker", "url": "./#/setup/poker", "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }] },
     { "name": "Caída", "short_name": "Caída", "url": "./#/setup/caida", "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }] },
     { "name": "Sala de juego", "short_name": "Sala", "url": "./#/room", "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }] },
     { "name": "Niveles", "short_name": "Niveles", "url": "./#/levels", "icons": [{ "src": "./icons/icon-192.png", "sizes": "192x192" }] }
