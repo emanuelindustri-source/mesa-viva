@@ -4,7 +4,9 @@
 
 Mesa Viva es una app Android **Kotlin nativa con WebView**. La lógica de juego, las pantallas y los 13 juegos están en React/TypeScript dentro de `android/app/src/main/assets/www`. La app usa Kotlin para cámara, sensores, vibración, PDF, Material You y el relay LAN.
 
-**Compose no está en uso.** Cambiar `MainActivity` a Compose no migra la app: solo cambia el contenedor. “Compose por completo” significa reescribir en Kotlin/Compose:
+Desde **v0.6.0**, `MainActivity` es `ComponentActivity` y usa `setContent` + `AndroidView` para hospedar la mesa. Es la **fase 0** de Compose, no una migración completa: la interfaz de los juegos sigue en WebView.
+
+“Compose por completo” significa reescribir en Kotlin/Compose:
 
 - Inicio, onboarding, catálogo, preparación, mesa, resultados, ajustes, niveles, sala, diagnóstico y PDF.
 - Las 13 superficies de juego y sus animaciones.
@@ -18,10 +20,11 @@ Es un proyecto de varias versiones, no un commit.
 
 ### Fase 0 · Base técnica
 
-- Fijar versiones estables: Kotlin, AGP, Gradle, Compose BOM y activity-compose.
-- Añadir un módulo/paquete `com.mesaviva.app.compose`.
-- Mantener el WebView actual como respaldo.
-- Pruebas instrumentadas mínimas y CI de compilación.
+- [x] Fijar versiones estables: Kotlin 2.0.21, Compose BOM 2024.12.01, activity-compose 1.9.3.
+- [x] Añadir `ComponentActivity` + `setContent` + `AndroidView`.
+- [x] Mantener el WebView actual como respaldo.
+- [ ] Actualizar Kotlin/AGP en una fase posterior.
+- [ ] Pruebas instrumentadas mínimas y CI de compilación.
 
 ### Fase 1 · Cáscara Compose
 
