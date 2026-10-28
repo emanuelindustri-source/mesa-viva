@@ -1,9 +1,9 @@
 export const APP_NAME = 'Mesa Viva';
-export const APP_VERSION = '0.2.0';
+export const APP_VERSION = '0.3.0';
 export const CONTACT_EMAIL = 'emanuel.industri@gmail.com';
 export const GITHUB_URL = 'https://github.com/emanuelindustri-source/mesa-viva';
 export const SITE_URL = 'https://emanuelindustri-source.github.io/mesa-viva/';
-export const GAMES_COUNT = 10;
+export const GAMES_COUNT = 12;
 export const CATALOG_COUNT = 30;
 export const IS_ANDROID = typeof document !== 'undefined' && Boolean((window as unknown as { MesaViva?: unknown }).MesaViva);
 

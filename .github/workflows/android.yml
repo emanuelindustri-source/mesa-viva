@@ -31,7 +31,7 @@ jobs:
           SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -name sdkmanager -type f | head -n1)"
           echo "sdkmanager=$SDKMANAGER"
           yes | "$SDKMANAGER" --licenses >/dev/null || true
-          "$SDKMANAGER" "platforms;android-34" "build-tools;34.0.0"
+          "$SDKMANAGER" "platforms;android-36" "build-tools;36.0.0"
       - name: Dependencias web
         run: npm ci
       - name: Build web

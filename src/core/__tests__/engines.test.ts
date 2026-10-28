@@ -11,6 +11,8 @@ import { mancalaModule } from '../../games/mancala';
 import { serpientesModule } from '../../games/serpientes';
 import { goModule } from '../../games/go';
 import { jungleModule } from '../../games/jungle';
+import { ludoModule } from '../../games/ludo';
+import { backgammonModule } from '../../games/backgammon';
 import { Match } from '../match';
 import type { Seat } from '../types';
 import { easterSunday, resolveFestival } from '../../theme/festivals';
@@ -195,5 +197,106 @@ describe('Jungle', () => {
     expect(match.act('p0', { type: 'move', from: moves[0]!.from, to: moves[0]!.to }).ok).toBe(true);
     expect(match.view('p1').turnId).toBe('p1');
     expect(jungleModule.meta.maxPlayers).toBe(2);
+  });
+});
+
+describe('Ludo', () => {
+  it('reparte 16 fichas y saca una ficha con un 6', () => {
+    const six = () => 0.99;
+    const state = ludoModule.create(seats(4), {}, six);
+    const view = ludoModule.view(state, 'p0');
+    expect((view.extra?.tokens as unknown[]).length).toBe(16);
+    expect(view.extra?.colors).toEqual(['red', 'green', 'yellow', 'blue']);
+    const rolled = ludoModule.act(state, { type: 'roll' }, 'p0', six);
+    expect(rolled.error).toBeUndefined();
+    expect(rolled.state.phase).toBe('move');
+    expect(rolled.state.dice).toBe(6);
+    const moved = ludoModule.act(rolled.state, { type: 'move', tokenId: 'red-0' }, 'p0', six);
+    expect(moved.error).toBeUndefined();
+    expect(moved.state.tokens.find((token) => token.id === 'red-0')?.progress).toBe(0);
+    expect(moved.state.phase).toBe('roll');
+    expect(moved.state.turn).toBe(0);
+    expect(ludoModule.meta.maxPlayers).toBe(4);
+  });
+
+  it('en dos jugadores usa rojo y amarillo', () => {
+    const state = ludoModule.create(seats(2), {}, () => 0.5);
+    const view = ludoModule.view(state, 'p0');
+    expect(view.extra?.colors).toEqual(['red', 'yellow']);
+    expect((view.extra?.tokens as unknown[]).length).toBe(8);
+  });
+
+  it('captura una ficha rival fuera de las casillas seguras', () => {
+    const state = ludoModule.create(seats(2), {}, () => 0.5);
+    state.tokens = state.tokens.map((token) => {
+      if (token.id === 'red-0') return { ...token, progress: 7 };
+      if (token.id === 'yellow-0') return { ...token, progress: 36 };
+      return token;
+    });
+    state.turn = 0;
+    state.phase = 'move';
+    state.dice = 3;
+    const result = ludoModule.act(state, { type: 'move', tokenId: 'red-0' }, 'p0', () => 0.5);
+    expect(result.error).toBeUndefined();
+    expect(result.state.tokens.find((token) => token.id === 'yellow-0')?.progress).toBe(-1);
+    expect(result.state.captures.p0).toBe(1);
+    expect(result.state.turn).toBe(0);
+    expect(result.state.phase).toBe('roll');
+  });
+});
+
+describe('Backgammon', () => {
+  it('inicia con 15 fichas por bando y mueve con dobles', () => {
+    const four = () => 0.5;
+    const state = backgammonModule.create(seats(2), {}, four);
+    const view = backgammonModule.view(state, 'p0');
+    const points = view.extra?.points as number[];
+    expect(points[23]).toBe(2);
+    expect(points[12]).toBe(5);
+    expect(points[7]).toBe(3);
+    expect(points[5]).toBe(5);
+    expect(points.reduce((sum, value) => sum + Math.max(0, value), 0)).toBe(15);
+    const rolled = backgammonModule.act(state, { type: 'roll' }, 'p0', four);
+    expect(rolled.error).toBeUndefined();
+    expect(rolled.state.movesLeft).toEqual([4, 4, 4, 4]);
+    const after = backgammonModule.view(rolled.state, 'p0');
+    const moves = (after.extra?.legalMoves ?? []) as Array<{ from: number; to: number }>;
+    expect(moves.length).toBeGreaterThan(0);
+    const moved = backgammonModule.act(rolled.state, { type: 'move', from: moves[0]!.from, to: moves[0]!.to }, 'p0', four);
+    expect(moved.error).toBeUndefined();
+    expect(moved.state.movesLeft.length).toBe(3);
+    expect(backgammonModule.meta.maxPlayers).toBe(2);
+  });
+
+  it('manda una ficha sola a la barra', () => {
+    const state = backgammonModule.create(seats(2), {}, () => 0.5);
+    state.points = Array.from({ length: 24 }, () => 0);
+    state.points[23] = 1;
+    state.points[19] = -1;
+    state.phase = 'move';
+    state.turn = 'w';
+    state.dice = [4, 4];
+    state.movesLeft = [4];
+    const result = backgammonModule.act(state, { type: 'move', from: 23, to: 19 }, 'p0', () => 0.5);
+    expect(result.error).toBeUndefined();
+    expect(result.state.bar.b).toBe(1);
+    expect(result.state.points[19]).toBe(1);
+  });
+
+  it('saca la última ficha y cierra la partida', () => {
+    const state = backgammonModule.create(seats(2), {}, () => 0.5);
+    state.points = Array.from({ length: 24 }, () => 0);
+    state.points[0] = 1;
+    state.off = { w: 14, b: 0 };
+    state.bar = { w: 0, b: 0 };
+    state.phase = 'move';
+    state.turn = 'w';
+    state.dice = [1, 1];
+    state.movesLeft = [1];
+    const result = backgammonModule.act(state, { type: 'move', from: 0, to: 24 }, 'p0', () => 0.5);
+    expect(result.error).toBeUndefined();
+    expect(result.state.off.w).toBe(15);
+    expect(result.state.phase).toBe('matchEnd');
+    expect(result.state.result?.winnerIds).toEqual(['p0']);
   });
 });

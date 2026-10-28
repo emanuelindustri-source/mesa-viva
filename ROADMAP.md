@@ -1,18 +1,28 @@
 # Roadmap
 
-## v0.2.0 · La mesa se amplía (actual)
+## v0.3.0 · La mesa clásica (actual)
+
+Ludo, Backgammon y Android moderno.
+
+- [x] 12 juegos jugables con bots: Caída, Furia de Colores, Dominó, Dados Mentirosos, Ajedrez, Damas, Serpientes y Escaleras, Mancala, Go, Jungle, Ludo y Backgammon.
+- [x] Ludo 2–4 jugadores con capturas, casillas seguras y meta exacta.
+- [x] Backgammon con barra, capturas, dobles y bear-off.
+- [x] 21 pruebas de motores.
+- [x] APK con target Android 16 (API 36) si la compilación lo confirma.
+- [ ] Reconexión de invitados a mitad de partida y bots que cubran asientos desconectados.
+- [ ] Torneos y ligas de sala.
+- [ ] Validación de la sala LAN en teléfono físico.
+
+## v0.2.0 · La mesa se amplía
 
 Go, Jungle y la sala LAN sin internet en Android.
 
-- [x] 10 juegos jugables con bots: Caída, Furia de Colores, Dominó, Dados Mentirosos, Ajedrez, Damas, Serpientes y Escaleras, Mancala, Go y Jungle.
+- [x] 10 juegos jugables: Caída, Furia de Colores, Dominó, Dados Mentirosos, Ajedrez, Damas, Serpientes y Escaleras, Mancala, Go y Jungle.
 - [x] Go 9×9/13×13 con capturas, ko y conteo.
 - [x] Jungle con río, trampas, saltos y guaridas.
 - [x] Sala LAN sin internet con relay nativo en el teléfono anfitrión y QR.
 - [x] Limpieza del relay LAN al salir o al arrancar la app.
 - [x] 15 pruebas de motores.
-- [ ] Ludo y Backgammon (próxima ola).
-- [ ] Reconexión de invitados a mitad de partida y bots que cubran asientos desconectados.
-- [ ] Torneos y ligas de sala.
 
 ## v0.1.1 · La primera mesa
 
@@ -29,7 +39,7 @@ Pulido de onboarding, cartas/fichas, coordenadas de tablero y CI Android. La bas
 - [x] Diagnóstico y envío por correo.
 - [x] PWA instalable y offline.
 
-## v0.3.0 · La fiesta completa
+## v0.4.0 · La fiesta completa
 
 - [ ] Mahjong americano, Riichi y Mahjong con naipes.
 - [ ] Aeroplane Chess, Ajedrez para tres y Soroban interactivo.

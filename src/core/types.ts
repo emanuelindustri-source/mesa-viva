@@ -10,7 +10,9 @@ export type GameId =
   | 'serpientes'
   | 'mancala'
   | 'go'
-  | 'jungle';
+  | 'jungle'
+  | 'ludo'
+  | 'backgammon';
 
 export type Difficulty = 'easy' | 'normal' | 'hard';
 export type GameCategory = 'cartas' | 'tablero' | 'dados';

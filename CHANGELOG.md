@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.3.0 · 2026-10-28
+
+La mesa clásica.
+
+### Añadido
+
+- **Ludo** 2–4 jugadores: cuatro fichas, salida con 6, capturas, casillas seguras, tres seises, turno extra y meta exacta.
+- **Backgammon**: 15 fichas, barra, capturas, dobles, bear-off y conteo de pips.
+- Tableros interactivos propios para Ludo y Backgammon, con selección de fichas y destinos.
+- 21 pruebas de motores (6 nuevas para Ludo y Backgammon).
+
+### Cambiado
+
+- Catálogo: Ludo y Backgammon pasan a jugables.
+- Portada, README y contadores: de 10 a 12 juegos.
+- Versión de app y service worker a 0.3.0.
+
 ## 0.2.0 · 2026-10-28
 
 La mesa se amplía y se vuelve local.

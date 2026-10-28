@@ -12,6 +12,7 @@ import { Button, Modal } from './components';
 import { burst, burstFromElement } from './particles/bus';
 import { haptic } from '../services/haptics';
 import { sfx } from '../audio/engine';
+import { LUDO_HOME, LUDO_START, LUDO_TRACK, ludoTokenCoord, type LudoColor, type LudoToken } from '../games/ludo';
 
 export interface SurfaceProps {
   view: GameView;
@@ -832,6 +833,285 @@ function JungleSurface({ view, act, busy }: SurfaceProps) {
   );
 }
 
+/* ------------------------------------------------------------------ Ludo */
+
+type LudoTokenView = LudoToken & { coord: [number, number]; finished: boolean };
+
+const LUDO_START_COLOR = new Map<number, LudoColor>();
+const LUDO_SAFE = new Set([0, 8, 13, 21, 26, 34, 39, 47]);
+for (const color of Object.keys(LUDO_START) as LudoColor[]) {
+  LUDO_START_COLOR.set(LUDO_START[color], color);
+}
+
+function LudoSurface({ view, act, busy }: SurfaceProps) {
+  const t = useT();
+  const ex = extra(view);
+  const tokens = (ex.tokens ?? []) as LudoTokenView[];
+  const colors = (ex.colors ?? []) as LudoColor[];
+  const legal = (ex.legalMoves ?? []) as Array<{ tokenId: string; from: number; to: number }>;
+  const legalTokens = new Set(legal.map((move) => move.tokenId));
+  const die = num(ex.dice, num(ex.lastRoll, 0));
+  const isTurn = view.turnId === view.youId;
+  const byCell = new Map<string, LudoTokenView[]>();
+  for (const token of tokens) {
+    const coord = token.coord ?? ludoTokenCoord(token);
+    const key = `${coord[0]},${coord[1]}`;
+    byCell.set(key, [...(byCell.get(key) ?? []), token]);
+  }
+  const startColor = new Map<string, LudoColor>();
+  for (const color of Object.keys(LUDO_START) as LudoColor[]) {
+    const pair = LUDO_TRACK[LUDO_START[color]];
+    if (pair) startColor.set(`${pair[0]},${pair[1]}`, color);
+  }
+  const trackCells = new Map<string, number>();
+  LUDO_TRACK.forEach(([c, r], index) => trackCells.set(`${c},${r}`, index));
+  const homeCells = new Map<string, LudoColor>();
+  for (const color of Object.keys(LUDO_HOME) as LudoColor[]) {
+    for (const [c, r] of LUDO_HOME[color]) homeCells.set(`${c},${r}`, color);
+  }
+  const homeCount = (ex.homeCount ?? {}) as Record<string, number>;
+
+  const zoneFor = (col: number, row: number): string => {
+    if (col < 6 && row < 6) return 'ludo-yard ludo-yard-green';
+    if (col > 8 && row < 6) return 'ludo-yard ludo-yard-yellow';
+    if (col < 6 && row > 8) return 'ludo-yard ludo-yard-red';
+    if (col > 8 && row > 8) return 'ludo-yard ludo-yard-blue';
+    if (col >= 6 && col <= 8 && row >= 6 && row <= 8) return 'ludo-center';
+    const key = `${col},${row}`;
+    const home = homeCells.get(key);
+    if (home) return `ludo-home ludo-home-${home}`;
+    const index = trackCells.get(key);
+    if (index !== undefined) {
+      const start = startColor.get(key);
+      if (start) return `ludo-track ludo-start ludo-start-${start}`;
+      if (LUDO_SAFE.has(index)) return 'ludo-track ludo-safe';
+      return 'ludo-track';
+    }
+    return 'ludo-void';
+  };
+
+  return (
+    <div className="surface surface-ludo">
+      <div className="ludo-status">
+        <div className={cx('ludo-die', isTurn && view.phase === 'roll' && 'is-live')}>{die || '—'}</div>
+        <div className="ludo-status-text">
+          <strong>{t('ludo.die')}</strong>
+          <span>{isTurn ? (view.phase === 'roll' ? t('ludo.rollHint') : t('ludo.pickToken')) : t('ludo.waiting')}</span>
+          {num(ex.sixStreak, 0) > 0 ? <span className="ludo-warning">{t('ludo.sixStreak', { n: num(ex.sixStreak, 0) })}</span> : null}
+        </div>
+      </div>
+
+      <div className="ludo-board-wrap">
+        <div className="ludo-board" role="grid" aria-label={t('ludo.board')}>
+          {Array.from({ length: 15 * 15 }, (_, index) => {
+            const col = index % 15;
+            const row = Math.floor(index / 15);
+            const key = `${col},${row}`;
+            const cellTokens = byCell.get(key) ?? [];
+            return (
+              <div key={key} className={cx('ludo-cell', zoneFor(col, row))}>
+                {zoneFor(col, row).includes('ludo-safe') ? <span className="ludo-star">★</span> : null}
+                <div className="ludo-tokens">
+                  {cellTokens.map((token) => {
+                    const movable = legalTokens.has(token.id) && !busy;
+                    return (
+                      <button
+                        key={token.id}
+                        type="button"
+                        className={cx('ludo-token', `ludo-token-${token.color}`, movable && 'is-movable', token.finished && 'is-home')}
+                        disabled={!movable}
+                        aria-label={t('ludo.tokenAria', { color: t(`ludo.${token.color}`) })}
+                        onClick={() => {
+                          if (!movable) return;
+                          act({ type: 'move', tokenId: token.id });
+                          haptic('card', true);
+                          sfx('card');
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="ludo-legend">
+        {colors.map((color, index) => {
+          const player = view.players[index];
+          return (
+            <span key={color} className="ludo-legend-item">
+              <span className={cx('ludo-dot', `ludo-dot-${color}`)} />
+              {player?.name ?? t(`ludo.${color}`)}
+              <b>{homeCount[player?.id ?? ''] ?? 0}/4</b>
+            </span>
+          );
+        })}
+      </div>
+      <p className="board-hint">{!isTurn ? t('ludo.waiting') : view.phase === 'roll' ? t('ludo.rollHint') : t('prompt.ludoMove', { n: die || '—' })}</p>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------- Backgammon */
+
+type BgMoveView = { from: number; to: number; die: number; hit?: boolean };
+
+function BackgammonSurface({ view, act, busy }: SurfaceProps) {
+  const t = useT();
+  const ex = extra(view);
+  const points = (ex.points ?? []) as number[];
+  const bar = (ex.bar ?? { w: 0, b: 0 }) as { w: number; b: number };
+  const off = (ex.off ?? { w: 0, b: 0 }) as { w: number; b: number };
+  const legal = (ex.legalMoves ?? []) as BgMoveView[];
+  const movesLeft = (ex.movesLeft ?? []) as number[];
+  const dice = (ex.dice ?? ex.lastDice ?? null) as [number, number] | null;
+  const pip = (ex.pip ?? { w: 0, b: 0 }) as { w: number; b: number };
+  const selectedState = useState<number | null>(null);
+  const selected = selectedState[0];
+  const setSelected = selectedState[1];
+  const sources = new Set(legal.map((move) => move.from));
+  const destinations = new Set(legal.map((move) => move.to));
+  const isTurn = view.turnId === view.youId;
+
+  useEffect(() => {
+    if (selected !== null && !sources.has(selected)) setSelected(null);
+  }, [legal, selected, setSelected, sources]);
+
+  const play = (from: number, to: number) => {
+    const move = legal.find((candidate) => candidate.from === from && candidate.to === to);
+    if (!move) return false;
+    act({ type: 'move', from, to });
+    setSelected(null);
+    haptic('card', true);
+    sfx('card');
+    return true;
+  };
+
+  const onPoint = (index: number) => {
+    if (busy) return;
+    if (selected !== null && destinations.has(index) && legal.some((move) => move.from === selected && move.to === index)) {
+      play(selected, index);
+      return;
+    }
+    if (sources.has(index)) {
+      setSelected(index);
+      haptic('select', true);
+      sfx('tap');
+    } else {
+      setSelected(null);
+    }
+  };
+
+  const onBar = () => {
+    if (busy) return;
+    if (sources.has(-1)) {
+      setSelected(-1);
+      haptic('select', true);
+      sfx('tap');
+    }
+  };
+
+  const bearOff = () => {
+    if (busy || selected === null) return;
+    play(selected, 24);
+  };
+
+  const Point = ({ point, top }: { point: number; top: boolean }) => {
+    const index = point - 1;
+    const count = points[index] ?? 0;
+    const owner = count > 0 ? 'w' : count < 0 ? 'b' : null;
+    const visible = Math.min(Math.abs(count), 5);
+    const isSource = sources.has(index);
+    const isDestination = destinations.has(index);
+    return (
+      <button
+        type="button"
+        className={cx('bg-point', top ? 'is-top' : 'is-bottom', owner && `bg-owner-${owner}`, isSource && 'is-source', isDestination && 'is-target', selected === index && 'is-selected')}
+        onClick={() => onPoint(index)}
+        disabled={busy}
+        aria-label={`${t('backgammon.point')} ${point}: ${Math.abs(count)}`}
+      >
+        <span className="bg-point-number">{point}</span>
+        <span className="bg-stack">
+          {Array.from({ length: visible }).map((_, i) => (
+            <span key={i} className={cx('bg-checker', owner === 'w' ? 'is-white' : 'is-black')} />
+          ))}
+          {Math.abs(count) > 5 ? <span className="bg-stack-more">+{Math.abs(count) - 5}</span> : null}
+        </span>
+        {isDestination ? <span className="bg-target-dot" /> : null}
+      </button>
+    );
+  };
+
+  const rowsTop = [13, 14, 15, 16, 17, 18];
+  const rowsTop2 = [19, 20, 21, 22, 23, 24];
+  const rowsBottom = [12, 11, 10, 9, 8, 7];
+  const rowsBottom2 = [6, 5, 4, 3, 2, 1];
+
+  return (
+    <div className="surface surface-backgammon">
+      <div className="bg-status">
+        <div className="bg-dice-pair">
+          {dice ? dice.map((value, index) => <span key={index} className="bg-die">{value}</span>) : <span className="bg-die bg-die-empty">—</span>}
+        </div>
+        <div className="bg-status-text">
+          <strong>{t('backgammon.dice')}</strong>
+          <span>{isTurn ? (view.phase === 'roll' ? t('prompt.bgRoll') : t('backgammon.pickMove')) : t('backgammon.waiting')}</span>
+          {movesLeft.length > 0 ? <span className="bg-moves">{t('backgammon.movesLeft', { n: movesLeft.join(' · ') })}</span> : null}
+        </div>
+        <div className="bg-pip">
+          <span>{t('backgammon.white')} {pip.w}</span>
+          <span>{t('backgammon.black')} {pip.b}</span>
+        </div>
+      </div>
+
+      <div className="bg-board">
+        <div className="bg-tray bg-tray-left" onClick={bearOff} role="button" aria-label={t('backgammon.off')}>
+          <span className="bg-tray-label">{t('backgammon.off')}</span>
+          <strong>{off.w}</strong>
+          <span className="bg-off-dot is-white" />
+          {selected !== null && destinations.has(24) ? <span className="bg-tray-hint">{t('backgammon.clickOff')}</span> : null}
+        </div>
+
+        <div className="bg-field">
+          <div className="bg-row bg-row-top">
+            <div className="bg-group">{rowsTop.map((point) => <Point key={point} point={point} top />)}</div>
+            <div className="bg-bar-gap" />
+            <div className="bg-group">{rowsTop2.map((point) => <Point key={point} point={point} top />)}</div>
+          </div>
+          <div className="bg-row bg-row-bottom">
+            <div className="bg-group">{rowsBottom.map((point) => <Point key={point} point={point} top={false} />)}</div>
+            <div className="bg-bar-gap" />
+            <div className="bg-group">{rowsBottom2.map((point) => <Point key={point} point={point} top={false} />)}</div>
+          </div>
+          <button type="button" className={cx('bg-bar', sources.has(-1) && 'is-source', selected === -1 && 'is-selected')} onClick={onBar} aria-label={t('backgammon.bar')}>
+            <span className="bg-bar-label">{t('backgammon.bar')}</span>
+            {Array.from({ length: Math.min(bar.w, 4) }).map((_, i) => <span key={`w${i}`} className="bg-checker is-white" />)}
+            {Array.from({ length: Math.min(bar.b, 4) }).map((_, i) => <span key={`b${i}`} className="bg-checker is-black" />)}
+            {bar.w + bar.b > 8 ? <span className="bg-stack-more">+{bar.w + bar.b - 8}</span> : null}
+          </button>
+        </div>
+
+        <div className="bg-tray bg-tray-right" onClick={bearOff} role="button" aria-label={t('backgammon.off')}>
+          <span className="bg-tray-label">{t('backgammon.off')}</span>
+          <strong>{off.b}</strong>
+          <span className="bg-off-dot is-black" />
+          {selected !== null && destinations.has(24) ? <span className="bg-tray-hint">{t('backgammon.clickOff')}</span> : null}
+        </div>
+      </div>
+
+      <div className="bg-legend">
+        <span><i className="bg-off-dot is-white" /> {t('backgammon.white')}: {off.w}/15</span>
+        <span><i className="bg-off-dot is-black" /> {t('backgammon.black')}: {off.b}/15</span>
+        <span>{t('backgammon.bar')}: {bar.w + bar.b}</span>
+      </div>
+      <p className="board-hint">{selected !== null ? t('backgammon.destination') : t('backgammon.tapSource')}</p>
+    </div>
+  );
+}
+
 /* ------------------------------------------------------------------ switch */
 export function GameSurface({ view, act, busy }: SurfaceProps) {
   switch (view.gameId) {
@@ -855,6 +1135,10 @@ export function GameSurface({ view, act, busy }: SurfaceProps) {
       return <GoSurface view={view} act={act} busy={busy} />;
     case 'jungle':
       return <JungleSurface view={view} act={act} busy={busy} />;
+    case 'ludo':
+      return <LudoSurface view={view} act={act} busy={busy} />;
+    case 'backgammon':
+      return <BackgammonSurface view={view} act={act} busy={busy} />;
     default:
       return (
         <div className="surface surface-fallback">
