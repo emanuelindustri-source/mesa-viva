@@ -27,7 +27,7 @@
 
 ### Checksums v0.9.0
 
-- APK release firmado: `14C86F385D74EDD33AA92DB1FE4E246085842C3FB3D534B93BE0F641F8896E3B` · 9.872.109 bytes.
+- APK release firmado: `577515990DF15A9D214D650C441B4C1731A972129B63075D49C062522F111E9F` · 9.872.145 bytes.
 - APK debug: lo publica el workflow de CI; consultar el release. El build local previo fue `F31890B69BE3BC203CFC5D9D592F73F061C7438C0722D1C3150EF0BF83B12DAC`.
 - Artefactos locales: `artifacts/mesa-viva-0.9.0-release.apk` y `artifacts/mesa-viva-0.9.0-debug.apk`.
 

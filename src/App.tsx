@@ -100,10 +100,14 @@ export default function App() {
     return () => window.removeEventListener('pointerdown', resume);
   }, [festival, route.path, settings.music]);
 
+  const afterOnboarding = route.path === '/room' || route.parts[0] === 'setup'
+    ? `${route.path}${route.params.toString() ? `?${route.params.toString()}` : ''}`
+    : '/';
+
   if (!onboarded) {
     return (
       <>
-        <OnboardingScreen onDone={() => navigate('/')} />
+        <OnboardingScreen onDone={() => navigate(afterOnboarding)} />
         <ParticleCanvas ambient={undefined} colors={[accent, festival.accent2, '#fff4d6']} />
         <ToastHost />
       </>
@@ -125,7 +129,7 @@ export default function App() {
   else if (path === '/room') content = <RoomScreen />;
   else if (path === '/privacy') content = <PrivacyScreen />;
   else if (path === '/about') content = <AboutScreen />;
-  else if (path === '/onboarding') content = <OnboardingScreen onDone={() => navigate('/')} />;
+  else if (path === '/onboarding') content = <OnboardingScreen onDone={() => navigate(afterOnboarding)} />;
   else content = <NotFoundScreen />;
 
   return (
