@@ -21,6 +21,7 @@
 - APK debug y APK release firmado compilados.
 - Emulador Android 14 (API 34): cáscara Compose, catálogo, Serpientes, WebView y PWA verificados con capturas.
 - Teléfono real `23117RA68G`: **instalación bloqueada por MIUI** (`INSTALL_FAILED_USER_RESTRICTED`). Hay que activar “Instalar vía USB” en Opciones de desarrollador; el APK anterior se desinstaló durante la prueba.
+- Para instalar en el teléfono: Ajustes → Sobre el teléfono → tocar “Versión de MIUI” 7 veces → Opciones de desarrollador → activar “Depuración USB (Ajustes de seguridad)” e “Instalar vía USB”. Luego abrir el enlace de descarga del release o ejecutar `adb install -r artifacts/mesa-viva-0.8.0-release.apk`.
 
 ### Checksums v0.8.0
 
