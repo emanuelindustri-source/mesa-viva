@@ -341,7 +341,7 @@ fun BackgammonScreen(state: ShellState, onBack: () -> Unit) {
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                log.takeLast(3).forEach { line ->
+                log.takeLast(5).forEach { line ->
                     Text(line, style = MaterialTheme.typography.labelSmall, maxLines = 1)
                 }
             }

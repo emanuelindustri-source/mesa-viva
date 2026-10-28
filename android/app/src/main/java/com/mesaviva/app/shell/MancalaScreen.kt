@@ -217,7 +217,7 @@ fun MancalaScreen(state: ShellState, onBack: () -> Unit) {
                     maxLines = 2,
                 )
             } else {
-                log.takeLast(3).forEach { line ->
+                log.takeLast(5).forEach { line ->
                     Text(line, style = MaterialTheme.typography.labelSmall, maxLines = 1)
                 }
             }
