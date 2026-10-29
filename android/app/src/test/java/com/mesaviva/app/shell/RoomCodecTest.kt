@@ -3,6 +3,7 @@ package com.mesaviva.app.shell
 import com.mesaviva.app.games.DamasColor
 import com.mesaviva.app.games.DamasGame
 import com.mesaviva.app.games.DamasPhase
+import com.mesaviva.app.games.DominoGame
 import com.mesaviva.app.games.MancalaGame
 import com.mesaviva.app.games.MancalaSide
 import org.json.JSONArray
@@ -163,6 +164,51 @@ class RoomCodecTest {
         assertEquals(state.bots, decoded.bots)
         assertEquals(state.positions, decoded.positions)
         assertEquals(state.turn, decoded.turn)
+    }
+
+    @Test
+    fun dominoRedactsEveryHandExceptTheViewer() {
+        val game = DominoGame(4, teams = false, target = 100, seed = 31L)
+        val state = game.newMatch()
+        val decoded = RoomCodec.dominoFromJson(RoomCodec.dominoToJson(state, 1))
+        assertNotNull(decoded)
+        assertEquals(state.players[1].hand.size, decoded!!.players[1].hand.size)
+        assertEquals(0, decoded.players[0].hand.size)
+        assertEquals(state.players[0].hand.size, decoded.handCounts[0])
+        assertEquals(state.players[1].hand, decoded.players[1].hand)
+    }
+
+    @Test
+    fun dominoRoundTripKeepsChainEndsAndScores() {
+        val game = DominoGame(2, teams = false, target = 100, seed = 41L)
+        val state = game.newMatch()
+        val decoded = RoomCodec.dominoFromJson(RoomCodec.dominoToJson(state, 0))
+        assertNotNull(decoded)
+        assertEquals(state.chain, decoded!!.chain)
+        assertEquals(state.left, decoded.left)
+        assertEquals(state.right, decoded.right)
+        assertEquals(state.turn, decoded.turn)
+        assertEquals(state.handNo, decoded.handNo)
+        assertEquals(state.target, decoded.target)
+        assertEquals(state.boneyard.size, decoded.boneyard.size)
+        assertEquals(state.players.map { it.score }, decoded.players.map { it.score })
+    }
+
+    @Test
+    fun dominoRejectsAnInvalidPlayerCount() {
+        val payload = JSONObject()
+            .put("players", JSONArray().put(JSONObject().put("name", "Solo")))
+            .put("turn", 0)
+        assertNull(RoomCodec.dominoFromJson(payload))
+    }
+
+    @Test
+    fun dominoDoesNotLeakTheBoneyardTiles() {
+        val game = DominoGame(4, teams = false, target = 100, seed = 13L)
+        val state = game.newMatch()
+        val payload = RoomCodec.dominoToJson(state, 2)
+        assertEquals(state.boneyard.size, payload.optInt("boneyard"))
+        assertEquals(false, payload.has("boneyardTiles"))
     }
 
     @Test

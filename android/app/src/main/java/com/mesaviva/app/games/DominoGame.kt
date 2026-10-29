@@ -61,6 +61,8 @@ data class DominoState(
     val lastPlay: DominoPlay? = null,
     val messageKey: String = "domino.msgStart",
     val messageParams: Map<String, Any?> = emptyMap(),
+    /** Conteo público de fichas por asiento; las manos ajenas no viajan. */
+    val handCounts: List<Int> = emptyList(),
 ) {
     val currentPlayer: DominoPlayer? get() = players.getOrNull(turn)
     val boneyardCount: Int get() = boneyard.size

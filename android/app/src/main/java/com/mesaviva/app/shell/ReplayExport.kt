@@ -41,12 +41,7 @@ object ReplayCodec {
         encode(MANCALA, seed, moves)
 
     fun encode(game: String, seed: Long, moves: List<Int>): String {
-        val encodedMoves = when (game) {
-            DAMAS -> moves.chunked(2)
-                .filter { it.size == 2 }
-                .joinToString(".") { "${it[0]}-${it[1]}" }
-            else -> moves.joinToString(".")
-        }
+        val encodedMoves = encodeMoves(game, moves)
         return buildString {
             append("mesaviva://replay?game=")
             append(URLEncoder.encode(game, "UTF-8"))
@@ -57,6 +52,25 @@ object ReplayCodec {
                 append(URLEncoder.encode(encodedMoves, "UTF-8"))
             }
         }
+    }
+
+    fun webLink(replay: ReplayLink): String = buildString {
+        append("https://emanuelindustri-source.github.io/mesa-viva/replay/?game=")
+        append(URLEncoder.encode(replay.game, "UTF-8"))
+        append("&seed=")
+        append(replay.seed)
+        val encodedMoves = encodeMoves(replay.game, replay.moves)
+        if (encodedMoves.isNotEmpty()) {
+            append("&moves=")
+            append(URLEncoder.encode(encodedMoves, "UTF-8"))
+        }
+    }
+
+    private fun encodeMoves(game: String, moves: List<Int>): String = when (game) {
+        DAMAS -> moves.chunked(2)
+            .filter { it.size == 2 }
+            .joinToString(".") { "${it[0]}-${it[1]}" }
+        else -> moves.joinToString(".")
     }
 
     fun parse(link: String): ReplayLink? {
@@ -146,11 +160,17 @@ fun saveReplayFile(
     }
 }
 
-fun shareReplayLink(context: Context, link: String, chooserTitle: String) {
+fun shareReplayLink(
+    context: Context,
+    link: String,
+    chooserTitle: String,
+    webLink: String? = null,
+) {
+    val text = if (webLink.isNullOrBlank()) link else "$link\n$webLink"
     val send = Intent(Intent.ACTION_SEND).apply {
         type = "text/plain"
         putExtra(Intent.EXTRA_SUBJECT, "Mesa Viva · replay")
-        putExtra(Intent.EXTRA_TEXT, link)
+        putExtra(Intent.EXTRA_TEXT, text)
     }
     val chooser = Intent.createChooser(send, chooserTitle).apply {
         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

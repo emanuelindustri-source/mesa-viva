@@ -6,6 +6,12 @@ import com.mesaviva.app.games.DamasGame
 import com.mesaviva.app.games.DamasMove
 import com.mesaviva.app.games.DamasPhase
 import com.mesaviva.app.games.DamasState
+import com.mesaviva.app.games.DominoEnd
+import com.mesaviva.app.games.DominoPhase
+import com.mesaviva.app.games.DominoPlay
+import com.mesaviva.app.games.DominoPlayer
+import com.mesaviva.app.games.DominoState
+import com.mesaviva.app.games.DominoTile
 import com.mesaviva.app.games.MancalaPhase
 import com.mesaviva.app.games.MancalaSide
 import com.mesaviva.app.games.MancalaState
@@ -161,6 +167,126 @@ internal object RoomCodec {
             lastTo = json.optInt("lastTo").coerceIn(0, 100),
             lastEvent = json.optString("lastEvent", "move"),
         )
+    }
+
+    fun dominoToJson(board: DominoState, viewerSeat: Int): JSONObject {
+        val players = JSONArray()
+        board.players.forEachIndexed { index, player ->
+            val ownsHand = index == viewerSeat
+            players.put(
+                JSONObject()
+                    .put("name", player.name)
+                    .put("bot", player.isBot)
+                    .put("team", player.team ?: JSONObject.NULL)
+                    .put("score", player.score)
+                    .put("handCount", board.handCounts.getOrElse(index) { player.hand.size })
+                    .put("hand", if (ownsHand) JSONArray(player.hand.map { it.id }) else JSONArray()),
+            )
+        }
+        val chain = JSONArray()
+        board.chain.forEach { chain.put(it.id) }
+        val lastPlay = board.lastPlay?.let {
+            JSONObject()
+                .put("player", it.playerIndex)
+                .put("tile", it.tile.id)
+                .put("end", it.end.name.lowercase())
+        } ?: JSONObject.NULL
+        return JSONObject()
+            .put("k", "state")
+            .put("game", RoomGame.Domino.id)
+            .put("viewer", viewerSeat)
+            .put("players", players)
+            .put("boneyard", board.boneyard.size)
+            .put("chain", chain)
+            .put("left", board.left ?: JSONObject.NULL)
+            .put("right", board.right ?: JSONObject.NULL)
+            .put("turn", board.turn)
+            .put("passes", board.passes)
+            .put("handNo", board.handNo)
+            .put("target", board.target)
+            .put("teams", board.teams)
+            .put("phase", when (board.phase) {
+                DominoPhase.Playing -> "playing"
+                DominoPhase.HandEnd -> "handend"
+                DominoPhase.MatchEnd -> "matchend"
+            })
+            .put("winnerIndices", JSONArray(board.winnerIndices))
+            .put("handWinnerIndex", board.handWinnerIndex ?: JSONObject.NULL)
+            .put("lastPlay", lastPlay)
+    }
+
+    fun dominoFromJson(json: JSONObject): DominoState? {
+        val playersJson = json.optJSONArray("players") ?: return null
+        if (playersJson.length() !in 2..4) return null
+        val viewer = json.optInt("viewer", -1)
+        val players = mutableListOf<DominoPlayer>()
+        val handCounts = mutableListOf<Int>()
+        for (index in 0 until playersJson.length()) {
+            val entry = playersJson.optJSONObject(index) ?: return null
+            val hand = if (index == viewer) {
+                val array = entry.optJSONArray("hand") ?: JSONArray()
+                (0 until array.length()).mapNotNull { tileFromId(array.optString(it)) }
+            } else {
+                emptyList()
+            }
+            players.add(
+                DominoPlayer(
+                    name = entry.optString("name", "Jugador ${index + 1}"),
+                    isBot = entry.optBoolean("bot"),
+                    team = if (entry.isNull("team")) null else entry.optInt("team"),
+                    hand = hand,
+                    score = entry.optInt("score"),
+                ),
+            )
+            handCounts.add(entry.optInt("handCount", hand.size).coerceAtLeast(0))
+        }
+        val chainJson = json.optJSONArray("chain") ?: JSONArray()
+        val chain = (0 until chainJson.length()).mapNotNull { tileFromId(chainJson.optString(it)) }
+        val boneyard = List(json.optInt("boneyard").coerceAtLeast(0)) { DominoTile(6, 6) }
+        val winnersJson = json.optJSONArray("winnerIndices") ?: JSONArray()
+        val winners = (0 until winnersJson.length())
+            .map { winnersJson.optInt(it) }
+            .filter { it in players.indices }
+        val lastPlay = json.optJSONObject("lastPlay")?.let { entry ->
+            val index = entry.optInt("player", -1)
+            val tile = tileFromId(entry.optString("tile")) ?: return@let null
+            if (index !in players.indices) return@let null
+            DominoPlay(
+                playerIndex = index,
+                tile = tile,
+                end = if (entry.optString("end") == "left") DominoEnd.Left else DominoEnd.Right,
+            )
+        }
+        return DominoState(
+            players = players,
+            boneyard = boneyard,
+            chain = chain,
+            left = if (json.isNull("left")) null else json.optInt("left"),
+            right = if (json.isNull("right")) null else json.optInt("right"),
+            turn = json.optInt("turn").coerceIn(0, players.lastIndex),
+            passes = json.optInt("passes").coerceAtLeast(0),
+            handNo = json.optInt("handNo").coerceAtLeast(1),
+            target = json.optInt("target", 100).coerceAtLeast(30),
+            teams = json.optBoolean("teams"),
+            phase = when (json.optString("phase")) {
+                "handend" -> DominoPhase.HandEnd
+                "matchend" -> DominoPhase.MatchEnd
+                else -> DominoPhase.Playing
+            },
+            winnerIndices = winners,
+            handWinnerIndex = if (json.isNull("handWinnerIndex")) null else json.optInt("handWinnerIndex"),
+            lastPlay = lastPlay,
+            handCounts = handCounts,
+        )
+    }
+
+    private fun tileFromId(raw: String): DominoTile? {
+        val parts = raw.split("-")
+        if (parts.size != 2) return null
+        val a = parts[0].toIntOrNull() ?: return null
+        val b = parts[1].toIntOrNull() ?: return null
+        if (a !in 0..6 || b !in 0..6) return null
+        return DominoTile(a, b)
     }
 
     fun mancalaFromJson(json: JSONObject): MancalaState? {

@@ -39,6 +39,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -149,7 +151,12 @@ fun GoScreen(state: ShellState, onBack: () -> Unit) {
                 .background(GO_WOOD),
         ) {
             Canvas(
-                Modifier.fillMaxSize().pointerInput(board.size, board.turn, board.phase, humanTurn) {
+                Modifier.fillMaxSize()
+                    .semantics {
+                        contentDescription = "Tablero de Go ${board.size} por ${board.size}. " +
+                            if (board.turn == 1) "Turno de negras." else "Turno de blancas."
+                    }
+                    .pointerInput(board.size, board.turn, board.phase, humanTurn) {
                     detectTapGestures { tap ->
                         if (board.phase != GoPhase.Play || !humanTurn) return@detectTapGestures
                         val margin = size.width * 0.065f

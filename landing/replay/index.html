@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Replay · Mesa Viva</title>
+  <meta name="description" content="Visor web de replays de Mesa Viva para Damas y Mancala." />
+  <style>
+    :root {
+      --ink: #17130e;
+      --cream: #f7f1e3;
+      --paper: #fffaf0;
+      --gold: #d99a2b;
+      --green: #145c4c;
+      --wine: #7d2634;
+      --muted: #6e6354;
+      --line: #e2d5bd;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 12% 8%, rgba(217, 154, 43, 0.18), transparent 32rem),
+        radial-gradient(circle at 88% 90%, rgba(20, 92, 76, 0.18), transparent 30rem),
+        var(--cream);
+      color: var(--ink);
+      font-family: "Outfit", "Segoe UI", system-ui, sans-serif;
+    }
+    a { color: var(--green); }
+    header {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 28px 20px 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .mark {
+      width: 46px; height: 46px; border-radius: 50%;
+      display: grid; place-items: center;
+      background: linear-gradient(135deg, var(--gold), #f2c96d);
+      color: var(--ink); font-weight: 800; font-size: 20px;
+      box-shadow: 0 8px 24px rgba(23, 19, 14, 0.18);
+    }
+    .brand b { display: block; font-family: Georgia, "Times New Roman", serif; font-size: 22px; }
+    .brand span { color: var(--muted); font-size: 13px; }
+    main { max-width: 1080px; margin: 0 auto; padding: 18px 20px 50px; }
+    .hero { margin: 10px 0 22px; }
+    .eyebrow {
+      text-transform: uppercase; letter-spacing: .16em; font-size: 12px;
+      font-weight: 700; color: var(--wine);
+    }
+    h1 { font-family: Georgia, "Times New Roman", serif; font-size: clamp(34px, 6vw, 58px); margin: 6px 0; line-height: 1; }
+    .meta { color: var(--muted); font-size: 14px; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(260px, .8fr); gap: 22px; align-items: start; }
+    @media (max-width: 780px) { .layout { grid-template-columns: 1fr; } }
+    .panel {
+      background: rgba(255, 250, 240, .9);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 16px;
+      box-shadow: 0 16px 50px rgba(53, 38, 18, .08);
+    }
+    .board { width: 100%; aspect-ratio: 1; display: grid; border-radius: 14px; overflow: hidden; border: 2px solid #6e4a32; }
+    .board.damas { grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr); }
+    .cell { position: relative; display: grid; place-items: center; }
+    .cell.light { background: #e9d8b4; }
+    .cell.dark { background: #6e4a32; }
+    .cell.last { box-shadow: inset 0 0 0 3px var(--gold); }
+    .piece { width: 76%; height: 76%; border-radius: 50%; display: grid; place-items: center; font-size: clamp(10px, 2.4vw, 20px); font-weight: 800; }
+    .piece.white { background: #fff6e2; color: #3a2817; border: 2px solid #8a6a45; }
+    .piece.black { background: #241a13; color: #e9c46a; border: 2px solid #0b0806; }
+    .mancala { display: grid; grid-template-columns: 64px 1fr 64px; gap: 8px; padding: 10px; background: #7b4e2e; border-radius: 14px; }
+    .store { background: #5a3a22; border-radius: 12px; display: grid; place-items: center; color: #ffe0a3; font-weight: 800; font-size: 20px; }
+    .pits { display: grid; grid-template-rows: 1fr 1fr; gap: 8px; }
+    .pit-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+    .pit { aspect-ratio: 1; border-radius: 50%; background: #6e4a32; border: 1px solid rgba(255, 224, 163, .35); display: grid; place-items: center; color: #fff3d6; font-weight: 700; }
+    .pit.last { box-shadow: 0 0 0 3px var(--gold); }
+    .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    button, .button {
+      border: 1px solid var(--line); background: var(--paper); color: var(--ink);
+      border-radius: 999px; padding: 10px 16px; font-weight: 700; font-size: 14px; cursor: pointer;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+    }
+    button.primary, .button.primary { background: var(--green); color: #fff; border-color: var(--green); }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    .hud { display: flex; justify-content: space-between; gap: 10px; margin-top: 10px; color: var(--muted); font-size: 13px; }
+    .moves { max-height: 420px; overflow: auto; display: grid; gap: 6px; margin-top: 12px; }
+    .move { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font-size: 13px; background: #fff; }
+    .move.active { border-color: var(--gold); background: #fff6dd; }
+    .error { border: 1px solid #e6b8bd; background: #fff1f2; color: #7d2634; padding: 16px; border-radius: 14px; }
+    .note { color: var(--muted); font-size: 12px; line-height: 1.5; margin-top: 12px; }
+    footer { max-width: 1080px; margin: 0 auto; padding: 0 20px 40px; color: var(--muted); font-size: 12px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="mark">MV</div>
+    <div class="brand"><b>Mesa Viva</b><span>Replay sin servidor</span></div>
+  </header>
+  <main>
+    <section class="hero">
+      <span class="eyebrow">Archivo de partida</span>
+      <h1 id="title">Replay</h1>
+      <p class="meta" id="meta">Cargando…</p>
+    </section>
+    <div class="layout">
+      <section class="panel">
+        <div id="board" class="board damas" aria-label="Tablero de replay"></div>
+        <div class="controls">
+          <button id="prev" type="button">← Anterior</button>
+          <button id="play" class="primary" type="button">▶ Reproducir</button>
+          <button id="next" type="button">Siguiente →</button>
+        </div>
+        <div class="hud"><span id="step">Paso 0</span><span id="seed"></span></div>
+        <p class="note">Este visor reconstruye la partida con la semilla y las jugadas del enlace. No necesita cuenta ni conexión al relay.</p>
+      </section>
+      <aside class="panel">
+        <strong>Jugadas</strong>
+        <div class="moves" id="moves"></div>
+        <p class="note"><a id="appLink" href="#">Abrir en Mesa Viva</a><br /><a href="../">Volver a la portada</a></p>
+      </aside>
+    </div>
+  </main>
+  <footer>Mesa Viva · replay autocontenido · sin datos personales</footer>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const game = (params.get('game') || '').toLowerCase();
+    const seed = params.get('seed') || '0';
+    const rawMoves = params.get('moves') || '';
+    const boardEl = document.getElementById('board');
+    const movesEl = document.getElementById('moves');
+    const titleEl = document.getElementById('title');
+    const metaEl = document.getElementById('meta');
+    const stepEl = document.getElementById('step');
+    const seedEl = document.getElementById('seed');
+
+    const nativeQuery = new URLSearchParams({ game, seed, moves: rawMoves }).toString();
+    document.getElementById('appLink').href = `mesaviva://replay?${nativeQuery}`;
+
+    function fail(message) {
+      document.querySelector('.layout').innerHTML = `<section class="panel"><div class="error">${message}</div></section>`;
+    }
+
+    function parseMoves() {
+      if (!rawMoves) return [];
+      if (game === 'damas') {
+        return rawMoves.split('.').map((chunk) => {
+          const [a, b] = chunk.split('-').map(Number);
+          return [a, b];
+        }).filter(([a, b]) => Number.isInteger(a) && Number.isInteger(b));
+      }
+      return rawMoves.split('.').map(Number).filter(Number.isInteger);
+    }
+
+    const moves = parseMoves();
+    let frames = [];
+    let labels = [];
+    let step = 0;
+    let timer = null;
+
+    function isDark(index) {
+      return ((index % 8) + Math.floor(index / 8)) % 2 === 1;
+    }
+
+    function damasFrames() {
+      const start = Array(64).fill(null);
+      for (let i = 0; i < 64; i += 1) {
+        if (!isDark(i)) continue;
+        const rank = Math.floor(i / 8);
+        if (rank <= 2) start[i] = 'B';
+        else if (rank >= 5) start[i] = 'W';
+      }
+      const list = [{ board: start.slice(), last: null }];
+      const names = [];
+      let board = start.slice();
+      for (const [from, to] of moves) {
+        const piece = board[from];
+        if (!piece) break;
+        board[from] = null;
+        if (Math.abs((to % 8) - (from % 8)) === 2) {
+          board[(from + to) / 2] = null;
+        }
+        const rank = Math.floor(to / 8);
+        board[to] = piece === 'W' && rank === 0 ? 'WK'
+          : piece === 'B' && rank === 7 ? 'BK' : piece;
+        list.push({ board: board.slice(), last: [from, to] });
+        names.push(`${square(from)}–${square(to)}`);
+      }
+      return { frames: list, labels: names };
+    }
+
+    function square(index) {
+      return String.fromCharCode(97 + (index % 8)) + (8 - Math.floor(index / 8));
+    }
+
+    function mancalaFrames() {
+      let pits = [4, 4, 4, 4, 4, 4, 0, 4, 4, 4, 4, 4, 4, 0];
+      const list = [{ pits: pits.slice(), last: null }];
+      const names = [];
+      for (const pit of moves) {
+        if (pit < 0 || pit > 13) break;
+        const white = pit <= 5;
+        const myStore = white ? 6 : 13;
+        const oppStore = white ? 13 : 6;
+        const side = white ? [0, 1, 2, 3, 4, 5] : [7, 8, 9, 10, 11, 12];
+        let seeds = pits[pit];
+        pits[pit] = 0;
+        let cursor = pit;
+        while (seeds > 0) {
+          cursor = (cursor + 1) % 14;
+          if (cursor === oppStore) continue;
+          pits[cursor] += 1;
+          seeds -= 1;
+        }
+        if (side.includes(cursor) && pits[cursor] === 1) {
+          const opposite = 12 - cursor;
+          const captured = pits[opposite];
+          if (captured > 0) {
+            pits[opposite] = 0;
+            pits[cursor] = 0;
+            pits[myStore] += captured + 1;
+          }
+        }
+        list.push({ pits: pits.slice(), last: cursor });
+        names.push(`Hoyo ${pit + 1}`);
+      }
+      return { frames: list, labels: names };
+    }
+
+    if (game !== 'damas' && game !== 'mancala') {
+      fail('El enlace no contiene un juego de replay válido. Usa <code>game=damas</code> o <code>game=mancala</code>.');
+    } else {
+      const built = game === 'damas' ? damasFrames() : mancalaFrames();
+      frames = built.frames;
+      labels = built.labels;
+      step = frames.length - 1;
+      titleEl.textContent = game === 'damas' ? 'Damas' : 'Mancala';
+      metaEl.textContent = `${labels.length} jugada${labels.length === 1 ? '' : 's'} · semilla ${seed}`;
+      seedEl.textContent = `Semilla ${seed}`;
+      if (game === 'damas') boardEl.className = 'board damas';
+      renderMoves();
+      render();
+    }
+
+    function renderDamas(frame) {
+      boardEl.innerHTML = '';
+      for (let i = 0; i < 64; i += 1) {
+        const cell = document.createElement('div');
+        cell.className = `cell ${isDark(i) ? 'dark' : 'light'}`;
+        if (frame.last && frame.last.includes(i)) cell.classList.add('last');
+        const piece = frame.board[i];
+        if (piece) {
+          const el = document.createElement('div');
+          el.className = `piece ${piece.startsWith('W') ? 'white' : 'black'}`;
+          el.textContent = piece.length === 2 ? '♛' : '';
+          cell.appendChild(el);
+        }
+        boardEl.appendChild(cell);
+      }
+    }
+
+    function renderMancala(frame) {
+      boardEl.className = 'board mancala';
+      boardEl.style.aspectRatio = 'auto';
+      const stores = [frame.pits[13], frame.pits[6]];
+      const top = [12, 11, 10, 9, 8, 7];
+      const bottom = [0, 1, 2, 3, 4, 5];
+      const pitHtml = (index) => `<div class="pit ${frame.last === index ? 'last' : ''}">${frame.pits[index]}</div>`;
+      boardEl.innerHTML = `
+        <div class="store">${stores[0]}</div>
+        <div class="pits">
+          <div class="pit-row">${top.map(pitHtml).join('')}</div>
+          <div class="pit-row">${bottom.map(pitHtml).join('')}</div>
+        </div>
+        <div class="store">${stores[1]}</div>`;
+    }
+
+    function render() {
+      if (!frames.length) return;
+      const frame = frames[Math.max(0, Math.min(step, frames.length - 1))];
+      if (game === 'damas') renderDamas(frame);
+      else renderMancala(frame);
+      stepEl.textContent = `Paso ${step} de ${frames.length - 1}`;
+      document.getElementById('prev').disabled = step <= 0;
+      document.getElementById('next').disabled = step >= frames.length - 1;
+      [...movesEl.children].forEach((el, index) => {
+        el.classList.toggle('active', index === step - 1);
+      });
+    }
+
+    function renderMoves() {
+      movesEl.innerHTML = '';
+      labels.forEach((label, index) => {
+        const el = document.createElement('div');
+        el.className = 'move';
+        el.textContent = `${index + 1}. ${label}`;
+        el.addEventListener('click', () => {
+          stop();
+          step = index + 1;
+          render();
+        });
+        movesEl.appendChild(el);
+      });
+      if (!labels.length) {
+        movesEl.innerHTML = '<div class="move">Sin jugadas: solo la posición inicial.</div>';
+      }
+    }
+
+    function stop() {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+      document.getElementById('play').textContent = '▶ Reproducir';
+    }
+
+    document.getElementById('prev').addEventListener('click', () => {
+      stop();
+      step = Math.max(0, step - 1);
+      render();
+    });
+    document.getElementById('next').addEventListener('click', () => {
+      stop();
+      step = Math.min(frames.length - 1, step + 1);
+      render();
+    });
+    document.getElementById('play').addEventListener('click', () => {
+      if (timer) {
+        stop();
+        return;
+      }
+      if (step >= frames.length - 1) step = 0;
+      render();
+      document.getElementById('play').textContent = '⏸ Pausar';
+      timer = setInterval(() => {
+        if (step >= frames.length - 1) {
+          stop();
+          return;
+        }
+        step += 1;
+        render();
+      }, 700);
+    });
+  </script>
+</body>
+</html>

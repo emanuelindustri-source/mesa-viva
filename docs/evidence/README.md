@@ -13,6 +13,7 @@ Capturas de las versiones publicadas. Se conservan para auditoría y para que cu
 | v1.4.0 | [`v1.4.0/`](./v1.4.0/) | Crónica PDF nativa, Descargas, compartición y accesibilidad |
 | v1.5.0 | [`v1.5.0/`](./v1.5.0/) | Salas LAN nativas, QR, invitado en Damas, escáner, replay con semilla y PDF con estadísticas |
 | v1.6.0 | [`v1.6.0/`](./v1.6.0/) | Serpientes de 4 asientos, relay online, replay exportable e importación |
+| v1.7.0 | [`v1.7.0/`](./v1.7.0/) | Dominó de 4 asientos con manos privadas, replay automático y visor web |
 
 Reglas:
 

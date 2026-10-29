@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -66,6 +67,9 @@ import com.mesaviva.app.games.DamasColor
 import com.mesaviva.app.games.DamasGame
 import com.mesaviva.app.games.DamasPhase
 import com.mesaviva.app.games.DamasState
+import com.mesaviva.app.games.DominoEnd
+import com.mesaviva.app.games.DominoPhase
+import com.mesaviva.app.games.DominoState
 import com.mesaviva.app.games.MancalaGame
 import com.mesaviva.app.games.MancalaPhase
 import com.mesaviva.app.games.MancalaSide
@@ -238,7 +242,11 @@ private fun NativeRoomLobby(
                     Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         Text(state.t("room.createNative"), style = MaterialTheme.typography.titleMedium)
                         Text(
-                            if (game == RoomGame.Snakes) state.t("room.snakesPlayers") else state.t("room.twoPlayers"),
+                            if (game == RoomGame.Snakes || game == RoomGame.Domino) {
+                                state.t("room.snakesPlayers")
+                            } else {
+                                state.t("room.twoPlayers")
+                            },
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -401,6 +409,18 @@ private fun HostLobby(
                                 onClick = { onSelectGame(option) },
                                 label = { Text("${option.emoji} ${option.title(state.language)}") },
                             )
+                        }
+                    }
+                    if (session.selectedGame == RoomGame.Domino) {
+                        Text(state.t("room.dominoPlayers"), style = MaterialTheme.typography.labelMedium)
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            listOf(2, 3, 4).forEach { count ->
+                                FilterChip(
+                                    selected = session.dominoPlayers == count,
+                                    onClick = { session.chooseDominoPlayers(count) },
+                                    label = { Text(count.toString()) },
+                                )
+                            }
                         }
                     }
                     Text(state.t("room.guestsTitle"), style = MaterialTheme.typography.titleMedium)
@@ -601,8 +621,10 @@ private fun NativeRoomGame(
     val damas = session.damasState
     val mancala = session.mancalaState
     val snakes = session.snakesState
+    val domino = session.dominoState
     val finished = (game == RoomGame.Damas && damas?.phase == DamasPhase.MatchEnd) ||
         (game == RoomGame.Mancala && mancala?.phase == MancalaPhase.MatchEnd) ||
+        (game == RoomGame.Domino && domino?.phase == DominoPhase.MatchEnd) ||
         (game == RoomGame.Snakes && snakes?.finished == true)
 
     LaunchedEffect(finished) {
@@ -678,6 +700,16 @@ private fun NativeRoomGame(
                     else -> state.t("room.theirTurn", mapOf("name" to opponentName))
                 }
             }
+            game == RoomGame.Domino && domino != null -> {
+                val myDominoSeat = session.mySeat
+                if (myDominoSeat !in domino.players.indices) {
+                    state.t("room.spectating")
+                } else {
+                    val name = domino.players.getOrNull(domino.turn)?.name ?: opponentName
+                    if (domino.turn == myDominoSeat) state.t("room.yourTurn")
+                    else state.t("room.theirTurn", mapOf("name" to name))
+                }
+            }
             game == RoomGame.Snakes && snakes != null -> {
                 val name = snakes.names.getOrElse(snakes.turn) { opponentName }
                 if (snakes.turn == session.mySeat) state.t("room.yourTurn")
@@ -725,6 +757,15 @@ private fun NativeRoomGame(
                     RoomMancalaBoard(state, session, mancala, mySide)
                 }
             }
+            RoomGame.Domino -> {
+                if (domino == null) {
+                    Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+                        Text(state.t("room.syncState"), style = MaterialTheme.typography.bodyMedium)
+                    }
+                } else {
+                    RoomDominoBoard(state, session, domino)
+                }
+            }
             RoomGame.Snakes -> {
                 if (snakes == null) {
                     Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
@@ -748,6 +789,7 @@ private fun NativeRoomGame(
             }
             val canResign = !finished && when (game) {
                 RoomGame.Snakes -> session.mySeat in 0..3
+                RoomGame.Domino -> session.mySeat in 0 until (session.dominoState?.players?.size ?: 0)
                 null -> false
                 else -> session.isHost || session.mySeat == 1
             }
@@ -775,6 +817,20 @@ private fun NativeRoomGame(
         if (session.isHost && session.botSeat && board.turn == MancalaSide.Black && board.phase == MancalaPhase.Play) {
             delay(620)
             session.hostBotMancalaMove()
+        }
+    }
+
+    LaunchedEffect(
+        session.dominoState?.turn,
+        session.dominoState?.phase,
+        session.dominoState?.handNo,
+        session.dominoState?.players?.map { it.hand.size },
+    ) {
+        val board = session.dominoState ?: return@LaunchedEffect
+        val player = board.players.getOrNull(board.turn) ?: return@LaunchedEffect
+        if (session.isHost && board.phase == DominoPhase.Playing && player.isBot) {
+            delay(680)
+            session.hostBotDominoMove()
         }
     }
 
@@ -838,10 +894,12 @@ private fun NativeRoomGame(
 
     if (resultOpen && finished) {
         val draw = (game == RoomGame.Damas && damas?.draw == true) ||
-            (game == RoomGame.Mancala && mancala?.whiteStore == mancala?.blackStore)
+            (game == RoomGame.Mancala && mancala?.whiteStore == mancala?.blackStore) ||
+            (game == RoomGame.Domino && domino?.winnerIndices?.isEmpty() == true)
         val won = when (game) {
             RoomGame.Damas -> myColor != null && damas?.winner == myColor
             RoomGame.Mancala -> mySide != null && mancala?.winner == mySide
+            RoomGame.Domino -> domino?.winnerIndices?.contains(session.mySeat) == true
             RoomGame.Snakes -> snakes?.winner == session.mySeat
             null -> false
         }
@@ -870,6 +928,11 @@ private fun NativeRoomGame(
                     }
                     if (game == RoomGame.Mancala && mancala != null) {
                         Text("${state.t("mancala.you")}: ${mancala.whiteStore} · ${opponentName}: ${mancala.blackStore}")
+                    }
+                    if (game == RoomGame.Domino && domino != null) {
+                        domino.players.forEachIndexed { index, player ->
+                            Text("${player.name}: ${state.t("domino.score", mapOf("n" to player.score))}")
+                        }
                     }
                     if (game == RoomGame.Snakes && snakes != null) {
                         snakes.names.forEachIndexed { index, name ->
@@ -1041,6 +1104,181 @@ private fun RoomDamasBoard(
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+    }
+}
+
+@Composable
+private fun RoomDominoBoard(
+    state: ShellState,
+    session: NativeRoomController,
+    board: DominoState,
+) {
+    val mySeat = session.mySeat
+    val canPlay = mySeat in board.players.indices
+    val myTurn = canPlay && board.turn == mySeat && board.phase == DominoPhase.Playing
+    val myHand = board.players.getOrNull(mySeat)?.hand.orEmpty()
+    var selected by remember(mySeat, board.handNo) { mutableStateOf<Int?>(null) }
+    val selectedEnds = selected?.let { session.dominoEndsFor(it) } ?: emptyList()
+
+    fun play(index: Int, end: DominoEnd) {
+        if (session.isHost) session.hostDominoPlay(index, end) else session.guestDominoPlay(index, end)
+        selected = null
+    }
+
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(7.dp)) {
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            board.players.forEachIndexed { index, player ->
+                val active = index == board.turn && board.phase == DominoPhase.Playing
+                Surface(
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(10.dp),
+                    color = if (active) {
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.32f)
+                    },
+                ) {
+                    Column(
+                        Modifier.padding(horizontal = 4.dp, vertical = 5.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Text(
+                            player.name,
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Text(
+                            state.t("domino.score", mapOf("n" to player.score)),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                        Text(
+                            "${board.handCounts.getOrElse(index) { player.hand.size }} 🁢",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        if (active) {
+                            Text("●", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                        }
+                    }
+                }
+            }
+        }
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                board.left?.toString() ?: "—",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(horizontal = 4.dp),
+            )
+            LazyRow(
+                modifier = Modifier.weight(1f),
+                horizontalArrangement = Arrangement.spacedBy(3.dp),
+            ) {
+                itemsIndexed(board.chain) { _, tile ->
+                    DominoTileView(tile = tile, compact = true)
+                }
+            }
+            Text(
+                board.right?.toString() ?: "—",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(horizontal = 4.dp),
+            )
+        }
+
+        Text(
+            state.t("domino.hand", mapOf("n" to board.handNo)) + " · " +
+                state.t("domino.boneyard", mapOf("n" to board.boneyard.size)) + " · " +
+                state.t("domino.target", mapOf("n" to board.target)),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        if (board.phase == DominoPhase.HandEnd) {
+            Text(
+                state.t("room.handClosed") + " " + state.t("domino.msgHandEnd", mapOf("points" to "")),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
+
+        Text(state.t("room.yourHand"), style = MaterialTheme.typography.labelMedium)
+        if (!canPlay) {
+            Text(state.t("room.spectating"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        } else {
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                itemsIndexed(myHand) { index, tile ->
+                    val ends = session.dominoEndsFor(index)
+                    DominoTileView(
+                        tile = tile,
+                        compact = false,
+                        selected = selected == index,
+                        playable = myTurn && ends.isNotEmpty() && !session.dominoPending,
+                        onClick = {
+                            if (myTurn && ends.isNotEmpty()) {
+                                if (ends.size == 1) play(index, ends.first()) else selected = index
+                            }
+                        },
+                    )
+                }
+            }
+        }
+
+        if (selected != null && selectedEnds.size > 1) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(
+                    onClick = { play(selected!!, DominoEnd.Left) },
+                    modifier = Modifier.weight(1f),
+                ) { Text(state.t("domino.left")) }
+                OutlinedButton(
+                    onClick = { play(selected!!, DominoEnd.Right) },
+                    modifier = Modifier.weight(1f),
+                ) { Text(state.t("domino.right")) }
+            }
+        }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(
+                onClick = {
+                    if (session.isHost) session.hostDominoDraw() else session.guestDominoDraw()
+                },
+                enabled = myTurn && !session.dominoHasPlayable() &&
+                    board.boneyard.isNotEmpty() && !session.dominoPending,
+                modifier = Modifier.weight(1f),
+            ) { Text(state.t("domino.draw")) }
+            OutlinedButton(
+                onClick = {
+                    if (session.isHost) session.hostDominoPass() else session.guestDominoPass()
+                },
+                enabled = myTurn && !session.dominoHasPlayable() &&
+                    board.boneyard.isEmpty() && !session.dominoPending,
+                modifier = Modifier.weight(1f),
+            ) { Text(state.t("domino.pass")) }
+            if (board.phase == DominoPhase.HandEnd) {
+                Button(
+                    onClick = { if (session.isHost) session.hostDominoNextHand() },
+                    enabled = session.isHost,
+                    modifier = Modifier.weight(1.2f),
+                ) {
+                    Text(if (session.isHost) state.t("domino.nextHand") else state.t("room.waitNextHand"))
+                }
+            }
+        }
+
+        if (session.dominoPending) {
+            Text(
+                state.t("room.syncState"),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 

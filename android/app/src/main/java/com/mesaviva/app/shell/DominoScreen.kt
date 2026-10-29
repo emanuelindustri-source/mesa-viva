@@ -454,7 +454,7 @@ private fun DominoSetupDialog(
 }
 
 @Composable
-private fun DominoTileView(
+internal fun DominoTileView(
     tile: DominoTile,
     compact: Boolean = false,
     selected: Boolean = false,

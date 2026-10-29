@@ -1,5 +1,37 @@
 ﻿# Changelog
 
+## 1.7.0 · 2026-10-29
+
+La mesa llena.
+
+### Añadido
+
+- **Dominó nativo de 2–4 jugadores** en salas LAN/online, con manos privadas, pozo oculto, asientos, bots, puntos y siguiente mano.
+- Configuración de 2, 3 o 4 jugadores de Dominó desde el lobby.
+- **Reproducción automática** de replays en Damas y Mancala.
+- **Visor web de replays** con tableros de Damas y Mancala, lista de jugadas y auto-play.
+- El enlace compartido incluye versión nativa y versión web.
+- Accesibilidad de fichas de Ludo, puntos de Backgammon y tablero de Go.
+- 4 pruebas nuevas del códec de Dominó.
+
+### Cambiado
+
+- Android: `versionCode=19`, `versionName=1.7.0`.
+- El catálogo y los ajustes muestran 1.7.0.
+- El lobby diferencia Dominó y Serpientes de 2–4 jugadores.
+
+### Corregido
+
+- Las manos ajenas y las fichas del pozo no viajan a los invitados.
+- El anfitrión solo acepta jugadas del asiento y turno correctos.
+
+### Pendiente
+
+- Ludo y Damas Chinas de 3–6 jugadores.
+- Relay público y enlaces universales.
+- Replay web de Póker, Caída y Furia.
+- Accesibilidad completa y teléfono físico.
+
 ## 1.6.0 · 2026-10-29
 
 La mesa grande.

@@ -47,6 +47,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -246,6 +248,9 @@ fun LudoScreen(state: ShellState, onBack: () -> Unit) {
                             .clip(CircleShape)
                             .background(LUDO_COLORS[token.color] ?: Color.Gray)
                             .border(1.5.dp, Color.White.copy(alpha = 0.9f), CircleShape)
+                            .semantics {
+                                contentDescription = "Ficha ${token.slot + 1}, ${token.color.name}, casilla ${token.progress}"
+                            }
                             .then(
                                 if (token.id in legal && current?.isBot == false) {
                                     Modifier.clickable { doMove(token.id) }

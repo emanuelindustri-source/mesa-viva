@@ -1,15 +1,29 @@
 ﻿# Roadmap
 
-## v1.7.0 · La mesa llena (próxima)
+## v1.8.0 · La mesa completa (próxima)
 
-- [ ] Dominó, Ludo y Damas Chinas de 3–8 jugadores.
+- [ ] Ludo y Damas Chinas de 3–6 jugadores.
 - [ ] Relay público con TLS, límites y enlaces universales.
-- [ ] Reproductor de replay automático y visor web.
+- [ ] Replay web de Póker, Caída y Furia.
 - [ ] Accesibilidad completa en las quince mesas.
 - [ ] Teléfono físico y checklist de Play Store.
 - [ ] Baseline Profile y macrobenchmark de arranque.
 
-## v1.6.0 · La mesa grande (actual)
+## v1.7.0 · La mesa llena (actual)
+
+- [x] Dominó nativo de 2–4 jugadores con manos privadas, bots y puntos.
+- [x] Reproducción automática de replays.
+- [x] Visor web de replays de Damas y Mancala.
+- [x] Enlace compartido con versión nativa y web.
+- [x] Accesibilidad de Ludo, Backgammon y Go.
+- [x] 112 pruebas verdes (30 web + 82 Kotlin).
+- [x] APK y AAB de release firmados.
+- [x] Evidencia visual en `docs/evidence/v1.7.0/`.
+- [ ] Ludo y Damas Chinas de 3–6 (v1.8.0).
+- [ ] Relay público y replay web de Póker/Caída/Furia (v1.8.0).
+- [ ] Teléfono físico bloqueado por MIUI.
+
+## v1.6.0 · La mesa grande
 
 - [x] Serpientes y Escaleras nativo para 2–4 jugadores con asientos y bots.
 - [x] Relay online configurable además de LAN.

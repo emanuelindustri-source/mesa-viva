@@ -14,6 +14,12 @@ import com.mesaviva.app.games.DamasGame
 import com.mesaviva.app.games.DamasMove
 import com.mesaviva.app.games.DamasPhase
 import com.mesaviva.app.games.DamasState
+import com.mesaviva.app.games.DominoEnd
+import com.mesaviva.app.games.DominoGame
+import com.mesaviva.app.games.DominoMoveType
+import com.mesaviva.app.games.DominoPhase
+import com.mesaviva.app.games.DominoState
+import com.mesaviva.app.games.DominoTile
 import com.mesaviva.app.games.MancalaGame
 import com.mesaviva.app.games.MancalaPhase
 import com.mesaviva.app.games.MancalaSide
@@ -29,6 +35,7 @@ import java.time.format.DateTimeFormatter
 enum class RoomGame(val id: String, val emoji: String, val titleEs: String, val titleEn: String) {
     Damas("damas", "⛀", "Damas", "Checkers"),
     Mancala("mancala", "🫘", "Mancala", "Mancala"),
+    Domino("domino", "🁫", "Dominó", "Dominoes"),
     Snakes("serpientes", "🐍", "Serpientes", "Snakes");
 
     fun title(language: String): String = if (language == "en") titleEn else titleEs
@@ -109,6 +116,15 @@ class NativeRoomController(
     var snakesState by mutableStateOf<SnakesRoomState?>(null)
         private set
 
+    var dominoState by mutableStateOf<DominoState?>(null)
+        private set
+
+    var dominoPlayers by mutableStateOf(4)
+        private set
+
+    var dominoPending by mutableStateOf(false)
+        private set
+
     var mySeat by mutableStateOf(if (role == RoomRole.Host) 0 else 1)
         private set
 
@@ -127,6 +143,7 @@ class NativeRoomController(
     private val main = Handler(Looper.getMainLooper())
     private val damas = DamasGame()
     private val mancala = MancalaGame()
+    private var domino = DominoGame(4, false, 100)
     private val timeFormat = DateTimeFormatter.ofPattern("HH:mm")
 
     private var relay: LanRelayServer? = null
@@ -148,6 +165,7 @@ class NativeRoomController(
     val canStart: Boolean
         get() = isHost && status == RoomStatus.Hosting && when (selectedGame) {
             RoomGame.Snakes -> guests.any { it.online && it.seat in 1..3 }
+            RoomGame.Domino -> guests.any { it.online && it.seat in 1 until dominoPlayers }
             else -> guests.any { it.online && it.seat == 1 }
         }
 
@@ -278,12 +296,19 @@ class NativeRoomController(
                     .put("game", selectedGame.id)
                     .put("seat", seat))
                 if (inGame) {
-                    if (activeGame == RoomGame.Snakes) {
-                        syncSnakesSeats()
-                        broadcastState()
-                    } else {
-                        if (seat == 1) botSeat = false
-                        sendStateTo(id)
+                    when (activeGame) {
+                        RoomGame.Snakes -> {
+                            syncSnakesSeats()
+                            broadcastState()
+                        }
+                        RoomGame.Domino -> {
+                            syncDominoSeats()
+                            broadcastState()
+                        }
+                        else -> {
+                            if (seat == 1) botSeat = false
+                            sendStateTo(id)
+                        }
                     }
                     sendPayloadTo(id, JSONObject().put("k", "seat").put("seat", seat))
                 }
@@ -297,11 +322,15 @@ class NativeRoomController(
                     syncSnakesSeats()
                     broadcastState()
                 }
+                if (inGame && activeGame == RoomGame.Domino) {
+                    syncDominoSeats()
+                    broadcastState()
+                }
                 appendSystem(state.t("room.guestRejoined"))
                 NativeAudio.play(context, NativeAudio.Sfx.Chat, state.sfx)
                 if (inGame) {
                     sendPayloadTo(id, JSONObject().put("k", "seat").put("seat", guest?.seat ?: 1))
-                    if (activeGame != RoomGame.Snakes) sendStateTo(id)
+                    if (activeGame !in setOf(RoomGame.Snakes, RoomGame.Domino)) sendStateTo(id)
                 }
             }
             "guestLeft" -> {
@@ -316,6 +345,10 @@ class NativeRoomController(
                 if (inGame) {
                     if (activeGame == RoomGame.Snakes) {
                         syncSnakesSeats()
+                        broadcastState()
+                        appendSystem(state.t("room.guestLeftBot", mapOf("name" to (guest?.name ?: state.t("room.guestFallback")))))
+                    } else if (activeGame == RoomGame.Domino) {
+                        syncDominoSeats()
                         broadcastState()
                         appendSystem(state.t("room.guestLeftBot", mapOf("name" to (guest?.name ?: state.t("room.guestFallback")))))
                     } else if (guest?.seat == 1) {
@@ -359,6 +392,10 @@ class NativeRoomController(
             "sow" -> hostGuestMancalaSow(from, payload)
             "resign" -> hostGuestResign(from)
             "snakesRoll" -> hostGuestSnakesRoll(from)
+            "dominoPlay" -> hostGuestDominoPlay(from, payload)
+            "dominoDraw" -> hostGuestDominoDraw(from)
+            "dominoPass" -> hostGuestDominoPass(from)
+            "dominoNextHand" -> if (activeGame == RoomGame.Domino) hostDominoNextHand()
             "rematch" -> startMatch()
         }
     }
@@ -376,6 +413,26 @@ class NativeRoomController(
         when (selectedGame) {
             RoomGame.Damas -> damasState = damas.newMatch()
             RoomGame.Mancala -> mancalaState = mancala.newMatch()
+            RoomGame.Domino -> {
+                domino = DominoGame(dominoPlayers.coerceIn(2, 4), false, 100, System.nanoTime())
+                val base = domino.newMatch()
+                val names = MutableList(base.players.size) { index ->
+                    if (index == 0) hostName.ifBlank { state.t("room.hostFallback") } else botName(index)
+                }
+                val bots = MutableList(base.players.size) { it != 0 }
+                for (guest in guests) {
+                    if (guest.seat in 1 until base.players.size) {
+                        names[guest.seat] = guest.name
+                        bots[guest.seat] = !guest.online
+                    }
+                }
+                dominoState = base.copy(
+                    players = base.players.mapIndexed { index, player ->
+                        player.copy(name = names[index], isBot = bots[index])
+                    },
+                    handCounts = base.players.map { it.hand.size },
+                )
+            }
             RoomGame.Snakes -> {
                 snakesRandom = kotlin.random.Random(System.nanoTime())
                 val names = MutableList(4) { index ->
@@ -505,12 +562,229 @@ class NativeRoomController(
                 finishSnakes(snakesState!!)
                 broadcastState()
             }
+            RoomGame.Domino -> {
+                val current = dominoState ?: return
+                if (current.phase == DominoPhase.MatchEnd) return
+                val rival = (1 until current.players.size).firstOrNull() ?: 0
+                dominoState = current.copy(
+                    phase = DominoPhase.MatchEnd,
+                    winnerIndices = listOf(rival),
+                )
+                finishDomino(dominoState!!)
+                broadcastState()
+            }
             null -> Unit
         }
     }
 
+    fun chooseDominoPlayers(count: Int) {
+        if (isHost && !inGame) dominoPlayers = count.coerceIn(2, 4)
+    }
+
+    fun dominoEndsFor(tileIndex: Int): List<DominoEnd> {
+        val board = dominoState ?: return emptyList()
+        val seat = if (isHost) 0 else mySeat
+        val hand = board.players.getOrNull(seat)?.hand ?: return emptyList()
+        val tile = hand.getOrNull(tileIndex) ?: return emptyList()
+        val ends = mutableListOf<DominoEnd>()
+        if (tile.fits(board.left)) ends.add(DominoEnd.Left)
+        if (tile.fits(board.right)) ends.add(DominoEnd.Right)
+        return ends
+    }
+
+    fun dominoHasPlayable(): Boolean {
+        val board = dominoState ?: return false
+        val seat = if (isHost) 0 else mySeat
+        val hand = board.players.getOrNull(seat)?.hand ?: return false
+        return hand.any { tile ->
+            tile.fits(board.left) || tile.fits(board.right)
+        }
+    }
+
+    fun hostDominoPlay(tileIndex: Int, end: DominoEnd) {
+        if (!isHost || activeGame != RoomGame.Domino) return
+        val current = dominoState ?: return
+        applyHostDomino(domino.play(current, 0, tileIndex, end))
+    }
+
+    fun hostDominoDraw() {
+        if (!isHost || activeGame != RoomGame.Domino) return
+        val current = dominoState ?: return
+        applyHostDomino(domino.draw(current, 0))
+    }
+
+    fun hostDominoPass() {
+        if (!isHost || activeGame != RoomGame.Domino) return
+        val current = dominoState ?: return
+        applyHostDomino(domino.pass(current, 0))
+    }
+
+    fun hostDominoNextHand() {
+        if (!isHost || activeGame != RoomGame.Domino) return
+        val current = dominoState ?: return
+        if (current.phase != DominoPhase.HandEnd) return
+        val next = domino.nextHand(current)
+        dominoState = next.copy(handCounts = next.players.map { it.hand.size })
+        NativeAudio.play(context, NativeAudio.Sfx.Card, state.sfx)
+        broadcastState()
+    }
+
+    fun hostBotDominoMove() {
+        if (!isHost || activeGame != RoomGame.Domino) return
+        val current = dominoState ?: return
+        if (current.phase == DominoPhase.HandEnd) {
+            hostDominoNextHand()
+            return
+        }
+        if (current.phase != DominoPhase.Playing) return
+        val player = current.players.getOrNull(current.turn) ?: return
+        if (!player.isBot) return
+        when (val move = domino.botMove(current)) {
+            null -> Unit
+            else -> when (move.type) {
+                DominoMoveType.Play -> {
+                    val tile = move.tileIndex ?: return
+                    val end = move.end ?: return
+                    applyHostDomino(domino.play(current, current.turn, tile, end))
+                }
+                DominoMoveType.Draw -> applyHostDomino(domino.draw(current, current.turn))
+                DominoMoveType.Pass -> applyHostDomino(domino.pass(current, current.turn))
+                DominoMoveType.NextHand -> hostDominoNextHand()
+            }
+        }
+    }
+
+    fun guestDominoPlay(tileIndex: Int, end: DominoEnd) {
+        if (!isGuest || activeGame != RoomGame.Domino || dominoPending) return
+        val board = dominoState ?: return
+        if (mySeat !in 0 until board.players.size || board.turn != mySeat) return
+        if (board.phase != DominoPhase.Playing) return
+        dominoPending = true
+        sendPayload(JSONObject().put("k", "dominoPlay").put("tile", tileIndex).put("end", end.name.lowercase()))
+    }
+
+    fun guestDominoDraw() {
+        if (!isGuest || activeGame != RoomGame.Domino || dominoPending) return
+        val board = dominoState ?: return
+        if (mySeat !in 0 until board.players.size || board.turn != mySeat) return
+        if (board.phase != DominoPhase.Playing) return
+        dominoPending = true
+        sendPayload(JSONObject().put("k", "dominoDraw"))
+    }
+
+    fun guestDominoPass() {
+        if (!isGuest || activeGame != RoomGame.Domino || dominoPending) return
+        val board = dominoState ?: return
+        if (mySeat !in 0 until board.players.size || board.turn != mySeat) return
+        if (board.phase != DominoPhase.Playing) return
+        dominoPending = true
+        sendPayload(JSONObject().put("k", "dominoPass"))
+    }
+
+    private fun applyHostDomino(result: com.mesaviva.app.games.DominoResult) {
+        if (result.error != null) {
+            hint = state.t(result.error)
+            return
+        }
+        dominoState = result.state.copy(handCounts = result.state.players.map { it.hand.size })
+        hint = ""
+        val board = dominoState ?: return
+        when {
+            board.phase == DominoPhase.MatchEnd -> finishDomino(board)
+            board.phase == DominoPhase.HandEnd -> NativeAudio.play(
+                context,
+                if (board.winnerIndices.isEmpty()) NativeAudio.Sfx.Draw else NativeAudio.Sfx.Promote,
+                state.sfx,
+            )
+            else -> NativeAudio.play(context, NativeAudio.Sfx.Card, state.sfx)
+        }
+        state.vibrate(context, if (board.phase == DominoPhase.MatchEnd) 70 else 22)
+        broadcastState()
+    }
+
+    private fun finishDomino(board: DominoState) {
+        if (board.phase != DominoPhase.MatchEnd || awarded) return
+        awarded = true
+        val won = 0 in board.winnerIndices
+        state.awardMatch(win = won, draw = board.winnerIndices.isEmpty())
+        NativeAudio.play(
+            context,
+            when {
+                board.winnerIndices.isEmpty() -> NativeAudio.Sfx.Draw
+                won -> NativeAudio.Sfx.Win
+                else -> NativeAudio.Sfx.Lose
+            },
+            state.sfx,
+        )
+    }
+
+    private fun hostGuestDominoPlay(fromId: String?, payload: JSONObject) {
+        if (activeGame != RoomGame.Domino) return
+        val guest = guests.firstOrNull { it.id == fromId } ?: return
+        val current = dominoState ?: return
+        if (guest.seat !in 1 until current.players.size) return
+        if (current.turn != guest.seat || current.phase != DominoPhase.Playing) return
+        val tileIndex = payload.optInt("tile", -1)
+        val end = if (payload.optString("end") == "left") DominoEnd.Left else DominoEnd.Right
+        val result = domino.play(current, guest.seat, tileIndex, end)
+        if (result.error != null) {
+            sendStateTo(guest.id)
+            return
+        }
+        applyHostDomino(result)
+    }
+
+    private fun hostGuestDominoDraw(fromId: String?) {
+        if (activeGame != RoomGame.Domino) return
+        val guest = guests.firstOrNull { it.id == fromId } ?: return
+        val current = dominoState ?: return
+        if (guest.seat !in 1 until current.players.size) return
+        if (current.turn != guest.seat || current.phase != DominoPhase.Playing) return
+        val result = domino.draw(current, guest.seat)
+        if (result.error != null) {
+            sendStateTo(guest.id)
+            return
+        }
+        applyHostDomino(result)
+    }
+
+    private fun hostGuestDominoPass(fromId: String?) {
+        if (activeGame != RoomGame.Domino) return
+        val guest = guests.firstOrNull { it.id == fromId } ?: return
+        val current = dominoState ?: return
+        if (guest.seat !in 1 until current.players.size) return
+        if (current.turn != guest.seat || current.phase != DominoPhase.Playing) return
+        val result = domino.pass(current, guest.seat)
+        if (result.error != null) {
+            sendStateTo(guest.id)
+            return
+        }
+        applyHostDomino(result)
+    }
+
+    private fun syncDominoSeats() {
+        val current = dominoState ?: return
+        val players = current.players.mapIndexed { index, player ->
+            when {
+                index == 0 -> player.copy(name = hostName.ifBlank { state.t("room.hostFallback") }, isBot = false)
+                else -> {
+                    val guest = guests.firstOrNull { it.seat == index }
+                    if (guest != null) {
+                        player.copy(name = guest.name, isBot = !guest.online)
+                    } else {
+                        player.copy(name = botName(index), isBot = true)
+                    }
+                }
+            }
+        }
+        dominoState = current.copy(
+            players = players,
+            handCounts = current.handCounts.ifEmpty { players.map { it.hand.size } },
+        )
+    }
+
     fun hostToggleBot() {
-        if (!isHost || !inGame || activeGame == RoomGame.Snakes) return
+        if (!isHost || !inGame || activeGame in setOf(RoomGame.Snakes, RoomGame.Domino)) return
         botSeat = !botSeat
         hint = state.t(if (botSeat) "room.botActive" else "room.botOff")
     }
@@ -583,6 +857,17 @@ class NativeRoomController(
                     winner = MancalaSide.White,
                 )
                 finishMancala(mancalaState!!, hostWon = true)
+                broadcastState()
+            }
+            RoomGame.Domino -> {
+                val current = dominoState ?: return
+                if (guest.seat !in 1 until current.players.size) return
+                if (current.phase == DominoPhase.MatchEnd) return
+                dominoState = current.copy(
+                    phase = DominoPhase.MatchEnd,
+                    winnerIndices = listOf(0),
+                )
+                finishDomino(dominoState!!)
                 broadcastState()
             }
             null -> Unit
@@ -714,18 +999,29 @@ class NativeRoomController(
 
     private fun broadcastState() {
         if (!isHost) return
+        if (activeGame == RoomGame.Domino) {
+            val board = dominoState ?: return
+            for (guest in guests) {
+                if (guest.online) {
+                    sendPayloadTo(guest.id, RoomCodec.dominoToJson(board, guest.seat))
+                }
+            }
+            return
+        }
         val payload = stateJson() ?: return
         sendPayloadToGuests(payload)
     }
 
     private fun sendStateTo(guest: String) {
         if (!isHost || guest.isBlank()) return
-        stateJson()?.let { sendPayloadTo(guest, it) }
+        val seat = guests.firstOrNull { it.id == guest }?.seat ?: 1
+        stateJson(seat)?.let { sendPayloadTo(guest, it) }
     }
 
-    private fun stateJson(): JSONObject? = when (activeGame) {
+    private fun stateJson(viewerSeat: Int = 0): JSONObject? = when (activeGame) {
         RoomGame.Damas -> damasState?.let { damasJson(it) }
         RoomGame.Mancala -> mancalaState?.let { mancalaJson(it) }
+        RoomGame.Domino -> dominoState?.let { RoomCodec.dominoToJson(it, viewerSeat) }
         RoomGame.Snakes -> snakesState?.let { RoomCodec.snakesToJson(it) }
         null -> null
     }
@@ -892,6 +1188,8 @@ class NativeRoomController(
                 damasState = null
                 mancalaState = null
                 snakesState = null
+                dominoState = null
+                dominoPending = false
                 awarded = false
                 appendSystem(state.t("room.youAreInMatch"))
                 NativeAudio.play(context, NativeAudio.Sfx.Card, state.sfx)
@@ -946,6 +1244,31 @@ class NativeRoomController(
                         won -> NativeAudio.play(context, NativeAudio.Sfx.Win, state.sfx)
                         else -> NativeAudio.play(context, NativeAudio.Sfx.Lose, state.sfx)
                     }
+                }
+            }
+            RoomGame.Domino.id -> {
+                val parsed = RoomCodec.dominoFromJson(payload) ?: return
+                val previous = dominoState
+                dominoState = parsed
+                activeGame = RoomGame.Domino
+                dominoPending = false
+                if (parsed.phase == DominoPhase.MatchEnd && !awarded) {
+                    awarded = true
+                    val won = mySeat in parsed.winnerIndices
+                    state.awardMatch(win = won, draw = parsed.winnerIndices.isEmpty())
+                    NativeAudio.play(
+                        context,
+                        when {
+                            parsed.winnerIndices.isEmpty() -> NativeAudio.Sfx.Draw
+                            won -> NativeAudio.Sfx.Win
+                            else -> NativeAudio.Sfx.Lose
+                        },
+                        state.sfx,
+                    )
+                } else if (parsed.phase == DominoPhase.HandEnd) {
+                    NativeAudio.play(context, NativeAudio.Sfx.Promote, state.sfx)
+                } else if (previous == null || parsed.chain.size > previous.chain.size) {
+                    NativeAudio.play(context, NativeAudio.Sfx.Card, state.sfx)
                 }
             }
             RoomGame.Snakes.id -> {
@@ -1082,6 +1405,8 @@ class NativeRoomController(
         damasState = null
         mancalaState = null
         snakesState = null
+        dominoState = null
+        dominoPending = false
         awarded = false
         botSeat = false
     }
