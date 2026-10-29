@@ -61,7 +61,8 @@ Es un proyecto de varias versiones, no un commit.
 - [x] Mesa compartida, chat y salas nativas LAN para Damas y Mancala (v1.5.0).
 - [x] Serpientes de 2–4 jugadores, relay online configurable y replays exportables (v1.6.0).
 - [x] Dominó de 2–4 con manos privadas, replay automático y visor web (v1.7.0).
-- [ ] Salas nativas de Ludo y Damas Chinas; relay público (v1.8.0).
+- [x] Catálogo de 30 juegos; Reversi y Ur nativos (v1.8.0).
+- [ ] Brisca y Truco; Ludo y Damas Chinas en salas; relay público (v1.9.0).
 
 ### Fase 4 · Retirada del WebView
 
@@ -72,7 +73,8 @@ Es un proyecto de varias versiones, no un commit.
 - v1.4.0 añade crónica PDF nativa en las quince mesas y accesibilidad básica de cartas y turnos.
 - v1.5.0 añade salas LAN nativas para Damas y Mancala, replays con semilla, audio procedural y PDF con estadísticas.
 - v1.6.0 añade Serpientes de 2–4 jugadores, relay online configurable, replays exportables e importables y audio en las quince mesas.
-- v1.7.0 añade Dominó de 2–4 con manos privadas, replay automático y visor web. La PWA y la sala web siguen en el WebView; el siguiente paso son Ludo/Damas Chinas y el relay público.
+- v1.7.0 añade Dominó de 2–4 con manos privadas, replay automático y visor web.
+- v1.8.0 completa el catálogo de 30 juegos y suma Reversi y Ur nativos. La PWA y la sala web siguen en el WebView; el siguiente paso son Brisca/Truco, Ludo/Damas Chinas y el relay público.
 
 ## Arquitectura propuesta
 

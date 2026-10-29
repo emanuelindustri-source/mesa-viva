@@ -1,5 +1,31 @@
 ﻿# Changelog
 
+## 1.8.0 · 2026-10-29
+
+Treinta juegos.
+
+### Añadido
+
+- **Catálogo de 30 juegos** sin duplicados: 17 jugables y 13 próximos.
+- **Reversi nativo** 8×8 con volteo, passing, esquinas, movilidad y bots de tres dificultades.
+- **Juego Real de Ur nativo** de 20 casillas, rosetas, capturas, turno extra y llegada exacta.
+- **Brisca** y **Truco** en el catálogo como próximos juegos.
+- 11 pruebas nuevas de Reversi y Ur.
+- Portada y catálogo muestran 17 de 30.
+
+### Cambiado
+
+- Android: `versionCode=20`, `versionName=1.8.0`.
+- El inicio y los ajustes muestran 1.8.0.
+- Se eliminó la ficha duplicada de Ur.
+
+### Pendiente
+
+- Brisca y Truco nativos.
+- Ludo y Damas Chinas en salas.
+- Dominó por parejas, relay público y accesibilidad completa.
+- Teléfono físico bloqueado por MIUI.
+
 ## 1.7.0 · 2026-10-29
 
 La mesa llena.

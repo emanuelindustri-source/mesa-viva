@@ -121,7 +121,7 @@ fun CatalogScreen(
         }
         item {
             Text(
-                "Mesa Viva 1.7.0 · 15 juegos · Dominó de 4 · replays web · sin anuncios",
+                "Mesa Viva 1.8.0 · 17 de 30 juegos · Dominó de 4 · replays web · sin anuncios",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 8.dp),

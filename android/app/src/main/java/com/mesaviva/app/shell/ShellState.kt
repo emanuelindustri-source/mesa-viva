@@ -30,6 +30,8 @@ enum class ShellScreen {
     Caida,
     Furia,
     Poker,
+    Reversi,
+    Ur,
     Room,
 }
 

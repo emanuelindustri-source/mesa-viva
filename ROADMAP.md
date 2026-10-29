@@ -1,15 +1,29 @@
 ﻿# Roadmap
 
-## v1.8.0 · La mesa completa (próxima)
+## v1.9.0 · La mesa completa (próxima)
 
+- [ ] Brisca y Truco nativos.
 - [ ] Ludo y Damas Chinas de 3–6 jugadores.
 - [ ] Relay público con TLS, límites y enlaces universales.
-- [ ] Replay web de Póker, Caída y Furia.
-- [ ] Accesibilidad completa en las quince mesas.
+- [ ] Replay web de más juegos.
+- [ ] Accesibilidad completa en las 17 mesas.
 - [ ] Teléfono físico y checklist de Play Store.
-- [ ] Baseline Profile y macrobenchmark de arranque.
+- [ ] Baseline Profile y macrobenchmark.
 
-## v1.7.0 · La mesa llena (actual)
+## v1.8.0 · Treinta juegos (actual)
+
+- [x] Catálogo de 30 juegos sin duplicados: 17 jugables y 13 próximos.
+- [x] Reversi nativo con bots y tres dificultades.
+- [x] Ur nativo con rosetas, capturas y llegada exacta.
+- [x] Brisca y Truco en el catálogo.
+- [x] 123 pruebas verdes (30 web + 93 Kotlin).
+- [x] APK y AAB de release firmados.
+- [x] Evidencia visual en `docs/evidence/v1.8.0/`.
+- [ ] Brisca, Truco y el resto del catálogo (v1.9.0).
+- [ ] Ludo y Damas Chinas en salas.
+- [ ] Teléfono físico bloqueado por MIUI.
+
+## v1.7.0 · La mesa llena
 
 - [x] Dominó nativo de 2–4 jugadores con manos privadas, bots y puntos.
 - [x] Reproducción automática de replays.
