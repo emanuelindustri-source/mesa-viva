@@ -4,66 +4,63 @@
 
 ## Estado actual
 
-- **Versión publicada:** 1.8.0.
+- **Versión publicada:** 1.9.0.
 - **Catálogo:** 30 juegos.
-- **Juegos jugables:** 17, todos 100 % Jetpack Compose.
+- **Juegos jugables:** 19, todos 100 % Jetpack Compose.
 - **Juegos en WebView:** 0 (el WebView queda como respaldo de la PWA y de la sala remota).
 - **Salas nativas:** Damas y Mancala (2), Dominó (2–4) y Serpientes (2–4), por LAN o relay online configurable.
 - **Replays:** semilla, paso a paso, automático, enlace, archivo JSON, importación y visor web de Damas/Mancala.
-- **Crónica PDF:** 17 mesas, con tarjeta de estadísticas.
-- **Audio nativo:** música procedural por festividad y efectos en las 17 mesas.
+- **Crónica PDF:** 19 mesas, con tarjeta de estadísticas.
+- **Audio nativo:** música procedural por festividad y efectos en las 19 mesas.
 - **Repositorio:** <https://github.com/emanuelindustri-source/mesa-viva>
 - **Portada:** <https://emanuelindustri-source.github.io/mesa-viva/>
 - **Juego web:** <https://emanuelindustri-source.github.io/mesa-viva/play/>
 - **Replay web:** <https://emanuelindustri-source.github.io/mesa-viva/replay/>
-- **Release:** <https://github.com/emanuelindustri-source/mesa-viva/releases/tag/v1.8.0>
-- **VERSION:** `1.8.0`
-- **Android:** `versionCode=20`, `versionName=1.8.0`, compileSdk/targetSdk 36.
+- **Release:** <https://github.com/emanuelindustri-source/mesa-viva/releases/tag/v1.9.0>
+- **VERSION:** `1.9.0`
+- **Android:** `versionCode=21`, `versionName=1.9.0`, compileSdk/targetSdk 36.
 - **Gradle:** 8.14.4.
 
 ### Calidad
 
 - 30/30 pruebas de motores web.
-- 93/93 pruebas Kotlin (juegos, códec de salas, replays, Reversi y Ur).
-- **123 pruebas en total.**
+- 101/101 pruebas Kotlin (juegos, salas, replays, Reversi, Ur, Brisca y Truco).
+- **131 pruebas en total.**
 - TypeScript sin errores.
 - Web compilada con Vite 6.4.5 y sincronizada dentro del APK.
 - APK debug, APK release firmado y AAB release firmado.
-- Reversi y Ur probados en emulador Android 14.
-- Dominó probado con anfitrión real + 3 invitados WebSocket; manos privadas y pozo oculto.
-- Visor web probado en navegador real.
-- Teléfono real `23117RA68G`: detectado por `adb`, pero MIUI bloquea la instalación por USB.
+- Brisca y Truco probados en emulador Android 14.
+- 19 juegos nativos en el catálogo; 11 pendientes.
+- Teléfono físico `22101316G`: detectado por `adb`, pero MIUI rechaza la instalación USB.
 
-### Checksums v1.8.0
+### Checksums v1.9.0
 
-- APK release firmado: `0B184F5903FC328412E38F88EC9A39E30CE5CD2276AFF5699F0A1F0E429EF92D` · 10.636.441 bytes.
-- AAB release firmado: `61455C1AD961E05E75240457A4A9FE46D0B43800813690A58861522A1308285F` · 10.259.356 bytes.
-- APK debug de CI: `5D50D429C08166B494C510859FAE9CECB52832B0C704C55ED1FC242990AF60E3` · 14.200.898 bytes.
-- Artefactos locales en `artifacts/`: `mesa-viva-1.8.0-release.apk`, `mesa-viva-1.8.0-release.aab`. La release de GitHub añade `mesa-viva-1.8.0-debug.apk`.
+- APK release firmado: `85847BE0911D1058798CC526EAAD25E5EFB61F03657B079DA5DA04A7C4EFFCD3` · 10.718.361 bytes.
+- AAB release firmado: `E7F1E5B569F231486DDEE5C0507E443E058B228C5D3F4DDDE922D06C1DF690F5` · 10.343.829 bytes.
+- Artefactos locales en `artifacts/`: `mesa-viva-1.9.0-release.apk`, `mesa-viva-1.9.0-release.aab`. La release de GitHub añade `mesa-viva-1.9.0-debug.apk`.
 
 ## Compose
 
 - **Cáscara nativa completa:** inicio, catálogo, niveles, ajustes, sala y navegación.
-- **17 juegos 100 % Compose.**
+- **19 juegos 100 % Compose:** Póker, Caída, Furia, Dominó, Dados, Ajedrez, Damas, Serpientes, Mancala, Go, Jungle, Ludo, Backgammon, Xiangqi, Damas Chinas, Reversi, Ur, **Brisca** y **Truco**.
 - **Salas nativas:** Damas, Mancala, Dominó y Serpientes.
-- **Reversi y Ur:** nuevos motores con bots, historial y PDF.
-- **Replay automático** y **visor web**.
+- **Replay automático** y **visor web** de Damas/Mancala.
 - **Crónica PDF** en cada mesa.
-- **Audio nativo** en las 17 mesas.
+- **Audio nativo** en las 19 mesas.
 - **XP real** al terminar.
 - **Accesibilidad:** cartas, fichas, casillas, puntos y tableros descritos.
-- **Pendiente:** Brisca, Truco y los 11 juegos restantes del catálogo.
+- **Pendiente:** Ludo y Damas Chinas en salas, Brisca/Truco online y los 11 juegos restantes.
 
-## Siguiente versión: 1.9.0
+## Siguiente versión: 2.0.0
 
-Ver [`v1.9.0.md`](./v1.9.0.md). Incluye:
+Ver [`v2.0.0.md`](./v2.0.0.md). Incluye:
 
-1. Brisca y Truco nativos.
+1. Brisca y Truco en salas con manos privadas.
 2. Ludo y Damas Chinas en salas.
-3. Dominó por parejas y meta configurable.
-4. Relay público y enlaces universales.
-5. Replay web de más juegos.
-6. Accesibilidad completa, teléfono físico y Baseline Profile.
+3. Relay público y enlaces universales.
+4. Replay web de Reversi, Ur, Póker, Caída y Furia.
+5. Accesibilidad completa, teléfono físico y Baseline Profile.
+6. Shogi, Janggi y el resto del catálogo.
 
 ## Dónde está cada cosa
 
@@ -75,7 +72,11 @@ Ver [`v1.9.0.md`](./v1.9.0.md). Incluye:
 | `src/net/room.ts` | Salas web, host/invitado y reconexión |
 | `server/room-server.mjs` | Relay Node |
 | `landing/replay/index.html` | Visor web de replays |
-| `android/.../games/` | Motores Kotlin de los 17 juegos |
+| `android/.../games/` | Motores Kotlin de los 19 juegos |
+| `android/.../games/BriscaGame.kt` | Reglas de Brisca |
+| `android/.../games/TrucoGame.kt` | Reglas de Truco |
+| `android/.../shell/BriscaScreen.kt` | Mesa de Brisca |
+| `android/.../shell/TrucoScreen.kt` | Mesa de Truco |
 | `android/.../shell/NativeRoom.kt` | Sesión host/invitado, asientos, protocolo y bots |
 | `android/.../shell/RoomCodec.kt` | Códec JSON con redacción de manos de Dominó |
 | `android/.../shell/SnakesRoom.kt` | Reglas puras de Serpientes para 2–4 |
@@ -83,8 +84,6 @@ Ver [`v1.9.0.md`](./v1.9.0.md). Incluye:
 | `android/.../shell/RoomScreen.kt` | Lobby, sala web y mesas LAN/online |
 | `android/.../shell/NativeAudio.kt` | Música y efectos procedurales |
 | `android/.../shell/NativeChronicle.kt` | Crónica PDF |
-| `android/.../shell/ReversiScreen.kt` | Mesa de Reversi |
-| `android/.../shell/UrScreen.kt` | Mesa de Ur |
 | `landing/` | Portada, versiones, descargas y replay |
 | `tools/build-pages.mjs` | Portada + juego + replay en `dist-site/` |
 | `versions/` | Evidencia inmutable por versión |
@@ -125,4 +124,4 @@ cd android && gradlew.bat bundleRelease
 3. Mantener este `NEXT.md` actualizado, sin eliminarlo.
 4. No guardar tokens, contraseñas ni keystores en el repositorio.
 5. Antes de publicar: typecheck, tests web, tests Kotlin, build web, APK, AAB, CI/Pages/Android.
-6. No afirmar “100 % Compose” global hasta retirar el WebView. **Estado v1.8.0: los 17 juegos jugables son Compose; el WebView solo queda como respaldo de la PWA y la sala remota.**
+6. No afirmar “100 % Compose” global hasta retirar el WebView. **Estado v1.9.0: los 19 juegos jugables son Compose; el WebView solo queda como respaldo de la PWA y la sala remota.**

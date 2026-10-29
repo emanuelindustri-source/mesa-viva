@@ -764,4 +764,150 @@ class NativeGamesTest {
         assertTrue((result.state.players[0].chips) > 800)
         assertTrue((result.state.players[1].chips) > 800)
     }
+
+    @Test
+    fun `brisca deck has forty unique cards and 120 points`() {
+        val deck = BriscaGame.deck()
+        assertEquals(40, deck.size)
+        assertEquals(40, deck.map { it.id }.toSet().size)
+        assertEquals(120, deck.sumOf { BriscaGame.points(it) })
+    }
+
+    @Test
+    fun `brisca deal leaves three cards each and a trump`() {
+        val game = BriscaGame(playerCount = 2, target = 100, seed = 11)
+        val state = game.newMatch()
+        assertEquals(3, state.hands[0].size)
+        assertEquals(3, state.hands[1].size)
+        assertEquals(34, state.deck.size + if (state.trumpCard != null) 1 else 0)
+        assertNotNull(state.trumpCard)
+        assertEquals(state.trumpCard?.suit, state.trumpSuit)
+        assertEquals(11, BriscaGame.points(BriscaGame.deck().first { it.rank == 1 }))
+    }
+
+    @Test
+    fun `brisca trump beats a higher card of another suit`() {
+        val game = BriscaGame(seed = 5)
+        val lead = SpanishCard("espadas-1", SpanishSuit.Espadas, 1)
+        val trump = SpanishCard("oros-2", SpanishSuit.Oros, 2)
+        val trick = listOf(
+            BriscaPlay(0, lead),
+            BriscaPlay(1, trump),
+        )
+        assertEquals(1, game.winningPlay(trick, SpanishSuit.Oros)?.seat)
+    }
+
+    @Test
+    fun `brisca plays a whole hand and scores every card`() {
+        val game = BriscaGame(playerCount = 2, target = 100, seed = 42)
+        var state = game.newMatch()
+        var guard = 0
+        while (state.phase == BriscaPhase.Playing && guard++ < 400) {
+            val action = game.botAction(state)
+            val card = when (action) {
+                is BriscaAction.PlayCard -> game.handOf(state, state.turn).first { it.id == action.cardId }
+                else -> game.handOf(state, state.turn).firstOrNull()
+            }
+            if (card == null) break
+            val result = game.playCard(state, card.id)
+            assertEquals(null, result.error)
+            state = result.state
+        }
+        assertTrue(state.phase == BriscaPhase.HandEnd || state.phase == BriscaPhase.MatchEnd)
+        assertEquals(120, state.scores.sum())
+        assertTrue(state.history.size >= 20)
+    }
+
+    @Test
+    fun `truco tanto uses the best pair and figures are worth zero`() {
+        val hand = listOf(
+            SpanishCard("oros-7", SpanishSuit.Oros, 7),
+            SpanishCard("copas-7", SpanishSuit.Copas, 7),
+            SpanishCard("espadas-6", SpanishSuit.Espadas, 6),
+        )
+        assertEquals(33, TrucoGame.tanto(hand))
+        val figures = listOf(
+            SpanishCard("oros-12", SpanishSuit.Oros, 12),
+            SpanishCard("copas-11", SpanishSuit.Copas, 11),
+            SpanishCard("espadas-7", SpanishSuit.Espadas, 7),
+        )
+        assertEquals(7, TrucoGame.tanto(figures))
+    }
+
+    @Test
+    fun `truco deals three cards and accepts envido`() {
+        val game = TrucoGame(target = 30, seed = 9)
+        val start = game.newMatch()
+        assertEquals(3, start.hands[0].size)
+        assertEquals(3, start.hands[1].size)
+        assertEquals(TrucoPhase.Envido, start.phase)
+        val called = game.callEnvido(start, start.mano, "envido")
+        assertNotNull(called.state.pending)
+        val resolved = game.respond(called.state, true)
+        assertEquals(TrucoPhase.Play, resolved.state.phase)
+        assertNotNull(resolved.state.envidoReveal)
+        assertEquals(2, resolved.state.scores.sum())
+    }
+
+    @Test
+    fun `truco accepted raises the stake and rejection awards the previous stake`() {
+        val game = TrucoGame(target = 30, seed = 12)
+        var state = game.startPlay(game.newMatch()).state
+        val called = game.callTruco(state, 0)
+        assertEquals(2, called.state.pending?.stake)
+        state = game.respond(called.state, true).state
+        assertEquals(2, state.handStake)
+        assertEquals(TrucoPhase.Play, state.phase)
+        val first = game.botPlayCard(state, state.turn)!!
+        state = game.playCard(state, first.id).state
+        val second = game.botPlayCard(state, state.turn)!!
+        state = game.playCard(state, second.id).state
+        val retruco = game.callTruco(state, state.turn)
+        assertEquals(3, retruco.state.pending?.stake)
+        val rejected = game.respond(retruco.state, false)
+        assertEquals(TrucoPhase.HandEnd, rejected.state.phase)
+        assertEquals(2, rejected.state.scores.sum())
+    }
+
+    @Test
+    fun `truco bot can finish a match without getting stuck`() {
+        val game = TrucoGame(target = 15, seed = 21)
+        var state = game.newMatch()
+        var guard = 0
+        while (state.phase != TrucoPhase.MatchEnd && guard++ < 600) {
+            val pending = state.pending
+            state = when {
+                pending != null -> {
+                    val accept = if (pending.kind in setOf("envido", "realEnvido", "envidoEnvigido")) {
+                        game.botAcceptsEnvido(state, pending.awaiting, pending.stake)
+                    } else {
+                        game.botAcceptsTruco(state, pending.awaiting, pending.stake)
+                    }
+                    game.respond(state, accept).state
+                }
+                state.phase == TrucoPhase.Envido -> {
+                    if (game.botWantsEnvido(state, state.turn)) {
+                        game.callEnvido(state, state.turn).state
+                    } else {
+                        game.startPlay(state).state
+                    }
+                }
+                state.phase == TrucoPhase.Play -> {
+                    if (state.turn == 0 && game.botShouldCallTruco(state, 0)) {
+                        game.callTruco(state, 0).state
+                    } else if (state.turn == 1 && game.botShouldCallTruco(state, 1)) {
+                        game.callTruco(state, 1).state
+                    } else {
+                        val card = game.botPlayCard(state, state.turn)!!
+                        game.playCard(state, card.id).state
+                    }
+                }
+                state.phase == TrucoPhase.HandEnd -> game.nextHand(state).state
+                else -> state
+            }
+        }
+        assertEquals(TrucoPhase.MatchEnd, state.phase)
+        assertTrue(state.scores.any { it >= 15 })
+        assertTrue(state.history.isNotEmpty())
+    }
 }

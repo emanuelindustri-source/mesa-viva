@@ -1,5 +1,29 @@
 ﻿# Changelog
 
+## 1.9.0 · 2026-10-29
+
+La baraja completa.
+
+### Añadido
+
+- **Brisca nativa** de 2–4 jugadores con triunfo, bazas, parejas, meta configurable, bots, historial, PDF y XP.
+- **Truco nativo** de 2 jugadores con envido, real envido, truco, retruco, vale cuatro, mazo, bots, historial, PDF y XP.
+- 8 pruebas nuevas de Brisca y Truco.
+- El catálogo llega a **19 juegos jugables** de 30.
+
+### Cambiado
+
+- Android: `versionCode=21`, `versionName=1.9.0`.
+- El inicio, catálogo, ajustes y portada muestran la 1.9.0 y 19 juegos.
+- Las novedades describen Brisca y Truco.
+
+### Pendiente
+
+- Ludo y Damas Chinas en salas.
+- Brisca y Truco online.
+- Relay público, replays web adicionales y accesibilidad completa.
+- Teléfono físico bloqueado por MIUI.
+
 ## 1.8.0 · 2026-10-29
 
 Treinta juegos.

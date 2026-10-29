@@ -26,7 +26,8 @@ Cada versión de Mesa Viva tiene su propio archivo en esta carpeta. **No se borr
 | 1.6.0 | 2026-10-29 | Publicada | [`v1.6.0.md`](./v1.6.0.md) |
 | 1.7.0 | 2026-10-29 | Publicada | [`v1.7.0.md`](./v1.7.0.md) |
 | 1.8.0 | 2026-10-29 | Publicada | [`v1.8.0.md`](./v1.8.0.md) |
-| 1.9.0 | 2026-10-29 | Pendiente | [`v1.9.0.md`](./v1.9.0.md) |
+| 1.9.0 | 2026-10-29 | Publicada | [`v1.9.0.md`](./v1.9.0.md) |
+| 2.0.0 | 2026-10-29 | Pendiente | [`v2.0.0.md`](./v2.0.0.md) |
 
 ## Relevo
 

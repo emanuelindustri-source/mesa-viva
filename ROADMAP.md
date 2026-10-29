@@ -1,16 +1,19 @@
 ﻿# Roadmap
 
-## v1.9.0 · La mesa completa (próxima)
+## v1.9.0 · La baraja completa (actual)
 
-- [ ] Brisca y Truco nativos.
-- [ ] Ludo y Damas Chinas de 3–6 jugadores.
-- [ ] Relay público con TLS, límites y enlaces universales.
-- [ ] Replay web de más juegos.
-- [ ] Accesibilidad completa en las 17 mesas.
-- [ ] Teléfono físico y checklist de Play Store.
-- [ ] Baseline Profile y macrobenchmark.
+- [x] Brisca nativa de 2–4 con triunfo, bazas, parejas y meta.
+- [x] Truco nativo con envido, real envido, truco, retruco y vale cuatro.
+- [x] 19 juegos jugables, todos en Jetpack Compose.
+- [x] 131 pruebas verdes (30 web + 101 Kotlin).
+- [x] APK y AAB de release firmados.
+- [x] Evidencia visual en `docs/evidence/v1.9.0/`.
+- [ ] Ludo y Damas Chinas de 3–6 en salas (v2.0.0).
+- [ ] Relay público con TLS y enlaces universales (v2.0.0).
+- [ ] Replay web de Reversi, Ur, Póker, Caída y Furia (v2.0.0).
+- [ ] Accesibilidad completa, Baseline Profile y teléfono físico (v2.0.0).
 
-## v1.8.0 · Treinta juegos (actual)
+## v1.8.0 · Treinta juegos
 
 - [x] Catálogo de 30 juegos sin duplicados: 17 jugables y 13 próximos.
 - [x] Reversi nativo con bots y tres dificultades.
@@ -19,7 +22,7 @@
 - [x] 123 pruebas verdes (30 web + 93 Kotlin).
 - [x] APK y AAB de release firmados.
 - [x] Evidencia visual en `docs/evidence/v1.8.0/`.
-- [ ] Brisca, Truco y el resto del catálogo (v1.9.0).
+- [x] Brisca y Truco nativos (v1.9.0).
 - [ ] Ludo y Damas Chinas en salas.
 - [ ] Teléfono físico bloqueado por MIUI.
 

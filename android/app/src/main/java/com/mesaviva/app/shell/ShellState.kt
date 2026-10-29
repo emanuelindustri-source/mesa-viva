@@ -32,6 +32,8 @@ enum class ShellScreen {
     Poker,
     Reversi,
     Ur,
+    Brisca,
+    Truco,
     Room,
 }
 

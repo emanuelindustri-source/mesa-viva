@@ -90,6 +90,8 @@ fun MesaVivaApp(
         ShellScreen.Poker,
         ShellScreen.Reversi,
         ShellScreen.Ur,
+        ShellScreen.Brisca,
+        ShellScreen.Truco,
     )
     Scaffold(
         containerColor = Color.Transparent,
@@ -138,6 +140,8 @@ fun MesaVivaApp(
                     "poker" -> ShellScreen.Poker
                     "reversi" -> ShellScreen.Reversi
                     "ur" -> ShellScreen.Ur
+                    "brisca" -> ShellScreen.Brisca
+                    "truco" -> ShellScreen.Truco
                     else -> ShellScreen.Catalog
                 }
             }
@@ -165,6 +169,8 @@ fun MesaVivaApp(
                     ShellScreen.Poker -> PokerScreen(state) { state.screen = ShellScreen.Home }
                     ShellScreen.Reversi -> ReversiScreen(state) { state.screen = ShellScreen.Home }
                     ShellScreen.Ur -> UrScreen(state) { state.screen = ShellScreen.Home }
+                    ShellScreen.Brisca -> BriscaScreen(state) { state.screen = ShellScreen.Home }
+                    ShellScreen.Truco -> TrucoScreen(state) { state.screen = ShellScreen.Home }
                 }
             }
         }
@@ -371,7 +377,7 @@ private fun HeroCard(state: ShellState, onOpenWeb: (String) -> Unit, onNative: (
                 }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                MiniBadge("17", state.t("home.games"))
+                MiniBadge("19", state.t("home.games"))
                 MiniBadge("11", state.t("home.languages"))
             }
         }
