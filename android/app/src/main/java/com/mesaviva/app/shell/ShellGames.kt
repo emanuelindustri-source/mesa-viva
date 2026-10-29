@@ -11,11 +11,11 @@ data class ShellGame(
     val native: Boolean = false,
 )
 
-/** Catálogo de la cáscara. Doce juegos abren su mesa nativa; Caída, Furia y Póker usan la mesa web. */
+/** Catálogo de la cáscara. Catorce juegos abren su mesa nativa; Póker usa la mesa web. */
 val SHELL_GAMES: List<ShellGame> = listOf(
     ShellGame("poker", "Póker de la casa", "♠️", "2–6", "cartas", "playable", "Texas Hold'em con fichas de práctica."),
-    ShellGame("caida", "Caída", "🃏", "2–4", "cartas", "playable", "Cantos, caídas y mesa limpia."),
-    ShellGame("furia", "Furia de Colores", "🎴", "2–4", "cartas", "playable", "Combina colores y grita ¡Última!"),
+    ShellGame("caida", "Caída", "🃏", "2–4", "cartas", "playable", "Cantos, caídas y mesa limpia. Nativo en Compose.", native = true),
+    ShellGame("furia", "Furia de Colores", "🎴", "2–4", "cartas", "playable", "Combina colores y grita ¡Última! Nativo en Compose.", native = true),
     ShellGame("domino", "Dominó", "🁫", "2–4", "tablero", "playable", "Doble 6, parejas y tranca. Nativo en Compose.", native = true),
     ShellGame("dados", "Dados Mentirosos", "🎲", "2–6", "dados", "playable", "Cubiletes, pujas y mentiras. Nativo en Compose.", native = true),
     ShellGame("ajedrez", "Ajedrez", "♟️", "2", "tablero", "playable", "Reglas completas e IA alfa-beta. Nativo en Compose.", native = true),

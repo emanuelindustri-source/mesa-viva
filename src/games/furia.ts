@@ -271,7 +271,7 @@ export const furiaModule: GameModule<FuriaState> = {
       if (!card) return { state, events: [], error: 'error.invalidAction' };
       if (state.hasDrawn && state.drawnId !== card.id) return { state, events: [], error: 'error.onlyDrawn' };
       if (!canPlayOn(card, state)) return { state, events: [], error: 'error.cardDoesNotMatch' };
-      let chosenColor = state.color;
+      let chosenColor = isWild(card) ? state.color : (card.suit as FuriaColor);
       if (isWild(card)) {
         const requested = String(action.color ?? '');
         if (!FURIA_COLORS.includes(requested as FuriaColor)) {

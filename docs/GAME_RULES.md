@@ -1,11 +1,11 @@
 # Reglas y variantes
 
-Las reglas completas viven dentro de la app (botón **Reglas** en cada mesa) y en el catálogo. Esta página resume la variante implementada en v0.1.0.
+Las reglas completas viven dentro de la app (botón **Reglas** en cada mesa) y en el catálogo. Esta página resume la variante implementada en v1.2.0. Caída y Furia de Colores ya tienen mesa nativa en Jetpack Compose.
 
 ## Caída (Venezuela, 2–4 jugadores)
 
-- Baraja española de 40 (1–7, 10–12). Meta configurable: 24, 30 o 50.
-- El repartidor “entrega” cuatro cartas: 1·2·3·4 o 4·3·2·1 dan 4 puntos; fallar da 1 punto al jugador a la derecha.
+- Baraja española de 40 (1–7, 10–12). Meta configurable: 40, 70 o 100.
+- El repartidor “entrega” cuatro cartas: 1·2·3·4 o 4·3·2·1 dan 2 puntos; fallar da 1 punto al jugador a la derecha.
 - Se reparten 3 cartas. En tu turno juegas una carta. Si igualas el rango de una carta de la mesa, haces **caída**: te llevas esa carta y las que están encima. Sumas el valor del rango (1–7 = 1; 10 = 2; 11 = 3; 12 = 4). Vaciar la mesa suma 5 (“caída con mesa”).
 - Cantos (una vez por mano): ronda, trivilín (5), patrulla (6), vigía (7), registro (8), registrico (10), casa chica (11), casa grande (12). Trivilín de 12 o en la primera mano gana al instante.
 - Al agotarse el mazo, cada 10 cartas capturadas valen 1 punto. Gana quien llegue a la meta.
@@ -13,7 +13,7 @@ Las reglas completas viven dentro de la app (botón **Reglas** en cada mesa) y e
 
 ## Furia de Colores (2–4 jugadores)
 
-- 108 naipes originales de cuatro colores (Sol, Mar, Selva, Magma).
+- 108 naipes originales de cuatro colores (Sol, Mar, Selva, Magma), mesa nativa en Compose.
 - Se reparten 7. Juega una carta que coincida en color, número o símbolo, o un comodín.
 - Salto, Reversa, Roba Dos, Comodín y Comodín Roba Cuatro. Al quedarte con una carta, la mesa grita “¡Última!”.
 - Si no puedes jugar, robas una; si sirve, puedes jugarla; si no, pasas.

@@ -462,4 +462,174 @@ class NativeGamesTest {
         val state = game.newMatch().copy(turn = 1)
         assertNotNull(game.botAction(state, "normal", Random(19)))
     }
+
+    @Test
+    fun `caida deck has forty unique cards and rank points`() {
+        val deck = CaidaGame.spanishDeck()
+        assertEquals(40, deck.size)
+        assertEquals(40, deck.map { it.id }.toSet().size)
+        assertEquals(1, CaidaGame.rankPoints(7))
+        assertEquals(2, CaidaGame.rankPoints(10))
+        assertEquals(3, CaidaGame.rankPoints(11))
+        assertEquals(4, CaidaGame.rankPoints(12))
+    }
+
+    @Test
+    fun `caida detects calls`() {
+        val game = CaidaGame(playerCount = 4, seed = 20)
+        val triple = listOf(
+            SpanishCard("a", SpanishSuit.Oros, 7),
+            SpanishCard("b", SpanishSuit.Copas, 7),
+            SpanishCard("c", SpanishSuit.Espadas, 7),
+        )
+        assertEquals("trivilin", game.detectCanto(triple)?.key)
+        val vigia = listOf(
+            SpanishCard("a", SpanishSuit.Oros, 5),
+            SpanishCard("b", SpanishSuit.Copas, 5),
+            SpanishCard("c", SpanishSuit.Espadas, 6),
+        )
+        assertEquals("vigia", game.detectCanto(vigia)?.key)
+        val registrico = listOf(
+            SpanishCard("a", SpanishSuit.Oros, 1),
+            SpanishCard("b", SpanishSuit.Copas, 10),
+            SpanishCard("c", SpanishSuit.Espadas, 11),
+        )
+        assertEquals("registrico", game.detectCanto(registrico)?.key)
+    }
+
+    @Test
+    fun `caida deals four delivery cards and three cards per player`() {
+        val game = CaidaGame(playerCount = 4, seed = 21)
+        val state = game.newMatch()
+        assertEquals(CaidaPhase.Entrega, state.phase)
+        assertEquals(40, state.deck.size)
+        val result = game.deliver(state)
+        assertEquals(null, result.error)
+        assertEquals(CaidaPhase.Play, result.state.phase)
+        assertEquals(4, result.state.delivery?.cards?.size)
+        assertTrue(result.state.hands.all { it.size == 3 })
+        assertEquals(24, result.state.deck.size)
+    }
+
+    @Test
+    fun `caida captures the matching table card and everything above it`() {
+        val game = CaidaGame(playerCount = 2, seed = 22)
+        val base = game.newMatch()
+        val seven = SpanishCard("mine", SpanishSuit.Oros, 7)
+        val tableSeven = SpanishCard("table", SpanishSuit.Copas, 7)
+        val top = SpanishCard("top", SpanishSuit.Espadas, 3)
+        val state = base.copy(
+            phase = CaidaPhase.Play,
+            turn = 0,
+            hands = listOf(listOf(seven, SpanishCard("other", SpanishSuit.Bastos, 2)), emptyList()),
+            table = listOf(tableSeven, top),
+            deck = emptyList(),
+            scores = listOf(0, 0),
+        )
+        val result = game.playCard(state, "mine")
+        assertEquals(null, result.error)
+        assertEquals(6, result.state.scores[0])
+        assertTrue(result.state.table.isEmpty())
+        assertTrue(result.state.lastCapture?.mesa == true)
+    }
+
+    @Test
+    fun `caida claims a canto before playing`() {
+        val game = CaidaGame(playerCount = 2, seed = 23)
+        val base = game.newMatch()
+        val hand = listOf(
+            SpanishCard("a", SpanishSuit.Oros, 4),
+            SpanishCard("b", SpanishSuit.Copas, 4),
+            SpanishCard("c", SpanishSuit.Espadas, 4),
+        )
+        val state = base.copy(
+            phase = CaidaPhase.Play,
+            turn = 0,
+            hands = listOf(hand, emptyList()),
+        )
+        val result = game.claimCanto(state)
+        assertEquals(null, result.error)
+        assertEquals(3, result.state.scores[0])
+        assertEquals(1, result.state.claimedHands[0].size)
+    }
+
+    @Test
+    fun `caida bot delivers or plays`() {
+        val game = CaidaGame(playerCount = 4, seed = 24)
+        val state = game.newMatch().copy(dealer = 1, turn = 2)
+        assertEquals(CaidaAction.Deliver, game.botAction(state))
+    }
+
+    @Test
+    fun `furia deck has one hundred eight unique cards`() {
+        val deck = FuriaGame.deck()
+        assertEquals(108, deck.size)
+        assertEquals(108, deck.map { it.id }.toSet().size)
+        assertEquals(50, FuriaGame.cardPoints(deck.first { it.action == FuriaAction.Wild }))
+    }
+
+    @Test
+    fun `furia deals seven cards and starts with a non wild`() {
+        val game = FuriaGame(playerCount = 4, seed = 25)
+        val state = game.newMatch()
+        assertEquals(4, state.seats.size)
+        assertTrue(state.hands.all { it.size == 7 })
+        assertEquals(1, state.discard.size)
+        assertTrue(state.discard.first().action != FuriaAction.Wild)
+    }
+
+    @Test
+    fun `furia matches color rank and wild`() {
+        val game = FuriaGame(playerCount = 2, seed = 26)
+        val base = game.newMatch()
+        val redTop = FuriaCard("top", FuriaSuit.Magma, 5)
+        val state = base.copy(discard = listOf(redTop), color = FuriaSuit.Magma)
+        assertTrue(game.canPlayOn(FuriaCard("red", FuriaSuit.Magma, 9), state))
+        assertTrue(game.canPlayOn(FuriaCard("five", FuriaSuit.Sol, 5), state))
+        assertTrue(game.canPlayOn(FuriaCard("wild", FuriaSuit.Wild, -1, FuriaAction.Wild), state))
+        assertTrue(!game.canPlayOn(FuriaCard("blue", FuriaSuit.Mar, 9), state))
+    }
+
+    @Test
+    fun `furia playing a matching number changes the active color`() {
+        val game = FuriaGame(playerCount = 2, seed = 29)
+        val base = game.newMatch()
+        val redNine = FuriaCard("red-nine", FuriaSuit.Magma, 9)
+        val state = base.copy(
+            phase = FuriaPhase.Play,
+            turn = 0,
+            hands = listOf(listOf(redNine, FuriaCard("extra", FuriaSuit.Sol, 2)), listOf(FuriaCard("other", FuriaSuit.Sol, 1))),
+            discard = listOf(FuriaCard("top", FuriaSuit.Selva, 9)),
+            color = FuriaSuit.Selva,
+        )
+        val result = game.play(state, "red-nine")
+        assertEquals(null, result.error)
+        assertEquals(FuriaSuit.Magma, result.state.color)
+    }
+
+    @Test
+    fun `furia wild requires a color and changes it`() {
+        val game = FuriaGame(playerCount = 2, seed = 27)
+        val base = game.newMatch()
+        val wild = FuriaCard("wild", FuriaSuit.Wild, -1, FuriaAction.Wild)
+        val state = base.copy(
+            phase = FuriaPhase.Play,
+            turn = 0,
+            hands = listOf(listOf(wild), listOf(FuriaCard("other", FuriaSuit.Sol, 1))),
+            discard = listOf(FuriaCard("top", FuriaSuit.Sol, 2)),
+            color = FuriaSuit.Sol,
+        )
+        assertNotNull(game.play(state, "wild", null).error)
+        val result = game.play(state, "wild", FuriaSuit.Mar)
+        assertEquals(null, result.error)
+        assertEquals(FuriaSuit.Mar, result.state.color)
+        assertEquals(FuriaPhase.MatchEnd, result.state.phase)
+    }
+
+    @Test
+    fun `furia bot returns an action`() {
+        val game = FuriaGame(playerCount = 4, seed = 28)
+        val state = game.newMatch().copy(turn = 1)
+        assertNotNull(game.botAction(state))
+    }
 }

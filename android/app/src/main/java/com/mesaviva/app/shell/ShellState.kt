@@ -27,6 +27,8 @@ enum class ShellScreen {
     Xiangqi,
     Chino,
     Dados,
+    Caida,
+    Furia,
     Room,
 }
 

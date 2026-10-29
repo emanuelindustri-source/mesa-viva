@@ -1,16 +1,28 @@
 # Roadmap
 
-## v1.2.0 · La mesa conectada (próxima)
+## v1.3.0 · La mesa conectada (próxima)
 
 - [ ] Salas nativas host/invitado para al menos dos juegos Compose, con reconexión visible.
-- [ ] Caída, Furia de Colores y Póker 100 % Compose.
+- [ ] Póker 100 % Compose para cerrar la paridad.
 - [ ] Crónica nativa con PDF y replays con semilla.
-- [ ] Accesibilidad completa: lector de pantalla, teclado y tamaños de texto.
-- [ ] Prueba en teléfono físico, LAN real, AAB y checklist de Play Store.
+- [ ] Accesibilidad completa, audio nativo y localización de historiales.
+- [ ] Teléfono físico, LAN real, AAB y checklist de Play Store.
 - [ ] Gradle 8.14.4+, perfil de rendimiento y arranque en frío.
 - [ ] Retirada del WebView al completar la paridad de los 15 juegos.
 
-## v1.1.0 · La mesa crece (actual)
+## v1.2.0 · La mesa completa (actual)
+
+- [x] Caída y Furia de Colores nativas en Compose.
+- [x] Baraja española y baraja de colores dibujadas, con partículas de polvo.
+- [x] 14 juegos 100 % Compose; Póker sigue en WebView.
+- [x] 48 pruebas Kotlin + 30 web = **78**.
+- [x] APK y AAB de release firmados; Caída y Furia verificadas en emulador Android 14.
+- [x] Evidencia visual en `docs/evidence/v1.2.0/`.
+- [ ] Salas nativas y Póker nativo (v1.3.0).
+- [ ] Teléfono físico bloqueado por MIUI.
+- [ ] Accesibilidad, PDF/replays y audio nativo.
+
+## v1.1.0 · La mesa crece
 
 - [x] Damas, Dados, Go, Jungle, Xiangqi y Damas Chinas nativos en Compose.
 - [x] Doce juegos 100 % Compose; Caída, Furia y Póker siguen en la mesa web.

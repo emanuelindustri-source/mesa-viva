@@ -2,7 +2,7 @@
 
 **Mesa Viva** es una aplicación de juegos de cartas y mesa con alma venezolana. Funciona sin conexión para jugar solo, contra bots o pasando el teléfono; y tiene salas en línea con código y QR para jugar con amigos. La web y el APK Android comparten el mismo motor de juego.
 
-> Estado actual: **v1.1.0**. Quince juegos jugables, Póker Texas Hold'em sin dinero real y **doce juegos 100 % Jetpack Compose**: Serpientes y Escaleras, Dominó, Ajedrez, Ludo, Mancala, Backgammon, **Damas**, **Dados Mentirosos**, **Go**, **Jungle**, **Xiangqi** y **Damas Chinas**. La cáscara nativa suma **Sala de juegos con QR** y sincroniza idioma y preferencias con la mesa web. Android 16 (API 36), APK/AAB firmados y PWA offline.
+> Estado actual: **v1.2.0**. Quince juegos jugables, Póker Texas Hold'em sin dinero real y **catorce juegos 100 % Jetpack Compose**: Serpientes y Escaleras, Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados Mentirosos, Go, Jungle, Xiangqi, Damas Chinas, **Caída** y **Furia de Colores**. La cáscara nativa suma **Sala de juegos con QR** y sincroniza idioma y preferencias con la mesa web. Android 16 (API 36), APK/AAB firmados y PWA offline.
 
 ---
 
@@ -21,8 +21,8 @@
 - **Jungle nativo (Compose)**: río, trampas, guaridas, rata/elefante y saltos de tigre y león.
 - **Xiangqi nativo (Compose)**: palacio, río, caballo bloqueado, cañón, soldados, generales enfrentados y bot alfa-beta.
 - **Damas Chinas nativo (Compose)**: estrella de 121 hoyos para 2–6 jugadores, saltos encadenados y meta opuesta.
-- **Caída** venezolana: entrega de mesa, cantos (ronda, trivilín, patrulla, vigía, registro, registrico, casa chica y casa grande), caídas, mesa limpia, parejas y meta de 24 puntos.
-- **Furia de Colores**: homenaje original a los juegos de combinar colores, con comodines, rebote, bloqueo y grito de “¡Última!”.
+- **Caída nativa (Compose)**: baraja española de 40 cartas dibujada, entrega de mesa, cantos (ronda, trivilín, patrulla, vigía, registro, registrico, casa chica y casa grande), caídas, mesa limpia, parejas, meta 40/70/100 y bots.
+- **Furia de Colores nativa (Compose)**: homenaje original a los juegos de combinar colores, con 108 naipes, comodines, rebote, bloqueo, roba dos/cuatro y grito de “¡Última!”.
 - **Dominó** doble 6 y doble 12, parejas, pozo, tranca y meta configurable.
 - **Dados Mentirosos**: cubiletes, pujas, “Dudo”, revelación y eliminación.
 - **Ajedrez** completo (enroque, al paso, promoción, jaque mate, ahogado, 50 movimientos, repetición, material insuficiente) con IA alfa-beta.
@@ -39,7 +39,7 @@
 - **Crónica de partida**: últimos 5 movimientos visibles, historial completo, descarga PDF con infografía.
 - **Temas**: Halloween criollo (El Silbón, La Sayona, El Hachero), Navidad, Reyes, Carnaval, San Valentín, San Patricio, Semana Santa, Cruz de Mayo, Corpus Christi, independencia por país y mesa neutral. El acento puede venir de la temporada, del sistema (Material You en Android) o del color dominante del fondo de pantalla.
 - **Idiomas**: español, inglés, portugués de Brasil, portugués de Portugal, alemán, ruso, italiano, francés, chino tradicional, chino simplificado y japonés.
-- **Android**: cáscara nativa en **Jetpack Compose** (Material 3, color dinámico/festividad, inicio, catálogo, niveles, ajustes, sala y navegación), **doce juegos nativos** (Serpientes, Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados, Go, Jungle, Xiangqi y Damas Chinas), y mesa compartida en `GameWebActivity` con `WebViewAssetLoader`. El idioma y las preferencias de la cáscara viajan a la web; el perfil vuelve con `ShellSync`. Target Android 16 (API 36), edge-to-edge con insets, back predictivo, APK de release firmado, vibración, sensores para agitar/“lanzar” el teléfono, cámara para QR y guardado de PDF en Descargas.
+- **Android**: cáscara nativa en **Jetpack Compose** (Material 3, color dinámico/festividad, inicio, catálogo, niveles, ajustes, sala y navegación), **catorce juegos nativos** (Serpientes, Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados, Go, Jungle, Xiangqi, Damas Chinas, Caída y Furia), y mesa compartida en `GameWebActivity` con `WebViewAssetLoader`. Solo Póker sigue en la capa web. El idioma y las preferencias de la cáscara viajan a la web; el perfil vuelve con `ShellSync`. Target Android 16 (API 36), edge-to-edge con insets, back predictivo, APK de release firmado, vibración, sensores para agitar/“lanzar” el teléfono, cámara para QR y guardado de PDF en Descargas.
 - **Privacidad**: sin cuentas, sin anuncios, sin rastreo. Las partidas locales se quedan en el dispositivo. El diagnóstico se envía solo si tú abres el correo.
 - **PWA**: instalable, service worker y funcionamiento offline.
 
@@ -137,7 +137,7 @@ npm run test:relay            # requiere npm run rooms en otra terminal
 python tools/check_i18n.py   # claves usadas vs. catálogo español
 ```
 
-- 30 pruebas de motores web + 36 pruebas de motores nativos Kotlin (Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados, Go, Jungle, Xiangqi y Damas Chinas). **66 en total**.
+- 30 pruebas de motores web + 48 pruebas de motores nativos Kotlin (Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados, Go, Jungle, Xiangqi, Damas Chinas, Caída y Furia). **78 en total**.
 - TypeScript estricto, sin `any` en la capa de motores.
 - Motor determinista con semilla reproducible.
 - Host autoritativo en red; los clientes solo reciben su vista redactada.
@@ -158,7 +158,7 @@ src/theme/       festividades, Semana Santa/Carnaval, paletas y Material You
 src/i18n/        catálogos y formateo de crónicas
 src/audio/       música generativa y SFX sintetizados
 src/services/    diagnóstico, sensores, háptica, PDF, QR, PWA
-android/         app Android (Compose nativo + 12 juegos Kotlin + GameWebActivity + relay LAN)
+android/         app Android (Compose nativo + 14 juegos Kotlin + GameWebActivity + relay LAN)
 server/          relay de salas (Node + ws)
 docs/            arquitectura, roadmap, privacidad y seguridad
 ```

@@ -1,4 +1,40 @@
-# Changelog
+﻿# Changelog
+
+## 1.2.0 · 2026-10-29
+
+La mesa completa.
+
+### Añadido
+
+- **Caída nativa en Compose**: baraja española de 40 cartas dibujada, entrega de 4, cantos, caídas, mesa limpia, parejas, meta 40/70/100, conteo de cartas y bots.
+- **Furia de Colores nativa en Compose**: 108 naipes originales, comodines, salto, reversa, roba dos, roba cuatro, ¡Última!, elección de color y bots.
+- `CardUi.kt`: baraja española, baraja Furia, reversos, etiquetas y partículas de polvo.
+- Modo “pasar el teléfono” con mano oculta y botón **Ver mi mano**.
+- 12 pruebas Kotlin nuevas; **78 pruebas en total** (30 web + 48 nativas).
+- Evidencia visual en `docs/evidence/v1.2.0/`.
+
+### Cambiado
+
+- Android: `versionCode=14`, `versionName=1.2.0`.
+- El inicio y el catálogo pasan a **14 juegos 100 % Compose**; solo Póker sigue en WebView.
+- Se corrigió el color activo de Furia al jugar una carta de otro color que coincide en número o acción, en Kotlin y en la mesa web.
+- La web se compila con Vite 6.4.5 y se sincroniza dentro del APK.
+
+### Corregido
+
+- Caída permite entregar, cantar antes de jugar, encadenar capturas y contar cartas al final de la mano.
+- Furia cambia el color activo al jugar una carta de otro color y exige color en los comodines.
+- Las manos de los bots no se muestran en Furia; la mano del jugador permanece visible.
+- La baraja española distingue oros, copas, espadas y bastos con sota, caballo y rey.
+- El tablero de Caída muestra el mazo, la mesa, la entrega, las capturas y el historial de cinco jugadas.
+
+### Pendiente
+
+- Salas nativas para los juegos Compose y reconexión.
+- Póker 100 % Compose.
+- Crónica nativa con PDF y replays con semilla.
+- Accesibilidad completa, audio nativo y prueba en teléfono físico.
+- Gradle 8.14.4+ y perfil de rendimiento.
 
 ## 1.1.0 · 2026-10-28
 
@@ -316,3 +352,4 @@ Primera mesa funcional.
 - El catálogo muestra 30 juegos con su estado; los jugables son los 8 anteriores.
 - El APK de CI es de depuración; la firma de release se documenta en `docs/DEPLOY.md`.
 - Reglas de juegos tradicionales adaptadas y documentadas como variante Mesa Viva.
+

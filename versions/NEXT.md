@@ -4,67 +4,71 @@
 
 ## Estado actual
 
-- **Versión publicada:** 1.1.0.
+- **Versión publicada:** 1.2.0.
 - **Juegos jugables:** 15.
-- **Juegos 100 % Compose:** 12 (Serpientes, Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados, Go, Jungle, Xiangqi y Damas Chinas).
-- **Juegos en WebView:** 3 (Caída, Furia de Colores y Póker).
+- **Juegos 100 % Compose:** 14 (Serpientes, Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados, Go, Jungle, Xiangqi, Damas Chinas, Caída y Furia de Colores).
+- **Juegos en WebView:** 1 (Póker).
 - **Repositorio:** <https://github.com/emanuelindustri-source/mesa-viva>
 - **Portada:** <https://emanuelindustri-source.github.io/mesa-viva/>
 - **Juego web:** <https://emanuelindustri-source.github.io/mesa-viva/play/>
-- **Release:** <https://github.com/emanuelindustri-source/mesa-viva/releases/tag/v1.1.0>
-- **VERSION:** `1.1.0`
-- **Android:** `versionCode=13`, `versionName=1.1.0`, compileSdk/targetSdk 36.
+- **Release:** <https://github.com/emanuelindustri-source/mesa-viva/releases/tag/v1.2.0>
+- **VERSION:** `1.2.0`
+- **Android:** `versionCode=14`, `versionName=1.2.0`, compileSdk/targetSdk 36.
 
 ### Calidad
 
 - 30/30 pruebas de motores web.
-- 36/36 pruebas Kotlin (Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados, Go, Jungle, Xiangqi y Damas Chinas).
-- **66 pruebas en total.**
+- 48/48 pruebas Kotlin (Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados, Go, Jungle, Xiangqi, Damas Chinas, Caída y Furia).
+- **78 pruebas en total.**
 - TypeScript sin errores.
-- Web compilada con Vite 6.4.5.
+- Web compilada con Vite 6.4.5 y sincronizada dentro del APK.
 - APK debug, APK release firmado y AAB release firmado.
-- Emulador Android 14: inicio, Damas, Go, Jungle, Xiangqi, Damas Chinas, Dados, movimientos, revelación y diálogos verificados.
-- Teléfono real `23117RA68G`: no detectado por `adb` en esta sesión. Sigue pendiente “Instalar vía USB” de MIUI.
+- Emulador Android 14: inicio, Caída (entrega, mano, table, jugadas, bots), Furia (mano, jugadas, robo, bots), Damas, Go, Jungle, Xiangqi, Damas Chinas y Dados verificados.
+- Teléfono real `23117RA68G`: detectado por `adb`, pero MIUI bloqueó la instalación por USB (“Instalación bloqueada de Mesa Viva vía USB”). Pendiente habilitar **Instalar vía USB** en Opciones de desarrollador.
 
-### Checksums v1.1.0
+### Checksums v1.2.0
 
-- APK release firmado: `7B66158DDA81F0F71BD63F7ABD54CCFD66045681083F7BE8B4435D502834AE94` · 10.167.061 bytes.
-- AAB release firmado: `C159BE20DBA2045B44FB76C3E87CE0A89CB112FA62FD35A13667A0BCAF5CFC24` · 9.805.620 bytes.
-- APK debug de CI: `98CB8E8C1054005D77BA7C787FC474F779CF17B13AB67E31C2EDDC3EA144FD24` · 13.469.150 bytes.
-- Artefactos locales en `artifacts/`: `mesa-viva-1.1.0-release.apk`, `mesa-viva-1.1.0-release.aab`.
+- APK release firmado: `0E4A075680A0D886FEF3DE9C6593FECCC5C8FE2B4D3562B50983B6DA7454FD37` · 10.265.373 bytes.
+- AAB release firmado: `CAD939E0CA80122EF5597E7E0C2E9B68924D14F15AA51460EBE5BA4FC9213906` · 9.907.089 bytes.
+- Artefactos locales en `artifacts/`: `mesa-viva-1.2.0-release.apk`, `mesa-viva-1.2.0-release.aab`.
+- El APK de depuración de CI se añade al tag `v1.2.0`.
 
 ## Compose
 
 - **Cáscara nativa completa:** inicio, catálogo, niveles, ajustes, sala y navegación.
-- **Doce juegos 100 % Compose:** los seis de v1.0.0 más Damas, Dados, Go, Jungle, Xiangqi y Damas Chinas.
+- **Catorce juegos 100 % Compose:** los doce de v1.1.0 más Caída y Furia de Colores.
+- **Caída:** baraja española dibujada, entrega, cantos, caídas, mesa limpia, parejas, meta y bots.
+- **Furia:** 108 naipes, comodines, saltos, reversas, roba dos/cuatro, ¡Última! y bots.
 - **Sala nativa:** crear/unirse, QR local ZXing, escaneo y selector de ronda.
 - **Sincronización:** la cáscara pasa idioma/música/efectos/vibración/movimiento a la web; `ShellSync` devuelve el perfil.
-- **Pendiente:** salas nativas, Caída/Furia/Póker nativos, PDF/replays nativos y retirada del WebView.
+- **Pendiente:** salas nativas, Póker nativo, PDF/replays nativos, audio nativo y retirada del WebView.
 
-## Siguiente versión: 1.2.0
+## Siguiente versión: 1.3.0
 
-Ver [`v1.2.0.md`](./v1.2.0.md). Incluye:
+Ver [`v1.3.0.md`](./v1.3.0.md). Incluye:
 
 1. Salas nativas host/invitado y reconexión.
-2. Caída, Furia y Póker nativos hasta la paridad total.
+2. Póker 100 % Compose para cerrar la paridad.
 3. Crónica nativa con PDF y replays con semilla.
-4. Accesibilidad completa y prueba en teléfono físico.
-5. Gradle 8.14.4+, perfil de rendimiento y checklist de tienda.
-6. Retirada progresiva del WebView.
+4. Accesibilidad completa y audio nativo por juego.
+5. Teléfono físico, LAN real y checklist de tienda.
+6. Gradle 8.14.4+ y perfil de rendimiento.
+7. Retirada del WebView al cerrar la paridad total.
 
 ## Dónde está cada cosa
 
 | Ruta | Contenido |
 |---|---|
 | `src/games/` | 15 motores web, incluido `poker.ts` |
-| `src/ui/GameSurface.tsx` | Superficies web, incluida `PokerSurface` |
+| `src/ui/GameSurface.tsx` | Superficies web, incluidas Caída, Furia y Póker |
 | `src/core/` | Tipos, registro, Match autoritativo, niveles |
 | `src/net/room.ts` | Salas, host/invitado y reconexión |
 | `server/room-server.mjs` | Relay Node |
 | `android/.../MainActivity.kt` | Cáscara Compose |
 | `android/.../GameWebActivity.kt` | Mesa compartida WebView + puentes + params nativos |
-| `android/.../games/` | Motores Kotlin: Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados, Go, Jungle, Xiangqi y Damas Chinas |
-| `android/.../shell/` | Estado, textos, tema, pantallas, sala, QR y las doce mesas |
+| `android/.../games/` | Motores Kotlin: Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados, Go, Jungle, Xiangqi, Damas Chinas, Caída y Furia |
+| `android/.../shell/` | Estado, textos, tema, pantallas, sala, QR y las catorce mesas |
+| `android/.../shell/CardUi.kt` | Barajas española y Furia, reversos y partículas |
 | `landing/` | Portada estática con historial de versiones |
 | `tools/build-pages.mjs` | Portada + juego en `dist-site/` |
 | `versions/` | Evidencia inmutable por versión |

@@ -77,6 +77,8 @@ fun MesaVivaApp(
         ShellScreen.Xiangqi,
         ShellScreen.Chino,
         ShellScreen.Dados,
+        ShellScreen.Caida,
+        ShellScreen.Furia,
     )
     Scaffold(
         containerColor = Color.Transparent,
@@ -120,6 +122,8 @@ fun MesaVivaApp(
                     "xiangqi" -> ShellScreen.Xiangqi
                     "chino" -> ShellScreen.Chino
                     "dados" -> ShellScreen.Dados
+                    "caida" -> ShellScreen.Caida
+                    "furia" -> ShellScreen.Furia
                     else -> ShellScreen.Catalog
                 }
             }
@@ -142,6 +146,8 @@ fun MesaVivaApp(
                     ShellScreen.Xiangqi -> XiangqiScreen(state) { state.screen = ShellScreen.Home }
                     ShellScreen.Chino -> ChinoScreen(state) { state.screen = ShellScreen.Home }
                     ShellScreen.Dados -> DadosScreen(state) { state.screen = ShellScreen.Home }
+                    ShellScreen.Caida -> CaidaScreen(state) { state.screen = ShellScreen.Home }
+                    ShellScreen.Furia -> FuriaScreen(state) { state.screen = ShellScreen.Home }
                 }
             }
         }
@@ -181,8 +187,8 @@ private fun HomeScreen(
                     QuickCard("♠️", state.t("home.poker"), state.t("home.pokerDesc"), Modifier.weight(1f)) {
                         onOpenWeb("/setup/poker")
                     }
-                    QuickCard("🃏", state.t("game.caida.name"), state.t("home.caidaDesc"), Modifier.weight(1f)) {
-                        onOpenWeb("/setup/caida")
+                    QuickCard("🎨", state.t("furia.title"), state.t("furia.subtitle"), Modifier.weight(1f)) {
+                        onNative("furia")
                     }
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -244,6 +250,14 @@ private fun HomeScreen(
                     }
                     QuickCard("🎲", state.t("dados.title"), state.t("dados.subtitle"), Modifier.weight(1f)) {
                         onNative("dados")
+                    }
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    QuickCard("🃏", state.t("caida.title"), state.t("caida.subtitle"), Modifier.weight(1f)) {
+                        onNative("caida")
+                    }
+                    QuickCard("🎨", state.t("furia.title"), state.t("furia.subtitle"), Modifier.weight(1f)) {
+                        onNative("furia")
                     }
                 }
             }
