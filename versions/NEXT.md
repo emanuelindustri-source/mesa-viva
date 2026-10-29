@@ -60,7 +60,8 @@
 Ver [`v1.8.0.md`](./v1.8.0.md). Incluye:
 
 1. Ludo y Damas Chinas nativos de 3–6 jugadores.
-2. Relay público con TLS, límites y enlaces universales.
+2. Dominó por parejas y meta configurable en sala.
+3. Relay público con TLS, límites y enlaces universales.
 3. Replay web de Póker, Caída y Furia.
 4. Accesibilidad completa en las quince mesas.
 5. Teléfono físico y checklist de Play Store.
