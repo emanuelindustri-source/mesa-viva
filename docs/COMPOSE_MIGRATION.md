@@ -58,7 +58,8 @@ Es un proyecto de varias versiones, no un commit.
 - [x] Historial completo y últimas cinco jugadas en las nuevas mesas.
 - [x] Caída y Furia de Colores nativos con barajas dibujadas.
 - [x] Póker nativo con ciegas, calles, botes laterales y showdown.
-- [ ] Mesa compartida, chat y salas nativas (v1.4.0).
+- [x] Mesa compartida, chat y salas nativas LAN para Damas y Mancala (v1.5.0).
+- [ ] Salas nativas de 3–8 jugadores y relay online (v1.6.0).
 
 ### Fase 4 · Retirada del WebView
 
