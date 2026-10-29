@@ -71,6 +71,12 @@ fun MesaVivaApp(
         ShellScreen.Ludo,
         ShellScreen.Mancala,
         ShellScreen.Backgammon,
+        ShellScreen.Damas,
+        ShellScreen.Go,
+        ShellScreen.Jungle,
+        ShellScreen.Xiangqi,
+        ShellScreen.Chino,
+        ShellScreen.Dados,
     )
     Scaffold(
         containerColor = Color.Transparent,
@@ -108,6 +114,12 @@ fun MesaVivaApp(
                     "ludo" -> ShellScreen.Ludo
                     "mancala" -> ShellScreen.Mancala
                     "backgammon" -> ShellScreen.Backgammon
+                    "damas" -> ShellScreen.Damas
+                    "go" -> ShellScreen.Go
+                    "jungle" -> ShellScreen.Jungle
+                    "xiangqi" -> ShellScreen.Xiangqi
+                    "chino" -> ShellScreen.Chino
+                    "dados" -> ShellScreen.Dados
                     else -> ShellScreen.Catalog
                 }
             }
@@ -124,6 +136,12 @@ fun MesaVivaApp(
                     ShellScreen.Ludo -> LudoScreen(state) { state.screen = ShellScreen.Home }
                     ShellScreen.Mancala -> MancalaScreen(state) { state.screen = ShellScreen.Home }
                     ShellScreen.Backgammon -> BackgammonScreen(state) { state.screen = ShellScreen.Home }
+                    ShellScreen.Damas -> DamasScreen(state) { state.screen = ShellScreen.Home }
+                    ShellScreen.Go -> GoScreen(state) { state.screen = ShellScreen.Home }
+                    ShellScreen.Jungle -> JungleScreen(state) { state.screen = ShellScreen.Home }
+                    ShellScreen.Xiangqi -> XiangqiScreen(state) { state.screen = ShellScreen.Home }
+                    ShellScreen.Chino -> ChinoScreen(state) { state.screen = ShellScreen.Home }
+                    ShellScreen.Dados -> DadosScreen(state) { state.screen = ShellScreen.Home }
                 }
             }
         }
@@ -202,6 +220,30 @@ private fun HomeScreen(
                     }
                     QuickCard("🐍", state.t("home.native"), state.t("snakes.subtitle"), Modifier.weight(1f)) {
                         onNative("serpientes")
+                    }
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    QuickCard("⛀", state.t("damas.title"), state.t("damas.subtitle"), Modifier.weight(1f)) {
+                        onNative("damas")
+                    }
+                    QuickCard("⚫", state.t("go.title"), state.t("go.subtitle"), Modifier.weight(1f)) {
+                        onNative("go")
+                    }
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    QuickCard("🐯", state.t("jungle.title"), state.t("jungle.subtitle"), Modifier.weight(1f)) {
+                        onNative("jungle")
+                    }
+                    QuickCard("🀄", state.t("xiangqi.title"), state.t("xiangqi.subtitle"), Modifier.weight(1f)) {
+                        onNative("xiangqi")
+                    }
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    QuickCard("✳️", state.t("chino.title"), state.t("chino.subtitle"), Modifier.weight(1f)) {
+                        onNative("chino")
+                    }
+                    QuickCard("🎲", state.t("dados.title"), state.t("dados.subtitle"), Modifier.weight(1f)) {
+                        onNative("dados")
                     }
                 }
             }
@@ -385,9 +427,9 @@ private fun NewsCard(state: ShellState) {
     ) {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(state.t("home.news"), style = MaterialTheme.typography.titleMedium)
-            NewsRow("🎯", state.t("home.newsDomino"))
-            NewsRow("🫘", state.t("home.newsChess"))
-            NewsRow("🎲", state.t("home.newsRoom"))
+            NewsRow("⚫", state.t("home.newsDomino"))
+            NewsRow("🀄", state.t("home.newsChess"))
+            NewsRow("✳️", state.t("home.newsRoom"))
         }
     }
 }

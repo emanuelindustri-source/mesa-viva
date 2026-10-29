@@ -21,6 +21,12 @@ enum class ShellScreen {
     Ludo,
     Mancala,
     Backgammon,
+    Damas,
+    Go,
+    Jungle,
+    Xiangqi,
+    Chino,
+    Dados,
     Room,
 }
 

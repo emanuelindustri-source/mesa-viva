@@ -1,6 +1,28 @@
 # Roadmap
 
-## v1.0.0 · La mesa completa (actual)
+## v1.2.0 · La mesa conectada (próxima)
+
+- [ ] Salas nativas host/invitado para al menos dos juegos Compose, con reconexión visible.
+- [ ] Caída, Furia de Colores y Póker 100 % Compose.
+- [ ] Crónica nativa con PDF y replays con semilla.
+- [ ] Accesibilidad completa: lector de pantalla, teclado y tamaños de texto.
+- [ ] Prueba en teléfono físico, LAN real, AAB y checklist de Play Store.
+- [ ] Gradle 8.14.4+, perfil de rendimiento y arranque en frío.
+- [ ] Retirada del WebView al completar la paridad de los 15 juegos.
+
+## v1.1.0 · La mesa crece (actual)
+
+- [x] Damas, Dados, Go, Jungle, Xiangqi y Damas Chinas nativos en Compose.
+- [x] Doce juegos 100 % Compose; Caída, Furia y Póker siguen en la mesa web.
+- [x] Historial completo y últimas cinco jugadas en las nuevas mesas.
+- [x] 36 pruebas Kotlin + 30 web = **66**.
+- [x] APK y AAB de release firmados; pantallas nuevas verificadas en emulador Android 14.
+- [x] Evidencia visual en `docs/evidence/v1.1.0/`.
+- [ ] Salas nativas y reconexión (v1.2.0).
+- [ ] Prueba en teléfono físico.
+- [ ] Accesibilidad avanzada y checklist de tienda.
+
+## v1.0.0 · La mesa completa
 
 - [x] Ludo nativo en Compose: 2–4 jugadores, cuatro fichas, capturas, casillas seguras, turno extra y meta exacta.
 - [x] Mancala nativo en Compose: siembra, captura, turno extra y bots.
@@ -127,15 +149,6 @@ Pulido de onboarding, cartas/fichas, coordenadas de tablero y CI Android. La bas
 - [x] APK Android con puentes nativos.
 - [x] Diagnóstico y envío por correo.
 - [x] PWA instalable y offline.
-
-## v1.1.0 · La mesa conectada
-
-- [ ] Salas nativas para los seis juegos Compose y reconexión visible.
-- [ ] Reproducción de partidas con semilla.
-- [ ] Accesibilidad: lector de pantalla completo, control por teclado y tamaños de texto.
-- [ ] Prueba en teléfono físico y publicación del APK/AAB.
-- [ ] Mahjong americano, Riichi y Mahjong con naipes.
-- [ ] Retirada progresiva del WebView hasta la paridad total.
 
 ## v0.4.0 · La fiesta completa (histórico)
 

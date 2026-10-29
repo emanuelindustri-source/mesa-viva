@@ -40,10 +40,14 @@ jobs:
           VITE_ROOM_WS_URL: ${{ vars.VITE_ROOM_WS_URL }}
       - name: Sincronizar assets
         run: npm run android:sync
-      - name: Compilar APK
+      - name: Pruebas Kotlin
         working-directory: android
         run: |
           chmod +x gradlew
+          ./gradlew testDebugUnitTest --no-daemon
+      - name: Compilar APK
+        working-directory: android
+        run: |
           ./gradlew assembleDebug --no-daemon
       - name: Renombrar APK
         run: |

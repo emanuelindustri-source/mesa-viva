@@ -4,51 +4,52 @@
 
 ## Estado actual
 
-- **Versión publicada:** 1.0.0.
+- **Versión publicada:** 1.1.0.
 - **Juegos jugables:** 15.
-- **Juegos 100 % Compose:** 6 (Serpientes y Escaleras, Dominó, Ajedrez, Ludo, Mancala y Backgammon).
+- **Juegos 100 % Compose:** 12 (Serpientes, Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados, Go, Jungle, Xiangqi y Damas Chinas).
+- **Juegos en WebView:** 3 (Caída, Furia de Colores y Póker).
 - **Repositorio:** <https://github.com/emanuelindustri-source/mesa-viva>
 - **Portada:** <https://emanuelindustri-source.github.io/mesa-viva/>
 - **Juego web:** <https://emanuelindustri-source.github.io/mesa-viva/play/>
-- **Release:** <https://github.com/emanuelindustri-source/mesa-viva/releases/tag/v1.0.0>
-- **VERSION:** `1.0.0`
-- **Android:** `versionCode=12`, `versionName=1.0.0`, compileSdk/targetSdk 36.
+- **Release:** <https://github.com/emanuelindustri-source/mesa-viva/releases/tag/v1.1.0>
+- **VERSION:** `1.1.0`
+- **Android:** `versionCode=13`, `versionName=1.1.0`, compileSdk/targetSdk 36.
 
 ### Calidad
 
 - 30/30 pruebas de motores web.
-- 17/17 pruebas Kotlin (Dominó, Ajedrez, Ludo, Mancala y Backgammon).
-- **47 pruebas en total.**
+- 36/36 pruebas Kotlin (Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados, Go, Jungle, Xiangqi y Damas Chinas).
+- **66 pruebas en total.**
 - TypeScript sin errores.
 - Web compilada con Vite 6.4.5.
 - APK debug, APK release firmado y AAB release firmado.
-- Emulador Android 14: Home, Ludo, Mancala, Backgammon, Sala, QR y WebView verificados.
-- Teléfono real `23117RA68G`: no estaba conectado. Sigue pendiente “Instalar vía USB” de MIUI.
+- Emulador Android 14: inicio, Damas, Go, Jungle, Xiangqi, Damas Chinas, Dados, movimientos, revelación y diálogos verificados.
+- Teléfono real `23117RA68G`: no detectado por `adb` en esta sesión. Sigue pendiente “Instalar vía USB” de MIUI.
 
-### Checksums v1.0.0
+### Checksums v1.1.0
 
-- APK release firmado: `33E57917714D7B9EEBA3D480ECA3DC00C25CEED9E618162554C58D0477EF8B5D` · 9.970.453 bytes.
-- APK debug (CI): `10CF5856C62933504DAE1B5A3E67EF4301CBC13CCFC07CD0F56D49EAD007DE1D` · 13.157.858 bytes.
-- AAB release firmado: `9EF6ADEA05D066EC2BDCE2164C77F5D44E3610B09510A65EC9170616B8D17E49` · 9.609.022 bytes.
-- Artefactos locales en `artifacts/`: `mesa-viva-1.0.0-release.apk`, `mesa-viva-1.0.0-debug.apk`, `mesa-viva-1.0.0-release.aab`.
+- APK release firmado: `7B66158DDA81F0F71BD63F7ABD54CCFD66045681083F7BE8B4435D502834AE94` · 10.167.061 bytes.
+- AAB release firmado: `C159BE20DBA2045B44FB76C3E87CE0A89CB112FA62FD35A13667A0BCAF5CFC24` · 9.805.620 bytes.
+- Artefactos locales en `artifacts/`: `mesa-viva-1.1.0-release.apk`, `mesa-viva-1.1.0-release.aab`.
 
 ## Compose
 
 - **Cáscara nativa completa:** inicio, catálogo, niveles, ajustes, sala y navegación.
-- **Seis juegos 100 % Compose:** Serpientes, Dominó, Ajedrez, Ludo, Mancala y Backgammon.
+- **Doce juegos 100 % Compose:** los seis de v1.0.0 más Damas, Dados, Go, Jungle, Xiangqi y Damas Chinas.
 - **Sala nativa:** crear/unirse, QR local ZXing, escaneo y selector de ronda.
 - **Sincronización:** la cáscara pasa idioma/música/efectos/vibración/movimiento a la web; `ShellSync` devuelve el perfil.
-- **Pendiente:** salas nativas, 9 juegos restantes en WebView y retirada del WebView.
+- **Pendiente:** salas nativas, Caída/Furia/Póker nativos, PDF/replays nativos y retirada del WebView.
 
-## Siguiente versión: 1.1.0
+## Siguiente versión: 1.2.0
 
-Ver [`v1.1.0.md`](./v1.1.0.md). Incluye:
+Ver [`v1.2.0.md`](./v1.2.0.md). Incluye:
 
-1. Salas nativas para los seis juegos Compose.
-2. Caída, Furia, Dados, Damas, Go, Jungle, Xiangqi, Damas Chinas y Póker nativos.
-3. Prueba en teléfono físico, LAN y AAB.
-4. Accesibilidad, AAB y checklist de tienda.
-5. Retirada progresiva del WebView.
+1. Salas nativas host/invitado y reconexión.
+2. Caída, Furia y Póker nativos hasta la paridad total.
+3. Crónica nativa con PDF y replays con semilla.
+4. Accesibilidad completa y prueba en teléfono físico.
+5. Gradle 8.14.4+, perfil de rendimiento y checklist de tienda.
+6. Retirada progresiva del WebView.
 
 ## Dónde está cada cosa
 
@@ -61,8 +62,8 @@ Ver [`v1.1.0.md`](./v1.1.0.md). Incluye:
 | `server/room-server.mjs` | Relay Node |
 | `android/.../MainActivity.kt` | Cáscara Compose |
 | `android/.../GameWebActivity.kt` | Mesa compartida WebView + puentes + params nativos |
-| `android/.../games/` | Motores Kotlin: Dominó, Ajedrez, Ludo, Mancala y Backgammon |
-| `android/.../shell/` | Estado, textos, tema, pantallas, sala, QR y los seis juegos |
+| `android/.../games/` | Motores Kotlin: Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados, Go, Jungle, Xiangqi y Damas Chinas |
+| `android/.../shell/` | Estado, textos, tema, pantallas, sala, QR y las doce mesas |
 | `landing/` | Portada estática con historial de versiones |
 | `tools/build-pages.mjs` | Portada + juego en `dist-site/` |
 | `versions/` | Evidencia inmutable por versión |

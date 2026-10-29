@@ -11,23 +11,23 @@ data class ShellGame(
     val native: Boolean = false,
 )
 
-/** Catálogo de la cáscara. Los jugables abren la mesa web; Serpientes es nativo. */
+/** Catálogo de la cáscara. Doce juegos abren su mesa nativa; Caída, Furia y Póker usan la mesa web. */
 val SHELL_GAMES: List<ShellGame> = listOf(
     ShellGame("poker", "Póker de la casa", "♠️", "2–6", "cartas", "playable", "Texas Hold'em con fichas de práctica."),
     ShellGame("caida", "Caída", "🃏", "2–4", "cartas", "playable", "Cantos, caídas y mesa limpia."),
     ShellGame("furia", "Furia de Colores", "🎴", "2–4", "cartas", "playable", "Combina colores y grita ¡Última!"),
     ShellGame("domino", "Dominó", "🁫", "2–4", "tablero", "playable", "Doble 6, parejas y tranca. Nativo en Compose.", native = true),
-    ShellGame("dados", "Dados Mentirosos", "🎲", "2–6", "dados", "playable", "Cubiletes, pujas y mentiras."),
+    ShellGame("dados", "Dados Mentirosos", "🎲", "2–6", "dados", "playable", "Cubiletes, pujas y mentiras. Nativo en Compose.", native = true),
     ShellGame("ajedrez", "Ajedrez", "♟️", "2", "tablero", "playable", "Reglas completas e IA alfa-beta. Nativo en Compose.", native = true),
-    ShellGame("damas", "Damas", "⛀", "2", "tablero", "playable", "Captura obligatoria y coronación."),
+    ShellGame("damas", "Damas", "⛀", "2", "tablero", "playable", "Captura obligatoria y coronación. Nativo en Compose.", native = true),
     ShellGame("serpientes", "Serpientes y Escaleras", "🐍", "2–4", "tablero", "playable", "Tablero, dado y bots. Nativo en Compose.", native = true),
     ShellGame("mancala", "Mancala", "🫘", "2", "tablero", "playable", "Siembra, captura y repite turno. Nativo en Compose.", native = true),
-    ShellGame("go", "Go", "⚫", "2", "tablero", "playable", "9×9 y 13×13, capturas y ko."),
-    ShellGame("jungle", "Jungle", "🐯", "2", "tablero", "playable", "Río, trampas y saltos de tigre."),
+    ShellGame("go", "Go", "⚫", "2", "tablero", "playable", "9×9 y 13×13, capturas y ko. Nativo en Compose.", native = true),
+    ShellGame("jungle", "Jungle", "🐯", "2", "tablero", "playable", "Río, trampas y saltos de tigre. Nativo en Compose.", native = true),
     ShellGame("ludo", "Ludo", "🎯", "2–4", "tablero", "playable", "Cuatro fichas, capturas y meta exacta. Nativo en Compose.", native = true),
     ShellGame("backgammon", "Backgammon", "🎲", "2", "tablero", "playable", "Barra, dobles y bear-off. Nativo en Compose.", native = true),
-    ShellGame("xiangqi", "Xiangqi", "🀄", "2", "tablero", "playable", "Ajedrez chino con palacio y río."),
-    ShellGame("chino", "Damas Chinas", "✳️", "2–6", "tablero", "playable", "Estrella de 121 hoyos."),
+    ShellGame("xiangqi", "Xiangqi", "🀄", "2", "tablero", "playable", "Ajedrez chino con palacio y río. Nativo en Compose.", native = true),
+    ShellGame("chino", "Damas Chinas", "✳️", "2–6", "tablero", "playable", "Estrella de 121 hoyos. Nativo en Compose.", native = true),
     ShellGame("shogi", "Shogi", "将", "2", "tablero", "soon", "Ajedrez japonés con piezas capturadas."),
     ShellGame("janggi", "Janggi", "象", "2", "tablero", "research", "Ajedrez coreano."),
     ShellGame("luzhanqi", "Luzhanqi", "🎖️", "2–4", "tablero", "research", "Guerra de piezas con niebla."),

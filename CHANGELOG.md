@@ -1,5 +1,46 @@
 # Changelog
 
+## 1.1.0 · 2026-10-28
+
+La mesa crece.
+
+### Añadido
+
+- **Damas nativo en Compose**: 8×8, 12 fichas por lado, captura obligatoria, cadenas, coronación, empate por 80 jugadas, bot alfa-beta y modo pasar el teléfono.
+- **Dados Mentirosos nativo en Compose**: 2–6 jugadores, cinco dados, pujas, “Dudo”, revelación, eliminación, privacidad al pasar el teléfono y bot con umbral de riesgo.
+- **Go nativo en Compose**: 9×9 y 13×13, grupos y libertades, ko simple, komi 6.5, conteo de territorio, capturas y bot heurístico.
+- **Jungle nativo en Compose**: 7×9, río, trampas, guaridas, rata/elefante, saltos de tigre y león, y bot alfa-beta.
+- **Xiangqi nativo en Compose**: palacio, río, caballo bloqueado, cañón, soldados, generales enfrentados, jaque, mate, ahogamiento y bot alfa-beta.
+- **Damas Chinas nativo en Compose**: estrella de 121 hoyos, 2–6 jugadores, saltos encadenados, progreso por triángulo y bot con distancia BFS.
+- Interfaz nativa compartida para las nuevas mesas: cabecera, banner de turno, últimas cinco jugadas e historial completo.
+- 19 pruebas Kotlin nuevas; **66 pruebas en total** (30 web + 36 nativas).
+- AAB y APK de release firmados, instalados y verificados en emulador Android 14.
+- Evidencia visual en `docs/evidence/v1.1.0/`.
+
+### Cambiado
+
+- Android: `versionCode=13`, `versionName=1.1.0`.
+- El catálogo nativo marca doce juegos como “Nativo Compose”.
+- El inicio, el catálogo y las novedades pasan a “12 juegos 100 % Compose”.
+- `VERSION`, `package.json`, README, ROADMAP y portada pasan a 1.1.0.
+- La migración Compose se documenta como fase 3 parcial: 12 de 15 juegos fuera del WebView.
+
+### Corregido
+
+- El tablero de Damas usa la diagonal correcta para las blancas y permite la coronación.
+- Las nuevas mesas muestran siempre las últimas cinco jugadas y el historial completo.
+- Dados oculta los cubiletes de los bots y pide confirmación visual al pasar el teléfono.
+- Go ya no llena el tablero de puntos de jugadas legales; solo marca la última piedra.
+- Los diálogos de preparación y resultado no dejan la mesa bloqueada.
+
+### Pendiente
+
+- Salas nativas para los doce juegos Compose y reconexión.
+- Caída, Furia de Colores y Póker 100 % Compose.
+- Crónica nativa con PDF y replays con semilla.
+- Accesibilidad completa, prueba en teléfono físico y checklist de tienda.
+- Actualización a Gradle 8.14.4+ y perfil de rendimiento.
+
 ## 1.0.0 · 2026-10-28
 
 La mesa completa.

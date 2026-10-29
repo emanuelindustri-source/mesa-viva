@@ -4,7 +4,7 @@
 
 Mesa Viva es una app Android **Kotlin nativa con WebView**. La lógica de juego, las pantallas y los 13 juegos están en React/TypeScript dentro de `android/app/src/main/assets/www`. La app usa Kotlin para cámara, sensores, vibración, PDF, Material You y el relay LAN.
 
-Desde **v1.0.0**, `MainActivity` es una cáscara nativa completa en Compose (inicio, catálogo, niveles, ajustes, sala y navegación) y `GameWebActivity` hospeda la mesa compartida en WebView. **Serpientes y Escaleras, Dominó, Ajedrez, Ludo, Mancala y Backgammon** son 100 % Compose. Es la **fase 2** completada; quedan 9 juegos en WebView.
+Desde **v1.1.0**, `MainActivity` es una cáscara nativa completa en Compose (inicio, catálogo, niveles, ajustes, sala y navegación) y `GameWebActivity` hospeda la mesa compartida en WebView. **Doce juegos** son 100 % Compose: Serpientes y Escaleras, Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados Mentirosos, Go, Jungle, Xiangqi y Damas Chinas. Es la **fase 3 parcial**; quedan Caída, Furia de Colores y Póker en WebView.
 
 “Compose por completo” significa reescribir en Kotlin/Compose:
 
@@ -51,17 +51,20 @@ Es un proyecto de varias versiones, no un commit.
 - Cada juego Compose se activa por bandera; el WebView sigue disponible.
 - Comparar rendimiento, accesibilidad y tamaño.
 
-### Fase 3 · Resto de juegos (v1.1.0+)
+### Fase 3 · Resto de juegos (v1.1.0, parcial)
 
-- Caída, Furia, Dados, Damas, Go, Jungle, Xiangqi, Damas Chinas y Póker.
-- Animaciones nativas con `Canvas`, `animate*AsState`, partículas y háptica.
-- Mesa compartida, chat y salas nativas.
+- [x] Damas, Dados, Go, Jungle, Xiangqi y Damas Chinas nativos.
+- [x] Animaciones con `Canvas`, `animate*AsState`, tableros táctiles y háptica.
+- [x] Historial completo y últimas cinco jugadas en las nuevas mesas.
+- [ ] Caída, Furia y Póker nativos (v1.2.0).
+- [ ] Mesa compartida, chat y salas nativas (v1.2.0).
 
 ### Fase 4 · Retirada del WebView
 
 - Eliminar assets web del APK cuando haya paridad.
 - Mantener la PWA web como producto independiente.
 - Reducir tamaño y mejorar arranque.
+- Estado: 12 de 15 juegos fuera del WebView; no afirmar “100 % Compose” global todavía.
 
 ## Arquitectura propuesta
 
@@ -96,4 +99,4 @@ android/app/src/main/java/com/mesaviva/app/
 
 ## Decisión
 
-La fase 2 está cerrada en v1.0.0 con estrategia **híbrida**: cáscara Compose + WebView para la mesa compartida, portando un juego a la vez. Seis juegos demuestran la viabilidad. No se afirmará “100 % Compose” global hasta retirar el WebView de los 15 juegos.
+La fase 3 avanza en v1.1.0 con estrategia **híbrida**: cáscara Compose + WebView para la mesa compartida, portando un juego a la vez. Doce juegos demuestran la viabilidad. No se afirmará “100 % Compose” global hasta retirar el WebView de los 15 juegos.
