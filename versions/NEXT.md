@@ -32,6 +32,7 @@
 
 - APK release firmado: `03B9877EC621011EB349CA8343A61F1CC1CEF243E196F583BE7AB8C4D8ED0A34` · 10.347.777 bytes.
 - AAB release firmado: `82BF157B48A970C6A7401A6988443DEB70E7D57DBDB368CBE69A0E75526E5036` · 9.982.625 bytes.
+- APK debug de CI: `6AA9F031BED52DEEEE9AEA3C96554E345AC9A524DCD57A2B2CCCA8EAB5292CBE` · 13.764.606 bytes.
 - Artefactos locales en `artifacts/`: `mesa-viva-1.4.0-release.apk`, `mesa-viva-1.4.0-release.aab`. La release de GitHub añade `mesa-viva-1.4.0-debug.apk`.
 
 ## Compose
