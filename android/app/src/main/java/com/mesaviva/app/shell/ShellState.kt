@@ -88,6 +88,7 @@ class ShellState(context: Context) {
     private val defaultLanguage = if (Locale.getDefault().language == "en") "en" else "es"
 
     var screen by mutableStateOf(ShellScreen.Home)
+    var roomLink by mutableStateOf<String?>(null)
     var language by mutableStateOf(prefs.getString("language", defaultLanguage) ?: defaultLanguage)
     var dynamicColor by mutableStateOf(prefs.getBoolean("dynamicColor", true))
     var haptics by mutableStateOf(prefs.getBoolean("haptics", true))
@@ -102,6 +103,7 @@ class ShellState(context: Context) {
     var wins by mutableStateOf(prefs.getInt("wins", 0))
     var losses by mutableStateOf(prefs.getInt("losses", 0))
     var matches by mutableStateOf(prefs.getInt("matches", 0))
+    var streak by mutableStateOf(prefs.getInt("streak", 0))
     var bestStreak by mutableStateOf(prefs.getInt("bestStreak", 0))
 
     val festival: Festival = festivalFor()
@@ -123,6 +125,7 @@ class ShellState(context: Context) {
         wins = prefs.getInt("wins", wins)
         losses = prefs.getInt("losses", losses)
         matches = prefs.getInt("matches", matches)
+        streak = prefs.getInt("streak", streak)
         bestStreak = prefs.getInt("bestStreak", bestStreak)
     }
 
@@ -165,6 +168,42 @@ class ShellState(context: Context) {
     fun updateReduceMotion(value: Boolean) {
         reduceMotion = value
         save()
+    }
+
+    /**
+     * Registra una partida terminada y reparte XP. Las victorias suman 90 XP,
+     * las derrotas 45 y los empates 30. El nivel se recalcula con la misma
+     * tabla que muestra la pantalla de perfil.
+     */
+    fun awardMatch(win: Boolean, draw: Boolean = false) {
+        matches += 1
+        when {
+            draw -> {
+                xp += 30
+                streak = 0
+            }
+            win -> {
+                wins += 1
+                xp += 90
+                streak += 1
+                if (streak > bestStreak) bestStreak = streak
+            }
+            else -> {
+                losses += 1
+                xp += 45
+                streak = 0
+            }
+        }
+        level = levelForXp(xp)
+        prefs.edit()
+            .putInt("xp", xp)
+            .putInt("level", level)
+            .putInt("wins", wins)
+            .putInt("losses", losses)
+            .putInt("matches", matches)
+            .putInt("streak", streak)
+            .putInt("bestStreak", bestStreak)
+            .apply()
     }
 
     fun vibrate(context: Context, millis: Long = 28L) {

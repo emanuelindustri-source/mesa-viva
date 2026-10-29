@@ -49,6 +49,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -76,6 +78,7 @@ fun DominoScreen(state: ShellState, onBack: () -> Unit) {
     var resultOpen by remember { mutableStateOf(false) }
     var historyOpen by remember { mutableStateOf(false) }
     var log by remember { mutableStateOf(listOf<String>()) }
+    var awarded by remember { mutableStateOf(false) }
 
     LaunchedEffect(board.messageKey, board.messageParams) {
         if (board.messageKey.isNotBlank()) {
@@ -89,6 +92,7 @@ fun DominoScreen(state: ShellState, onBack: () -> Unit) {
         board = game.newMatch()
         selectedTile = null
         log = emptyList()
+        awarded = false
         setupOpen = false
         resultOpen = false
     }
@@ -101,7 +105,23 @@ fun DominoScreen(state: ShellState, onBack: () -> Unit) {
         board = result.state
         selectedTile = null
         state.vibrate(context, 30)
-        if (board.phase == DominoPhase.MatchEnd) resultOpen = true
+        NativeAudio.play(context, NativeAudio.Sfx.Card, state.sfx)
+        if (board.phase == DominoPhase.MatchEnd && !awarded) {
+            awarded = true
+            val me = board.players.firstOrNull()
+            val myTeam = me?.team
+            val won = board.winnerIndices.any { index ->
+                val player = board.players.getOrNull(index)
+                if (player == null) false else if (myTeam != null) player.team == myTeam else player === me
+            }
+            state.awardMatch(win = won, draw = board.winnerIndices.isEmpty())
+            NativeAudio.play(
+                context,
+                if (won) NativeAudio.Sfx.Win else NativeAudio.Sfx.Lose,
+                state.sfx,
+            )
+            resultOpen = true
+        }
     }
 
     fun playSelected(end: DominoEnd) {
@@ -456,7 +476,11 @@ private fun DominoTileView(
             .clip(RoundedCornerShape(5.dp))
             .background(if (playable) Color(0xFFFFF8E8) else Color(0xFFD7D0C2))
             .border(if (selected) 2.dp else 1.dp, border, RoundedCornerShape(5.dp))
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+            .semantics {
+                contentDescription = "Ficha ${tile.a}-${tile.b}" +
+                    if (selected) ", seleccionada" else ""
+            },
     ) {
         Canvas(Modifier.fillMaxSize()) {
             val halfW = size.width / 2f

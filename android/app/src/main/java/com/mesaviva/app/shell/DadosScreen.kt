@@ -112,6 +112,7 @@ fun DadosScreen(state: ShellState, onBack: () -> Unit) {
         }
         board = res.state
         state.vibrate(context, 20)
+        NativeAudio.play(context, NativeAudio.Sfx.Tap, state.sfx)
     }
 
     fun doDoubt() {
@@ -124,6 +125,7 @@ fun DadosScreen(state: ShellState, onBack: () -> Unit) {
         revealOpen = true
         spin += 360f
         state.vibrate(context, 60)
+        NativeAudio.play(context, NativeAudio.Sfx.Dice, state.sfx)
         if (board.phase == DadosPhase.MatchEnd) resultOpen = true
     }
 

@@ -33,6 +33,7 @@ fun exportChroniclePdf(
     title: String,
     subtitle: String,
     lines: List<String>,
+    stats: List<Pair<String, String>> = emptyList(),
 ): ChronicleExport? {
     val document = PdfDocument()
     val titlePaint = Paint().apply {
@@ -68,6 +69,22 @@ fun exportChroniclePdf(
         typeface = Typeface.create("sans-serif", Typeface.NORMAL)
         isAntiAlias = true
     }
+    val statLabelPaint = Paint().apply {
+        color = Color.rgb(122, 96, 62)
+        textSize = 8f
+        typeface = Typeface.create("sans-serif", Typeface.NORMAL)
+        isAntiAlias = true
+    }
+    val statValuePaint = Paint().apply {
+        color = Color.rgb(43, 33, 21)
+        textSize = 15f
+        typeface = Typeface.create("serif", Typeface.BOLD)
+        isAntiAlias = true
+    }
+    val statsBackground = Paint().apply {
+        color = Color.rgb(250, 245, 234)
+        isAntiAlias = true
+    }
 
     var pageNumber = 1
     var page = document.startPage(PdfDocument.PageInfo.Builder(PAGE_WIDTH, PAGE_HEIGHT, pageNumber).create())
@@ -98,6 +115,29 @@ fun exportChroniclePdf(
     }
 
     drawHeader()
+    if (stats.isNotEmpty()) {
+        val visible = stats.take(4)
+        val rows = (visible.size + 1) / 2
+        val cardHeight = 18f + rows * 34f
+        canvas.drawRoundRect(
+            MARGIN,
+            y - 10f,
+            PAGE_WIDTH - MARGIN,
+            y + cardHeight,
+            8f,
+            8f,
+            statsBackground,
+        )
+        visible.forEachIndexed { index, (label, value) ->
+            val column = index % 2
+            val row = index / 2
+            val x = MARGIN + 14f + column * ((PAGE_WIDTH - MARGIN * 2) / 2f)
+            val top = y + 8f + row * 34f
+            canvas.drawText(label.take(26), x, top, statLabelPaint)
+            canvas.drawText(value.take(26), x, top + 18f, statValuePaint)
+        }
+        y += cardHeight + 16f
+    }
     if (lines.isEmpty()) {
         canvas.drawText("Sin movimientos registrados.", MARGIN, y, bodyPaint)
     } else {

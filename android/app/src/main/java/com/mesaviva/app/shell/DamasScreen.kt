@@ -70,6 +70,10 @@ fun DamasScreen(state: ShellState, onBack: () -> Unit) {
     var resultOpen by remember { mutableStateOf(false) }
     var historyOpen by remember { mutableStateOf(false) }
     var resignOpen by remember { mutableStateOf(false) }
+    var replayOpen by remember { mutableStateOf(false) }
+    var seed by remember { mutableStateOf(System.nanoTime()) }
+    var moves by remember { mutableStateOf(listOf<Pair<Int, Int>>()) }
+    var awarded by remember { mutableStateOf(false) }
 
     val humanTurn = allHumans || board.turn == DamasColor.White
     val legal = remember(board, humanTurn) {
@@ -79,13 +83,33 @@ fun DamasScreen(state: ShellState, onBack: () -> Unit) {
         if (selected == null) emptyList() else legal.filter { it.from == selected }
     }
 
+    fun finishIfNeeded(current: DamasState) {
+        if (current.phase != DamasPhase.MatchEnd || awarded) return
+        awarded = true
+        val win = current.winner == DamasColor.White
+        state.awardMatch(win = win, draw = current.draw)
+        NativeAudio.play(
+            context,
+            when {
+                current.draw -> NativeAudio.Sfx.Draw
+                win -> NativeAudio.Sfx.Win
+                else -> NativeAudio.Sfx.Lose
+            },
+            state.sfx,
+        )
+    }
+
     fun start() {
-        game = DamasGame()
+        seed = System.nanoTime()
+        game = DamasGame(seed)
         board = game.newMatch()
         selected = null
+        moves = emptyList()
+        awarded = false
         setupOpen = false
         resultOpen = false
         historyOpen = false
+        replayOpen = false
     }
 
     fun applyMove(from: Int, to: Int) {
@@ -95,8 +119,20 @@ fun DamasScreen(state: ShellState, onBack: () -> Unit) {
             return
         }
         board = res.state
+        moves = moves + (from to to)
         selected = res.state.mustContinueFrom
         state.vibrate(context, if (res.state.lastMove?.captured != null) 42 else 22)
+        val move = res.state.lastMove
+        NativeAudio.play(
+            context,
+            when {
+                move?.promotion == true -> NativeAudio.Sfx.Promote
+                move?.captured != null -> NativeAudio.Sfx.Capture
+                else -> NativeAudio.Sfx.Card
+            },
+            state.sfx,
+        )
+        finishIfNeeded(res.state)
         if (res.state.phase == DamasPhase.MatchEnd) resultOpen = true
     }
 
@@ -126,7 +162,19 @@ fun DamasScreen(state: ShellState, onBack: () -> Unit) {
             val res = game.move(board, move.from, move.to)
             if (res.error == null) {
                 board = res.state
+                moves = moves + (move.from to move.to)
                 selected = null
+                val done = res.state.lastMove
+                NativeAudio.play(
+                    context,
+                    when {
+                        done?.promotion == true -> NativeAudio.Sfx.Promote
+                        done?.captured != null -> NativeAudio.Sfx.Capture
+                        else -> NativeAudio.Sfx.Card
+                    },
+                    state.sfx,
+                )
+                finishIfNeeded(res.state)
                 if (res.state.phase == DamasPhase.MatchEnd) resultOpen = true
             }
         }
@@ -305,6 +353,7 @@ fun DamasScreen(state: ShellState, onBack: () -> Unit) {
                 TextButton(onClick = {
                     resignOpen = false
                     board = game.resign(board).state
+                    finishIfNeeded(board)
                     resultOpen = true
                 }) { Text(state.t("common.confirm")) }
             },
@@ -320,7 +369,22 @@ fun DamasScreen(state: ShellState, onBack: () -> Unit) {
             board.history,
             pdfTitle = state.t("damas.title"),
             pdfSubtitle = state.t("damas.subtitle"),
+            stats = listOf(
+                state.t("damas.white") to game.piecesOf(board, DamasColor.White).toString(),
+                state.t("damas.black") to game.piecesOf(board, DamasColor.Black).toString(),
+                state.t("damas.capturesStat") to "${board.captures[DamasColor.White] ?: 0} / ${board.captures[DamasColor.Black] ?: 0}",
+                state.t("damas.kingsStat") to "${game.kingsOf(board, DamasColor.White)} / ${game.kingsOf(board, DamasColor.Black)}",
+            ),
+            onReplay = if (moves.isNotEmpty()) {
+                { replayOpen = true }
+            } else {
+                null
+            },
         ) { historyOpen = false }
+    }
+
+    if (replayOpen) {
+        DamasReplayDialog(state, seed, moves) { replayOpen = false }
     }
 
     if (resultOpen && board.phase == DamasPhase.MatchEnd) {
@@ -391,6 +455,110 @@ private fun DamasSetupDialog(
         },
         confirmButton = { Button(onClick = onStart) { Text(state.t("common.start")) } },
         dismissButton = { TextButton(onClick = onDismiss) { Text(state.t("common.close")) } },
+    )
+}
+
+@Composable
+private fun DamasReplayDialog(
+    state: ShellState,
+    seed: Long,
+    moves: List<Pair<Int, Int>>,
+    onClose: () -> Unit,
+) {
+    val frames = remember(seed, moves) {
+        val replay = DamasGame(seed)
+        var current = replay.newMatch()
+        val list = mutableListOf(current)
+        for ((from, to) in moves) {
+            val result = replay.move(current, from, to)
+            if (result.error != null) break
+            current = result.state
+            list.add(current)
+        }
+        list
+    }
+    var step by remember(frames) { mutableStateOf(frames.lastIndex.coerceAtLeast(0)) }
+    val board = frames.getOrNull(step) ?: frames.last()
+    AlertDialog(
+        onDismissRequest = onClose,
+        title = { Text(state.t("replay.title")) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(
+                    state.t("replay.step", mapOf("n" to step, "total" to (frames.size - 1))),
+                    style = MaterialTheme.typography.labelMedium,
+                )
+                Text(
+                    "${state.t("replay.seed")}: ${seed.toString().takeLast(6)}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                BoxWithConstraints(
+                    Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f)
+                        .clip(RoundedCornerShape(10.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(10.dp)),
+                ) {
+                    val cell = maxWidth / 8
+                    Column(Modifier.fillMaxSize()) {
+                        for (row in 0 until 8) {
+                            Row(Modifier.weight(1f).fillMaxWidth()) {
+                                for (col in 0 until 8) {
+                                    val index = row * 8 + col
+                                    val piece = board.board[index]
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .fillMaxHeight()
+                                            .background(if (DamasGame.isDark(index)) DAMAS_DARK else DAMAS_LIGHT),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        if (piece != null) {
+                                            val white = piece.color == DamasColor.White
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .padding(cell * 0.10f)
+                                                    .background(if (white) DAMAS_WHITE else DAMAS_BLACK, CircleShape)
+                                                    .border(1.dp, if (white) Color(0xFF8A6A45) else Color(0xFF0B0806), CircleShape),
+                                                contentAlignment = Alignment.Center,
+                                            ) {
+                                                Text(
+                                                    if (piece.king) "♛" else "",
+                                                    fontSize = (cell.value * 0.38f).sp,
+                                                    color = if (white) Color(0xFF3A2817) else Color(0xFFE9C46A),
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(
+                        onClick = { if (step > 0) step -= 1 },
+                        enabled = step > 0,
+                        modifier = Modifier.weight(1f),
+                    ) { Text(state.t("replay.prev")) }
+                    OutlinedButton(
+                        onClick = { if (step < frames.lastIndex) step += 1 },
+                        enabled = step < frames.lastIndex,
+                        modifier = Modifier.weight(1f),
+                    ) { Text(state.t("replay.next")) }
+                }
+                Text(
+                    state.t("replay.note"),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onClose) { Text(state.t("common.close")) }
+        },
     )
 }
 

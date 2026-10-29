@@ -96,6 +96,15 @@ fun FuriaScreen(state: ShellState, onBack: () -> Unit) {
         pendingWild = null
         effect++
         state.vibrate(context, if (res.state.phase == FuriaPhase.MatchEnd) 70 else 22)
+        NativeAudio.play(
+            context,
+            when {
+                res.state.phase == FuriaPhase.MatchEnd -> NativeAudio.Sfx.Win
+                res.state.lastDraw != null -> NativeAudio.Sfx.Capture
+                else -> NativeAudio.Sfx.Card
+            },
+            state.sfx,
+        )
         if (board.phase == FuriaPhase.MatchEnd) resultOpen = true
     }
 

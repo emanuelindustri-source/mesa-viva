@@ -96,6 +96,7 @@ fun BackgammonScreen(state: ShellState, onBack: () -> Unit) {
         val res = game.roll(board)
         board = res.state
         state.vibrate(context, 24)
+        NativeAudio.play(context, NativeAudio.Sfx.Dice, state.sfx)
         addLog(
             state.t(
                 "bg.log.roll",

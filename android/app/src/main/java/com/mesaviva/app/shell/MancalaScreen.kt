@@ -64,6 +64,10 @@ fun MancalaScreen(state: ShellState, onBack: () -> Unit) {
     var winnerOpen by remember { mutableStateOf(false) }
     var historyOpen by remember { mutableStateOf(false) }
     var log by remember { mutableStateOf(listOf<String>()) }
+    var replayOpen by remember { mutableStateOf(false) }
+    var seed by remember { mutableStateOf(System.nanoTime()) }
+    var sowMoves by remember { mutableStateOf(listOf<Int>()) }
+    var awarded by remember { mutableStateOf(false) }
 
     fun picture(side: MancalaSide): String = when {
         side == MancalaSide.White -> state.t("mancala.you")
@@ -75,13 +79,34 @@ fun MancalaScreen(state: ShellState, onBack: () -> Unit) {
         log = (log + text).takeLast(200)
     }
 
+    fun finishIfNeeded(current: MancalaState) {
+        if (current.phase != MancalaPhase.MatchEnd || awarded) return
+        awarded = true
+        val draw = current.whiteStore == current.blackStore
+        val win = current.whiteStore > current.blackStore
+        state.awardMatch(win = win, draw = draw)
+        NativeAudio.play(
+            context,
+            when {
+                draw -> NativeAudio.Sfx.Draw
+                win -> NativeAudio.Sfx.Win
+                else -> NativeAudio.Sfx.Lose
+            },
+            state.sfx,
+        )
+    }
+
     fun start(asHumans: Boolean) {
         allHumans = asHumans
-        game = MancalaGame()
+        seed = System.nanoTime()
+        game = MancalaGame(seed)
         board = game.newMatch()
         log = emptyList()
+        sowMoves = emptyList()
+        awarded = false
         setupOpen = false
         winnerOpen = false
+        replayOpen = false
     }
 
     fun doSow(pit: Int) {
@@ -92,12 +117,15 @@ fun MancalaScreen(state: ShellState, onBack: () -> Unit) {
             return
         }
         board = res.state
+        sowMoves = sowMoves + pit
+        NativeAudio.play(context, if (res.state.lastCapture != null) NativeAudio.Sfx.Capture else NativeAudio.Sfx.Card, state.sfx)
         state.vibrate(context, 24)
         addLog(state.t("mancala.log.sow", mapOf("p" to picture(actor), "n" to (pit + 1))))
         if (res.state.lastCapture != null) {
             addLog(state.t("mancala.log.capture", mapOf("p" to picture(actor), "n" to res.state.lastCapture)))
             state.vibrate(context, 50)
         }
+        finishIfNeeded(res.state)
         if (res.state.phase == MancalaPhase.MatchEnd) winnerOpen = true
     }
 
@@ -232,7 +260,22 @@ fun MancalaScreen(state: ShellState, onBack: () -> Unit) {
             log,
             pdfTitle = state.t("mancala.title"),
             pdfSubtitle = state.t("mancala.subtitle"),
+            stats = listOf(
+                state.t("mancala.you") to board.whiteStore.toString(),
+                state.t("mancala.player2") to board.blackStore.toString(),
+                state.t("mancala.seedsStat") to board.pits.sum().toString(),
+                state.t("mancala.movesStat") to sowMoves.size.toString(),
+            ),
+            onReplay = if (sowMoves.isNotEmpty()) {
+                { replayOpen = true }
+            } else {
+                null
+            },
         ) { historyOpen = false }
+    }
+
+    if (replayOpen) {
+        MancalaReplayDialog(state, seed, sowMoves) { replayOpen = false }
     }
 
     if (setupOpen) {
@@ -342,5 +385,115 @@ private fun Pit(
                 fontWeight = FontWeight.Bold,
             )
         }
+    }
+}
+
+@Composable
+private fun MancalaReplayDialog(
+    state: ShellState,
+    seed: Long,
+    moves: List<Int>,
+    onClose: () -> Unit,
+) {
+    val frames = remember(seed, moves) {
+        val replay = MancalaGame(seed)
+        var current = replay.newMatch()
+        val list = mutableListOf(current)
+        for (pit in moves) {
+            val result = replay.sow(current, pit)
+            if (result.error != null) break
+            current = result.state
+            list.add(current)
+        }
+        list
+    }
+    var step by remember(frames) { mutableStateOf(frames.lastIndex.coerceAtLeast(0)) }
+    val board = frames.getOrNull(step) ?: frames.last()
+    AlertDialog(
+        onDismissRequest = onClose,
+        title = { Text(state.t("replay.title")) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(
+                    state.t("replay.step", mapOf("n" to step, "total" to (frames.size - 1))),
+                    style = MaterialTheme.typography.labelMedium,
+                )
+                Text(
+                    "${state.t("replay.seed")}: ${seed.toString().takeLast(6)}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    for (pit in listOf(12, 11, 10, 9, 8, 7)) {
+                        ReplayPit(board.pits[pit], Modifier.weight(1f))
+                    }
+                }
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    ReplayStore(board.blackStore, Modifier.weight(1f))
+                    Column(Modifier.weight(4f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            for (pit in 0..5) {
+                                ReplayPit(board.pits[pit], Modifier.weight(1f))
+                            }
+                        }
+                    }
+                    ReplayStore(board.whiteStore, Modifier.weight(1f))
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(
+                        onClick = { if (step > 0) step -= 1 },
+                        enabled = step > 0,
+                        modifier = Modifier.weight(1f),
+                    ) { Text(state.t("replay.prev")) }
+                    OutlinedButton(
+                        onClick = { if (step < frames.lastIndex) step += 1 },
+                        enabled = step < frames.lastIndex,
+                        modifier = Modifier.weight(1f),
+                    ) { Text(state.t("replay.next")) }
+                }
+                Text(
+                    state.t("replay.note"),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onClose) { Text(state.t("common.close")) }
+        },
+    )
+}
+
+@Composable
+private fun ReplayPit(count: Int, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .aspectRatio(1f)
+            .clip(CircleShape)
+            .background(Color(0xFF6E4A32))
+            .border(1.dp, Color(0xFFD5B05C).copy(alpha = 0.5f), CircleShape),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(count.toString(), color = Color(0xFFFFF3D6), style = MaterialTheme.typography.labelSmall)
+    }
+}
+
+@Composable
+private fun ReplayStore(count: Int, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .height(72.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color(0xFF5A3A22)),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(count.toString(), color = Color(0xFFE0A63A), style = MaterialTheme.typography.titleMedium)
     }
 }

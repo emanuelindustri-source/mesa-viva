@@ -1,5 +1,42 @@
 ﻿# Changelog
 
+## 1.5.0 · 2026-10-29
+
+La mesa conectada.
+
+### Añadido
+
+- **Salas nativas LAN** para Damas y Mancala: anfitrión, invitado, QR, escáner integrado, código, chat, reconexión y bot de relleno.
+- Enlace profundo `mesaviva://join?ws=…&code=…` y entrada manual por `ws://`.
+- El anfitrión valida cada jugada con el motor Kotlin y difunde el estado; el invitado nunca es autoridad.
+- **Replays con semilla** en Damas y Mancala, con paso anterior/siguiente y contador de jugada.
+- **PDF con tarjeta de estadísticas** para Damas y Mancala.
+- **Audio nativo procedural**: música original por festividad y efectos de carta, captura, coronación, dados, victoria, derrota, empate, chat y toque.
+- XP real al terminar partidas nativas y varias mesas locales, con racha y mejor racha.
+- Fichas de dominó y casillas de Damas descritas para lectores de pantalla.
+- Códec `RoomCodec` y 9 pruebas nuevas de protocolo y semilla.
+- Gradle **8.14.4**.
+
+### Cambiado
+
+- Android: `versionCode=17`, `versionName=1.5.0`.
+- La sala separa **Sala nativa** y **Sala web**.
+- El catálogo y los ajustes muestran 1.5.0.
+- La pestaña web sigue siendo el respaldo para los quince juegos y las salas remotas.
+
+### Corregido
+
+- El invitado ve el tablero de Damas con sus piezas abajo.
+- Un invitado nuevo puede ocupar el asiento si el anterior se desconectó.
+- El historial de Damas y Mancala ya no se limita a cinco líneas para el PDF y el replay.
+
+### Pendiente
+
+- Salas nativas de 3–8 jugadores.
+- Relay online nativo y replay exportable.
+- Accesibilidad completa y audio en las quince mesas.
+- Instalación en el teléfono físico bloqueado por MIUI.
+
 ## 1.4.0 · 2026-10-29
 
 Crónica y accesibilidad.

@@ -21,8 +21,8 @@ android {
         applicationId = "com.mesaviva.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 16
-        versionName = "1.4.0"
+        versionCode = 17
+        versionName = "1.5.0"
 
         vectorDrawables {
             useSupportLibrary = true
@@ -78,6 +78,8 @@ dependencies {
     implementation("org.java-websocket:Java-WebSocket:1.5.7")
     implementation("org.slf4j:slf4j-nop:2.0.13")
     implementation("com.google.zxing:core:3.5.3")
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
     testImplementation("junit:junit:4.13.2")
+    testImplementation("org.json:json:20240303")
 }
 

@@ -103,6 +103,11 @@ fun PokerScreen(state: ShellState, onBack: () -> Unit) {
         raiseOpen = false
         effect++
         state.vibrate(context, if (board.street == PokerStreet.MatchEnd) 70 else 22)
+        NativeAudio.play(
+            context,
+            if (board.street == PokerStreet.MatchEnd) NativeAudio.Sfx.Win else NativeAudio.Sfx.Card,
+            state.sfx,
+        )
         if (board.street == PokerStreet.HandEnd) handEndOpen = true
         if (board.street == PokerStreet.MatchEnd) resultOpen = true
     }
@@ -117,6 +122,7 @@ fun PokerScreen(state: ShellState, onBack: () -> Unit) {
         handEndOpen = false
         resultOpen = false
         effect++
+        NativeAudio.play(context, NativeAudio.Sfx.Card, state.sfx)
     }
 
     LaunchedEffect(board.turn, board.street, board.handNo, board.history.size, allHumans, difficulty) {

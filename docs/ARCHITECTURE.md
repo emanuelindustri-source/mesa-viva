@@ -54,7 +54,7 @@ Los motores son funciones puras sobre el estado (con el RNG explícito). Las vis
 - `i18n`: español como base, inglés completo, 9 locales adicionales con fallback en inglés.
 
 ### `android`
-Cáscara nativa en **Jetpack Compose** (`MainActivity`, `shell/`): inicio, catálogo, niveles, ajustes, sala, navegación, tema Material 3 y los quince juegos nativos (Serpientes, Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados, Go, Jungle, Xiangqi, Damas Chinas, Caída, Furia y Póker) con motores Kotlin en `games/`. `NativeChronicle.kt` genera la crónica PDF con `PdfDocument`, la guarda en Descargas y la comparte con `FileProvider`. `RoomScreen` genera QR local con ZXing. `GameWebActivity` hospeda la mesa compartida con `WebViewAssetLoader`, desde un origen HTTPS seguro, e inyecta `MesaViva` para vibración, sensores, color del sistema y PDF; gestiona cámara y selector de archivos. `ShellSync` importa el perfil de `localStorage` al volver de la mesa y la URL de la mesa recibe idioma/preferencias de la cáscara.
+Cáscara nativa en **Jetpack Compose** (`MainActivity`, `shell/`): inicio, catálogo, niveles, ajustes, sala, navegación, tema Material 3 y los quince juegos nativos (Serpientes, Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados, Go, Jungle, Xiangqi, Damas Chinas, Caída, Furia y Póker) con motores Kotlin en `games/`. `NativeChronicle.kt` genera la crónica PDF con `PdfDocument`, la guarda en Descargas y la comparte con `FileProvider`. `NativeRoom.kt` implementa la sesión host/invitado sobre `LanRelayServer`: el anfitrión es la autoridad, valida las jugadas con los motores Kotlin y difunde el estado; `RoomCodec.kt` serializa Damas y Mancala; `RoomScreen.kt` ofrece lobby, QR, escáner, chat, reconexión y las mesas LAN. `NativeAudio.kt` sintetiza música y efectos sin samples. `RoomScreen` genera QR local con ZXing y `MainActivity` atiende el enlace `mesaviva://join`. `GameWebActivity` hospeda la mesa compartida con `WebViewAssetLoader`, desde un origen HTTPS seguro, e inyecta `MesaViva` para vibración, sensores, color del sistema y PDF; gestiona cámara y selector de archivos. `ShellSync` importa el perfil de `localStorage` al volver de la mesa y la URL de la mesa recibe idioma/preferencias de la cáscara.
 
 ### `server`
 Relay Node + `ws`. En producción debe ir detrás de TLS (`wss`). El estado de la partida no se guarda: si el host se desconecta, la sala se cierra.
@@ -62,7 +62,9 @@ Relay Node + `ws`. En producción debe ir detrás de TLS (`wss`). El estado de l
 ## Decisiones
 
 - **Host autoritativo**: evita trampas y estados divergentes. Los invitados no ejecutan reglas.
-- **Relay en vez de P2P para v0.1**: WebRTC falla en redes móviles restrictivas y requiere STUN/TURN. Para juegos por turnos, un relay de baja latencia es más simple y fiable. La sala LAN sin servidor queda en el roadmap.
+- **Relay en vez de P2P para v0.1**: WebRTC falla en redes móviles restrictivas y requiere STUN/TURN. Para juegos por turnos, un relay de baja latencia es más simple y fiable. En Android, `LanRelayServer` levanta el relay dentro del teléfono anfitrión y las salas nativas de Damas y Mancala juegan sin internet.
+- **Anfitrión autoritativo también en LAN**: el invitado envía su jugada, el anfitrión la valida con el motor y devuelve el estado completo. Así no hay trampas ni divergencias y el bot puede ocupar el asiento si el invitado se cae.
+- **Audio procedural**: la música y los efectos se generan en el dispositivo para no depender de samples, licencias ni red.
 - **Offline real**: todos los assets y fuentes se empaquetan. Bots y hotseat no tocan la red.
 - **Originalidad**: arte CSS/SVG y música sintetizada propia; sin assets de terceros.
 - **Accesibilidad**: contraste alto, movimiento reducido, tamaños táctiles ≥44 px y textos localizados.

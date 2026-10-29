@@ -108,6 +108,11 @@ fun CaidaScreen(state: ShellState, onBack: () -> Unit) {
         board = res.state
         effect++
         state.vibrate(context, if (res.state.lastCapture != null) 55 else 22)
+        NativeAudio.play(
+            context,
+            if (res.state.lastCapture != null) NativeAudio.Sfx.Capture else NativeAudio.Sfx.Card,
+            state.sfx,
+        )
         if (board.phase == CaidaPhase.MatchEnd) resultOpen = true
     }
 
@@ -120,6 +125,7 @@ fun CaidaScreen(state: ShellState, onBack: () -> Unit) {
         board = res.state
         effect++
         state.vibrate(context, 40)
+        NativeAudio.play(context, NativeAudio.Sfx.Promote, state.sfx)
         if (board.phase == CaidaPhase.MatchEnd) resultOpen = true
     }
 

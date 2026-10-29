@@ -65,8 +65,9 @@ Es un proyecto de varias versiones, no un commit.
 - Eliminar assets web del APK cuando haya paridad.
 - Mantener la PWA web como producto independiente.
 - Reducir tamaño y mejorar arranque.
-- Estado: 15 de 15 juegos jugables fuera del WebView; el WebView queda como respaldo de la PWA y la sala online.
+- Estado: 15 de 15 juegos jugables fuera del WebView; el WebView queda como respaldo de la PWA y la sala remota.
 - v1.4.0 añade crónica PDF nativa en las quince mesas y accesibilidad básica de cartas y turnos.
+- v1.5.0 añade salas LAN nativas para Damas y Mancala, replays con semilla, audio procedural y PDF con estadísticas. La sala remota y la PWA siguen en el WebView; el siguiente paso es el relay online nativo y las salas de 3–8 jugadores.
 
 ## Arquitectura propuesta
 

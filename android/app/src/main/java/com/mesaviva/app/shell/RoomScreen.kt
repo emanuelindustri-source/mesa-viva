@@ -1,66 +1,1100 @@
 package com.mesaviva.app.shell
 
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-private const val WEB_ROOM_URL = "https://emanuelindustri-source.github.io/mesa-viva/play/#/room"
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
+import com.mesaviva.app.games.DamasColor
+import com.mesaviva.app.games.DamasGame
+import com.mesaviva.app.games.DamasPhase
+import com.mesaviva.app.games.DamasState
+import com.mesaviva.app.games.MancalaGame
+import com.mesaviva.app.games.MancalaPhase
+import com.mesaviva.app.games.MancalaSide
+import com.mesaviva.app.games.MancalaState
+import kotlinx.coroutines.delay
 
 @Composable
 fun RoomScreen(state: ShellState, onOpenWeb: (String) -> Unit) {
-    var code by remember { mutableStateOf("") }
-    var selectedGame by remember { mutableStateOf("caida") }
-    val qr = remember { generateQrBitmap(WEB_ROOM_URL) }
+    val context = LocalContext.current
+    var tab by remember { mutableStateOf(0) }
+    var session by remember { mutableStateOf<NativeRoomController?>(null) }
+    var joinHint by remember { mutableStateOf("") }
+    var pendingLink by remember { mutableStateOf<String?>(null) }
 
-    LazyColumn(
-        modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 30.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        item {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(state.t("room.title"), style = MaterialTheme.typography.headlineMedium)
-                Text(
-                    state.t("room.subtitle"),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+    val scanLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
+        val contents = result.contents
+        if (contents != null) {
+            val controller = NativeRoomController(context.applicationContext, state, RoomRole.Guest)
+            if (controller.joinLink(contents)) {
+                session = controller
+                joinHint = ""
+            } else {
+                joinHint = controller.hint.ifBlank { state.t("room.errorInvalidLink") }
+                controller.close()
+            }
+        }
+    }
+
+    LaunchedEffect(state.roomLink) {
+        val link = state.roomLink ?: return@LaunchedEffect
+        state.roomLink = null
+        pendingLink = link
+        tab = 0
+    }
+
+    LaunchedEffect(pendingLink) {
+        val link = pendingLink ?: return@LaunchedEffect
+        pendingLink = null
+        val controller = NativeRoomController(context.applicationContext, state, RoomRole.Guest)
+        if (controller.joinLink(link)) {
+            session = controller
+            joinHint = ""
+        } else {
+            joinHint = controller.hint.ifBlank { state.t("room.errorInvalidLink") }
+            controller.close()
+        }
+    }
+
+    DisposableEffect(session) {
+        val current = session
+        onDispose { current?.close() }
+    }
+
+    val active = session
+    if (active != null && active.inGame) {
+        NativeRoomGame(state, active) {
+            active.close()
+            session = null
+        }
+        return
+    }
+
+    Column(Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(state.t("room.title"), style = MaterialTheme.typography.headlineMedium)
+            Text(
+                state.t("room.subtitle"),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterChip(
+                    selected = tab == 0,
+                    onClick = { tab = 0 },
+                    label = { Text("📶 ${state.t("room.nativeTab")}") },
+                )
+                FilterChip(
+                    selected = tab == 1,
+                    onClick = { tab = 1 },
+                    label = { Text("🌐 ${state.t("room.webTab")}") },
                 )
             }
         }
+
+        if (tab == 0) {
+            NativeRoomLobby(
+                state = state,
+                session = session,
+                joinHint = joinHint,
+                onHost = { game ->
+                    val controller = NativeRoomController(context.applicationContext, state, RoomRole.Host)
+                    controller.host(game)
+                    session = controller
+                    joinHint = ""
+                },
+                onJoin = { url, code ->
+                    val controller = NativeRoomController(context.applicationContext, state, RoomRole.Guest)
+                    if (controller.join(url, code)) {
+                        session = controller
+                        joinHint = ""
+                    } else {
+                        joinHint = controller.hint.ifBlank { state.t("room.errorConnect") }
+                        controller.close()
+                    }
+                },
+                onScan = {
+                    val options = ScanOptions()
+                        .setOrientationLocked(false)
+                        .setPrompt(state.t("room.scanPrompt"))
+                        .setBeepEnabled(false)
+                    runCatching { scanLauncher.launch(options) }
+                        .onFailure { joinHint = state.t("room.scannerMissing") }
+                },
+                onClose = {
+                    session?.close()
+                    session = null
+                },
+                onSelectGame = { session?.selectGame(it) },
+            )
+        } else {
+            WebRoomTab(state, onOpenWeb)
+        }
+    }
+}
+
+@Composable
+private fun NativeRoomLobby(
+    state: ShellState,
+    session: NativeRoomController?,
+    joinHint: String,
+    onHost: (RoomGame) -> Unit,
+    onJoin: (String, String) -> Unit,
+    onScan: () -> Unit,
+    onClose: () -> Unit,
+    onSelectGame: (RoomGame) -> Unit,
+) {
+    if (session == null) {
+        var game by remember { mutableStateOf(RoomGame.Damas) }
+        var url by remember { mutableStateOf("") }
+        var code by remember { mutableStateOf("") }
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 14.dp, bottom = 30.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            item {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
+                    shape = RoundedCornerShape(18.dp),
+                ) {
+                    Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("📶  ${state.t("room.nativeBadge")}", style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            state.t("room.nativeDesc"),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+            item {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.28f)),
+                    shape = RoundedCornerShape(18.dp),
+                ) {
+                    Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text(state.t("room.createNative"), style = MaterialTheme.typography.titleMedium)
+                        Text(state.t("room.twoPlayers"), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            RoomGame.entries.forEach { option ->
+                                FilterChip(
+                                    selected = game == option,
+                                    onClick = { game = option },
+                                    label = { Text("${option.emoji} ${option.title(state.language)}") },
+                                )
+                            }
+                        }
+                        Button(
+                            onClick = { onHost(game) },
+                            modifier = Modifier.fillMaxWidth(),
+                        ) { Text("🎲 ${state.t("room.createNative")}") }
+                    }
+                }
+            }
+            item {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f)),
+                    shape = RoundedCornerShape(18.dp),
+                ) {
+                    Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(state.t("room.joinNative"), style = MaterialTheme.typography.titleMedium)
+                        Text(state.t("room.joinHelp"), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Button(onClick = onScan, modifier = Modifier.fillMaxWidth()) {
+                            Text("📷 ${state.t("room.scanNative")}")
+                        }
+                        OutlinedTextField(
+                            value = url,
+                            onValueChange = { url = it.take(120) },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            label = { Text(state.t("room.wsLabel")) },
+                            placeholder = { Text("ws://192.168.1.20:9001") },
+                        )
+                        OutlinedTextField(
+                            value = code,
+                            onValueChange = { value ->
+                                code = value.uppercase().filter { it.isLetterOrDigit() }.take(6)
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            label = { Text(state.t("room.code")) },
+                        )
+                        Button(
+                            onClick = { onJoin(url, code) },
+                            enabled = url.isNotBlank() && code.trim().length in 4..6,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) { Text(state.t("room.joinButton")) }
+                        if (joinHint.isNotBlank()) {
+                            Text(joinHint, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
+                        }
+                        Text(
+                            state.t("room.deepLinkNote"),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+        }
+        return
+    }
+
+    if (session.isHost) {
+        HostLobby(state, session, onClose, onSelectGame)
+    } else {
+        GuestLobby(state, session, onClose)
+    }
+}
+
+@Composable
+private fun HostLobby(
+    state: ShellState,
+    session: NativeRoomController,
+    onClose: () -> Unit,
+    onSelectGame: (RoomGame) -> Unit,
+) {
+    val qr = remember(session.qrText) {
+        if (session.qrText.isBlank()) null else generateQrBitmap(session.qrText)
+    }
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 14.dp, bottom = 30.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        item {
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
+                shape = RoundedCornerShape(18.dp),
+            ) {
+                Column(
+                    Modifier.fillMaxWidth().padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text(state.t("room.youAreHost"), style = MaterialTheme.typography.titleMedium)
+                    RoomStatusPill(state, session.status)
+                    if (session.code.isNotBlank()) {
+                        Text(
+                            session.code,
+                            style = MaterialTheme.typography.headlineLarge,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 6.sp,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                        Text(state.t("room.yourCode"), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    if (qr != null) {
+                        Image(
+                            bitmap = qr,
+                            contentDescription = state.t("room.qr"),
+                            modifier = Modifier.size(190.dp),
+                        )
+                    }
+                    if (session.shareUrl.isNotBlank()) {
+                        Text(
+                            session.shareUrl,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                    Text(
+                        state.t("room.nativeNote"),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            }
+        }
+        item {
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.28f)),
+                shape = RoundedCornerShape(18.dp),
+            ) {
+                Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(state.t("room.games"), style = MaterialTheme.typography.titleMedium)
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        RoomGame.entries.forEach { option ->
+                            FilterChip(
+                                selected = session.selectedGame == option,
+                                onClick = { onSelectGame(option) },
+                                label = { Text("${option.emoji} ${option.title(state.language)}") },
+                            )
+                        }
+                    }
+                    Text(state.t("room.guestsTitle"), style = MaterialTheme.typography.titleMedium)
+                    if (session.guests.isEmpty()) {
+                        Text(state.t("room.noneYet"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    } else {
+                        session.guests.forEach { guest ->
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text("👤", fontSize = 18.sp)
+                                Text(guest.name, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+                                Text(
+                                    state.t(if (guest.online) "room.onlineLabel" else "room.offlineLabel"),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = if (guest.online) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                                )
+                            }
+                        }
+                    }
+                    if (session.hint.isNotBlank()) {
+                        Text(session.hint, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
+                    }
+                    if (!session.inGame) {
+                        Button(
+                            onClick = { session.startMatch() },
+                            enabled = session.canStart,
+                            modifier = Modifier.fillMaxWidth(),
+                        ) { Text("▶  ${state.t("room.startNative")}") }
+                    }
+                    OutlinedButton(onClick = onClose, modifier = Modifier.fillMaxWidth()) {
+                        Text(state.t("room.closeRoom"))
+                    }
+                }
+            }
+        }
+        item {
+            RoomChatPanel(state, session.chat, session::sendChat)
+        }
+    }
+}
+
+@Composable
+private fun GuestLobby(
+    state: ShellState,
+    session: NativeRoomController,
+    onLeave: () -> Unit,
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 14.dp, bottom = 30.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        item {
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
+                shape = RoundedCornerShape(18.dp),
+            ) {
+                Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        if (session.hostName.isBlank()) state.t("room.waitingHost")
+                        else state.t("room.youAreGuestOf", mapOf("name" to session.hostName)),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    RoomStatusPill(state, session.status)
+                    Text(
+                        state.t("room.waitingStart"),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    if (session.error != null) {
+                        Text(session.error!!, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
+                    }
+                    if (session.hint.isNotBlank()) {
+                        Text(session.hint, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
+                    }
+                    OutlinedButton(onClick = onLeave, modifier = Modifier.fillMaxWidth()) {
+                        Text(state.t("room.leaveRoom"))
+                    }
+                }
+            }
+        }
+        item {
+            RoomChatPanel(state, session.chat, session::sendChat)
+        }
+    }
+}
+
+@Composable
+private fun RoomStatusPill(state: ShellState, status: RoomStatus) {
+    val label = when (status) {
+        RoomStatus.Idle -> state.t("room.connectingStatus")
+        RoomStatus.Connecting -> state.t("room.connectingStatus")
+        RoomStatus.Hosting -> state.t("room.connectedStatus")
+        RoomStatus.Joined -> state.t("room.connectedStatus")
+        RoomStatus.Reconnecting -> state.t("room.reconnectingStatus")
+        RoomStatus.Closed -> state.t("room.roomClosed")
+        RoomStatus.Error -> state.t("room.offlineLabel")
+    }
+    val color = when (status) {
+        RoomStatus.Hosting, RoomStatus.Joined -> MaterialTheme.colorScheme.primary
+        RoomStatus.Error, RoomStatus.Closed -> MaterialTheme.colorScheme.error
+        else -> MaterialTheme.colorScheme.tertiary
+    }
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = color.copy(alpha = 0.14f),
+    ) {
+        Text(
+            "● $label",
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+            style = MaterialTheme.typography.labelSmall,
+            color = color,
+        )
+    }
+}
+
+@Composable
+private fun RoomChatPanel(
+    state: ShellState,
+    messages: List<RoomChat>,
+    onSend: (String) -> Unit,
+) {
+    var text by remember { mutableStateOf("") }
+    val listState = rememberLazyListState()
+    LaunchedEffect(messages.size) {
+        if (messages.isNotEmpty()) {
+            runCatching { listState.animateScrollToItem(messages.lastIndex) }
+        }
+    }
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f)),
+        shape = RoundedCornerShape(18.dp),
+    ) {
+        Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("💬  ${state.t("room.chatTitle")}", style = MaterialTheme.typography.titleMedium)
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxWidth().height(170.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                items(messages) { message ->
+                    if (message.system) {
+                        Text(
+                            "${message.time} · ${message.text}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    } else {
+                        Text(
+                            "${message.time} · ${message.author}: ${message.text}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (message.mine) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
+                }
+            }
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it.take(200) },
+                    modifier = Modifier.weight(1f),
+                    singleLine = true,
+                    label = { Text(state.t("room.chatHint")) },
+                )
+                Button(
+                    onClick = {
+                        onSend(text)
+                        text = ""
+                    },
+                    enabled = text.isNotBlank(),
+                ) { Text(state.t("room.send")) }
+            }
+        }
+    }
+}
+
+/* --------------------------------------------------------------- mesa nativa */
+
+@Composable
+private fun NativeRoomGame(
+    state: ShellState,
+    session: NativeRoomController,
+    onExit: () -> Unit,
+) {
+    var chatOpen by remember { mutableStateOf(false) }
+    var resignOpen by remember { mutableStateOf(false) }
+    var exitOpen by remember { mutableStateOf(false) }
+    var resultOpen by remember { mutableStateOf(false) }
+    var resultShown by remember { mutableStateOf(false) }
+
+    val game = session.activeGame
+    val damas = session.damasState
+    val mancala = session.mancalaState
+    val finished = (game == RoomGame.Damas && damas?.phase == DamasPhase.MatchEnd) ||
+        (game == RoomGame.Mancala && mancala?.phase == MancalaPhase.MatchEnd)
+
+    LaunchedEffect(finished) {
+        if (finished && !resultShown) {
+            resultShown = true
+            resultOpen = true
+        } else if (!finished) {
+            resultShown = false
+        }
+    }
+
+    val myColor = if (session.isHost) DamasColor.White else DamasColor.Black
+    val mySide = if (session.isHost) MancalaSide.White else MancalaSide.Black
+    val opponentName = if (session.isHost) {
+        session.guests.firstOrNull()?.name ?: state.t("room.guestFallback")
+    } else {
+        session.hostName.ifBlank { state.t("room.hostFallback") }
+    }
+    val myName = if (session.isHost) {
+        state.name.ifBlank { state.t("room.hostFallback") }
+    } else {
+        state.name.ifBlank { state.t("room.guestFallback") }
+    }
+
+    Column(Modifier.fillMaxSize().padding(horizontal = 14.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = { exitOpen = true }) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = state.t("common.back"))
+            }
+            Column(Modifier.weight(1f)) {
+                Text(
+                    game?.title(state.language) ?: state.t("room.title"),
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    "$myName · ${state.t("room.nativeBadge")}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            TextButton(onClick = { chatOpen = true }) { Text("💬") }
+        }
+
+        val banner = when {
+            finished -> state.t("common.matchOver")
+            game == RoomGame.Damas && damas != null -> {
+                if (damas.turn == myColor) state.t("room.yourTurn")
+                else state.t("room.theirTurn", mapOf("name" to opponentName))
+            }
+            game == RoomGame.Mancala && mancala != null -> {
+                if (mancala.turn == mySide) state.t("room.yourTurn")
+                else state.t("room.theirTurn", mapOf("name" to opponentName))
+            }
+            else -> state.t("room.syncState")
+        }
+        NativeTurnBanner(text = banner, alert = false)
+
+        if (session.isHost && session.botSeat && session.inGame) {
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.16f),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+            ) {
+                Row(
+                    Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(state.t("room.botActive"), style = MaterialTheme.typography.labelSmall, modifier = Modifier.weight(1f))
+                    TextButton(onClick = { session.hostToggleBot() }) { Text(state.t("room.botOff")) }
+                }
+            }
+        }
+
+        Spacer(Modifier.height(6.dp))
+
+        when (game) {
+            RoomGame.Damas -> {
+                if (damas == null) {
+                    Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+                        Text(state.t("room.syncState"), style = MaterialTheme.typography.bodyMedium)
+                    }
+                } else {
+                    RoomDamasBoard(state, session, damas)
+                    NativeMoveLog(state, damas.history) { }
+                }
+            }
+            RoomGame.Mancala -> {
+                if (mancala == null) {
+                    Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+                        Text(state.t("room.syncState"), style = MaterialTheme.typography.bodyMedium)
+                    }
+                } else {
+                    RoomMancalaBoard(state, session, mancala)
+                }
+            }
+            null -> Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+                Text(state.t("room.syncState"))
+            }
+        }
+
+        Row(
+            Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            OutlinedButton(onClick = { session.returnToLobby() }, modifier = Modifier.weight(1f)) {
+                Text(state.t("room.backToLobby"))
+            }
+            Button(
+                onClick = { resignOpen = true },
+                enabled = !finished,
+                modifier = Modifier.weight(1f),
+            ) { Text(state.t("common.resign")) }
+            if (session.isHost && session.botSeat) {
+                OutlinedButton(onClick = { session.hostToggleBot() }) { Text("🤖") }
+            }
+        }
+    }
+
+    LaunchedEffect(session.damasState?.turn, session.botSeat, session.damasState?.history?.size) {
+        val board = session.damasState ?: return@LaunchedEffect
+        if (session.isHost && session.botSeat && board.turn == DamasColor.Black && board.phase == DamasPhase.Play) {
+            delay(620)
+            session.hostBotDamasMove()
+        }
+    }
+
+    LaunchedEffect(session.mancalaState?.turn, session.botSeat, session.mancalaState?.pits) {
+        val board = session.mancalaState ?: return@LaunchedEffect
+        if (session.isHost && session.botSeat && board.turn == MancalaSide.Black && board.phase == MancalaPhase.Play) {
+            delay(620)
+            session.hostBotMancalaMove()
+        }
+    }
+
+    if (chatOpen) {
+        AlertDialog(
+            onDismissRequest = { chatOpen = false },
+            title = { Text(state.t("room.chatTitle")) },
+            text = { RoomChatPanel(state, session.chat, session::sendChat) },
+            confirmButton = {
+                TextButton(onClick = { chatOpen = false }) { Text(state.t("common.close")) }
+            },
+        )
+    }
+
+    if (resignOpen) {
+        AlertDialog(
+            onDismissRequest = { resignOpen = false },
+            title = { Text(state.t("common.resign")) },
+            text = { Text(state.t("common.resignConfirm")) },
+            confirmButton = {
+                TextButton(onClick = {
+                    resignOpen = false
+                    if (session.isHost) session.hostResign() else session.guestResign()
+                }) { Text(state.t("common.confirm")) }
+            },
+            dismissButton = {
+                TextButton(onClick = { resignOpen = false }) { Text(state.t("common.cancel")) }
+            },
+        )
+    }
+
+    if (exitOpen) {
+        AlertDialog(
+            onDismissRequest = { exitOpen = false },
+            title = { Text(state.t("room.leaveRoom")) },
+            text = { Text(state.t("room.leaveConfirm")) },
+            confirmButton = {
+                TextButton(onClick = {
+                    exitOpen = false
+                    onExit()
+                }) { Text(state.t("common.confirm")) }
+            },
+            dismissButton = {
+                TextButton(onClick = { exitOpen = false }) { Text(state.t("common.cancel")) }
+            },
+        )
+    }
+
+    if (resultOpen && finished) {
+        val draw = (game == RoomGame.Damas && damas?.draw == true) ||
+            (game == RoomGame.Mancala && mancala?.whiteStore == mancala?.blackStore)
+        val won = when (game) {
+            RoomGame.Damas -> damas?.winner == myColor
+            RoomGame.Mancala -> mancala?.winner == mySide
+            null -> false
+        }
+        AlertDialog(
+            onDismissRequest = { resultOpen = false },
+            title = {
+                Text(
+                    when {
+                        draw -> state.t("room.drawMatch")
+                        won -> state.t("room.matchWon")
+                        else -> state.t("room.matchLost", mapOf("name" to opponentName))
+                    },
+                )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    if (game == RoomGame.Damas && damas != null) {
+                        Text(state.t("damas.whitePieces", mapOf("n" to damas.board.count { it?.color == DamasColor.White })))
+                        Text(state.t("damas.blackPieces", mapOf("n" to damas.board.count { it?.color == DamasColor.Black })))
+                    }
+                    if (game == RoomGame.Mancala && mancala != null) {
+                        Text("${state.t("mancala.you")}: ${mancala.whiteStore} · ${opponentName}: ${mancala.blackStore}")
+                    }
+                    Text(
+                        state.t("replay.note"),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            },
+            confirmButton = {
+                if (session.isHost) {
+                    TextButton(onClick = {
+                        resultOpen = false
+                        session.startMatch()
+                    }) { Text(state.t("room.rematch")) }
+                } else {
+                    TextButton(onClick = {
+                        resultOpen = false
+                        session.returnToLobby()
+                    }) { Text(state.t("room.backToLobby")) }
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { resultOpen = false }) { Text(state.t("common.close")) }
+            },
+        )
+    }
+}
+
+@Composable
+private fun RoomDamasBoard(
+    state: ShellState,
+    session: NativeRoomController,
+    board: DamasState,
+) {
+    var selected by remember { mutableStateOf<Int?>(null) }
+    val myColor = if (session.isHost) DamasColor.White else DamasColor.Black
+    val myTurn = board.phase == DamasPhase.Play && board.turn == myColor
+    val legal = remember(board) {
+        if (board.phase == DamasPhase.Play) session.damasLegalMoves() else emptyList()
+    }
+    val targets = remember(selected, legal, myTurn) {
+        if (selected == null || !myTurn) emptyList() else legal.filter { it.from == selected }
+    }
+
+    LaunchedEffect(board.mustContinueFrom, board.history.size) {
+        selected = board.mustContinueFrom
+    }
+
+    BoxWithConstraints(
+        Modifier
+            .fillMaxWidth()
+            .aspectRatio(1f)
+            .clip(RoundedCornerShape(12.dp))
+            .border(2.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(12.dp)),
+    ) {
+        val cell = maxWidth / 8
+        val flip = myColor == DamasColor.Black
+        Column(Modifier.fillMaxSize()) {
+            for (row in 0 until 8) {
+                Row(Modifier.weight(1f).fillMaxWidth()) {
+                    for (col in 0 until 8) {
+                        val index = if (flip) 63 - (row * 8 + col) else row * 8 + col
+                        val dark = DamasGame.isDark(index)
+                        val piece = board.board[index]
+                        val isSelected = selected == index
+                        val isTarget = targets.any { it.to == index }
+                        val isLast = board.lastMove?.let { it.from == index || it.to == index } == true
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                                .background(
+                                    when {
+                                        isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)
+                                        isLast -> Color(0x55E0A63A)
+                                        dark -> Color(0xFF6E4A32)
+                                        else -> Color(0xFFE9D8B4)
+                                    },
+                                )
+                                .clickable {
+                                    if (!myTurn) return@clickable
+                                    if (selected != null) {
+                                        val move = targets.firstOrNull { it.to == index }
+                                        if (move != null) {
+                                            if (session.isHost) session.hostDamasMove(move.from, move.to)
+                                            else session.guestDamasMove(move.from, move.to)
+                                            selected = null
+                                            return@clickable
+                                        }
+                                    }
+                                    if (piece?.color == myColor) {
+                                        selected = if (selected == index) null else index
+                                    }
+                                }
+                                .semantics {
+                                    contentDescription = buildString {
+                                        append(DamasGame.square(index))
+                                        if (piece != null) {
+                                            append(", ")
+                                            append(
+                                                if (piece.color == DamasColor.White) state.t("damas.white")
+                                                else state.t("damas.black"),
+                                            )
+                                            if (piece.king) append(" ♛")
+                                        }
+                                    }
+                                },
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            if (piece != null) {
+                                val white = piece.color == DamasColor.White
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(cell * 0.10f)
+                                        .background(if (white) Color(0xFFFFF6E2) else Color(0xFF241A13), CircleShape)
+                                        .border(
+                                            (cell.value * 0.025f).dp,
+                                            if (white) Color(0xFF8A6A45) else Color(0xFF0B0806),
+                                            CircleShape,
+                                        ),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Text(
+                                        if (piece.king) "♛" else "",
+                                        fontSize = (cell.value * 0.38f).sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (white) Color(0xFF3A2817) else Color(0xFFE9C46A),
+                                    )
+                                }
+                            }
+                            if (isTarget) {
+                                Box(
+                                    Modifier
+                                        .size(cell * 0.22f)
+                                        .clip(CircleShape)
+                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)),
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Row(
+        Modifier.fillMaxWidth().padding(top = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(
+            "● ${board.board.count { it?.color == DamasColor.White }} · ○ ${board.board.count { it?.color == DamasColor.Black }}",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            state.t(
+                "damas.kings",
+                mapOf(
+                    "w" to board.board.count { it?.color == DamasColor.White && it.king },
+                    "b" to board.board.count { it?.color == DamasColor.Black && it.king },
+                ),
+            ),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun RoomMancalaBoard(
+    state: ShellState,
+    session: NativeRoomController,
+    board: MancalaState,
+) {
+    val mySide = if (session.isHost) MancalaSide.White else MancalaSide.Black
+    val otherSide = if (mySide == MancalaSide.White) MancalaSide.Black else MancalaSide.White
+    val myTurn = board.phase == MancalaPhase.Play && board.turn == mySide
+    val playable = remember(board, mySide) {
+        if (board.phase != MancalaPhase.Play || board.turn != mySide) emptyList()
+        else MancalaGame.sidePits(mySide).filter { board.pits.getOrElse(it) { 0 } > 0 }
+    }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(18.dp))
+            .background(Color(0xFF7B4E2E))
+            .padding(12.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Text(
+            state.t("mancala.you") + ": " + board.pits[MancalaGame.store(mySide)],
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = Color(0xFFFFE0A3),
+        )
+        Row(
+            Modifier.fillMaxWidth().height(240.dp),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            StorePit(state.t("mancala.player2"), board.pits[MancalaGame.store(otherSide)], Modifier.weight(0.7f))
+            Column(Modifier.weight(3f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    for (pit in MancalaGame.sidePits(otherSide)) {
+                        MancalaPit(
+                            count = board.pits[pit],
+                            enabled = false,
+                            label = "${state.t("mancala.player2")} ${pit + 1}",
+                            modifier = Modifier.weight(1f),
+                        ) { }
+                    }
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    for (pit in MancalaGame.sidePits(mySide)) {
+                        MancalaPit(
+                            count = board.pits[pit],
+                            enabled = myTurn && pit in playable,
+                            label = "${state.t("mancala.you")} ${pit + 1}",
+                            modifier = Modifier.weight(1f),
+                        ) { if (session.isHost) session.hostMancalaSow(pit) else session.guestMancalaSow(pit) }
+                    }
+                }
+            }
+            StorePit(state.t("mancala.you"), board.pits[MancalaGame.store(mySide)], Modifier.weight(0.7f))
+        }
+        Text(
+            state.t("mancala.rules"),
+            style = MaterialTheme.typography.labelSmall,
+            color = Color(0xFFEADBC8),
+        )
+        if (board.lastCapture != null) {
+            Text(
+                state.t("mancala.capture", mapOf("n" to board.lastCapture)),
+                style = MaterialTheme.typography.labelSmall,
+                color = Color(0xFFFFE0A3),
+            )
+        }
+    }
+}
+
+@Composable
+private fun StorePit(label: String, count: Int, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(18.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+            .padding(vertical = 18.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Text(count.toString(), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Composable
+private fun MancalaPit(
+    count: Int,
+    enabled: Boolean,
+    label: String,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier = modifier
+            .aspectRatio(1f)
+            .clip(CircleShape)
+            .background(
+                if (enabled) MaterialTheme.colorScheme.primary.copy(alpha = 0.22f)
+                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+            )
+            .border(
+                1.dp,
+                if (enabled) MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+                else MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
+                CircleShape,
+            )
+            .then(if (enabled) Modifier.clickable(onClick = onClick) else Modifier)
+            .semantics { contentDescription = "$label: $count" },
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            count.toString(),
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = if (enabled) FontWeight.Bold else FontWeight.Normal,
+            color = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+/* --------------------------------------------------------------- sala web */
+
+@Composable
+private fun WebRoomTab(state: ShellState, onOpenWeb: (String) -> Unit) {
+    var code by remember { mutableStateOf("") }
+    var selectedGame by remember { mutableStateOf("caida") }
+    val qr = remember { generateQrBitmap("https://emanuelindustri-source.github.io/mesa-viva/play/#/room") }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 14.dp, bottom = 30.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
         item {
             Card(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
                 shape = RoundedCornerShape(18.dp),
             ) {
                 Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("📶  ${state.t("room.lan")}", style = MaterialTheme.typography.titleMedium)
+                    Text("🌐  ${state.t("room.lan")}", style = MaterialTheme.typography.titleMedium)
                     Text(
                         state.t("room.lanDesc"),
                         style = MaterialTheme.typography.bodySmall,
@@ -169,7 +1203,7 @@ fun RoomScreen(state: ShellState, onOpenWeb: (String) -> Unit) {
                                     modifier = Modifier.weight(1f),
                                 )
                             } else {
-                                androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
+                                Spacer(Modifier.weight(1f))
                             }
                         }
                     }

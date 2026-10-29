@@ -132,6 +132,8 @@ fun NativeHistoryDialog(
     entries: List<String>,
     pdfTitle: String = state.t("common.history"),
     pdfSubtitle: String = state.t("app.name"),
+    stats: List<Pair<String, String>> = emptyList(),
+    onReplay: (() -> Unit)? = null,
     onClose: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -155,8 +157,16 @@ fun NativeHistoryDialog(
         },
         confirmButton = {
             Row {
+                if (onReplay != null) {
+                    TextButton(onClick = {
+                        onClose()
+                        onReplay()
+                    }) {
+                        Text(state.t("common.replay"))
+                    }
+                }
                 TextButton(onClick = {
-                    val export = exportChroniclePdf(context, pdfTitle, pdfSubtitle, entries)
+                    val export = exportChroniclePdf(context, pdfTitle, pdfSubtitle, entries, stats)
                     if (export == null) {
                         Toast.makeText(context, state.t("common.pdfError"), Toast.LENGTH_SHORT).show()
                     } else {

@@ -120,6 +120,7 @@ fun SnakesGameScreen(state: ShellState, onBack: () -> Unit) {
         val player = players[current]
         rolling = true
         state.vibrate(context, 28)
+        NativeAudio.play(context, NativeAudio.Sfx.Dice, state.sfx)
         scope.launch {
             repeat(9) {
                 dice = Random.nextInt(1, 7)
@@ -162,6 +163,12 @@ fun SnakesGameScreen(state: ShellState, onBack: () -> Unit) {
                 winner = player
                 message = label("snakes.winner", "name" to player.name)
                 state.vibrate(context, 160)
+                state.awardMatch(win = !player.isBot)
+                NativeAudio.play(
+                    context,
+                    if (player.isBot) NativeAudio.Sfx.Lose else NativeAudio.Sfx.Win,
+                    state.sfx,
+                )
             } else {
                 current = (current + 1) % players.size
             }

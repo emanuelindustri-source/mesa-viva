@@ -1,15 +1,32 @@
 ﻿# Roadmap
 
-## v1.5.0 · La mesa conectada (próxima)
+## v1.6.0 · La mesa grande (próxima)
 
-- [ ] Salas nativas host/invitado para al menos dos juegos Compose, con reconexión visible.
-- [ ] Replays con semilla y exportación.
-- [ ] Accesibilidad completa, audio nativo y localización de historiales.
-- [ ] Teléfono físico, LAN real, AAB y checklist de Play Store.
-- [ ] Gradle 8.14.4+, perfil de rendimiento y arranque en frío.
-- [ ] Retirada del WebView de respaldo al desacoplar la PWA y la sala online.
+- [ ] Salas nativas de 3–8 jugadores: Dominó, Ludo, Serpientes y Damas Chinas.
+- [ ] Relay online nativo y reconexión entre redes.
+- [ ] Replay exportable y PDF con línea de tiempo.
+- [ ] Accesibilidad completa y audio en las quince mesas.
+- [ ] Teléfono físico, LAN real y checklist de Play Store.
+- [ ] Perfil de rendimiento y arranque en frío.
+- [ ] Retirada del WebView de respaldo al desacoplar la PWA y la sala remota.
 
-## v1.4.0 · Crónica y accesibilidad (actual)
+## v1.5.0 · La mesa conectada (actual)
+
+- [x] Salas nativas LAN host/invitado para Damas y Mancala, con QR, chat y reconexión.
+- [x] Escáner QR integrado y enlace `mesaviva://join`.
+- [x] Bot de relleno y recuperación del asiento al reconectar.
+- [x] Replays con semilla en Damas y Mancala.
+- [x] PDF con tarjeta de estadísticas.
+- [x] Audio nativo procedural por festividad y efectos en diez mesas.
+- [x] XP real, racha y mejor racha al terminar partidas.
+- [x] 95 pruebas verdes (30 web + 65 Kotlin).
+- [x] Gradle 8.14.4, APK y AAB de release firmados.
+- [x] Evidencia visual y PDF real en `docs/evidence/v1.5.0/`.
+- [ ] Salas nativas de 3–8 jugadores y relay online nativo (v1.6.0).
+- [ ] Teléfono físico bloqueado por MIUI.
+- [ ] Accesibilidad completa y replay exportable.
+
+## v1.4.0 · Crónica y accesibilidad
 
 - [x] Crónica PDF nativa en las quince mesas, con Descargas y compartición.
 - [x] PDF multipágina con título, fecha, historial y paginación.
