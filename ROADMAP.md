@@ -1,4 +1,4 @@
-# Roadmap
+﻿# Roadmap
 
 ## v1.4.0 · La mesa conectada (próxima)
 
@@ -14,7 +14,7 @@
 - [x] Póker Texas Hold'em nativo en Compose, con ciegas, calles, all-in, botes laterales y showdown.
 - [x] Evaluador de la mejor mano de 5 entre 7 y bots con tres dificultades.
 - [x] Quince juegos 100 % Compose; el WebView queda como respaldo.
-- [x] 55 pruebas Kotlin + 30 web = **85**.
+- [x] 56 pruebas Kotlin + 30 web = **86**.
 - [x] APK y AAB de release firmados; Póker verificado en emulador Android 14.
 - [x] Evidencia visual en `docs/evidence/v1.3.0/`.
 - [ ] Salas nativas, PDF/replays y accesibilidad.
@@ -49,7 +49,7 @@
 - [x] Mancala nativo en Compose: siembra, captura, turno extra y bots.
 - [x] Backgammon nativo en Compose: barra, dobles, bear-off, pips y bots.
 - [x] Seis juegos 100 % Compose: Serpientes, Dominó, Ajedrez, Ludo, Mancala y Backgammon.
-- [x] 17 pruebas Kotlin + 30 web = 47.
+- [x] 18 pruebas Kotlin + 30 web = 47.
 - [x] APK release firmado y AAB de release.
 - [x] Evidencia visual en `docs/evidence/v1.0.0/`.
 - [ ] Salas online nativas para los seis juegos Compose.
@@ -188,3 +188,4 @@ Pulido de onboarding, cartas/fichas, coordenadas de tablero y CI Android. La bas
 3. **Mesa segura.** El host valida; el invitado nunca ve lo que no debe.
 4. **Cultura venezolana con respeto.** Caída, dominó, leyendas y festividades, sin caricaturizar.
 5. **Accesible y hospitalaria.** 11 idiomas, movimiento reducido, alto contraste y un tono cálido.
+

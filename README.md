@@ -1,4 +1,4 @@
-# Mesa Viva · La fiesta se juega en tu mesa
+﻿# Mesa Viva · La fiesta se juega en tu mesa
 
 **Mesa Viva** es una aplicación de juegos de cartas y mesa con alma venezolana. Funciona sin conexión para jugar solo, contra bots o pasando el teléfono; y tiene salas en línea con código y QR para jugar con amigos. La web y el APK Android comparten el mismo motor de juego.
 
@@ -137,7 +137,7 @@ npm run test:relay            # requiere npm run rooms en otra terminal
 python tools/check_i18n.py   # claves usadas vs. catálogo español
 ```
 
-- 30 pruebas de motores web + 55 pruebas de motores nativos Kotlin (los quince juegos, incluidos Póker, Caída y Furia). **85 en total**.
+- 30 pruebas de motores web + 56 pruebas de motores nativos Kotlin (los quince juegos, incluidos Póker, Caída y Furia). **86 en total**.
 - TypeScript estricto, sin `any` en la capa de motores.
 - Motor determinista con semilla reproducible.
 - Host autoritativo en red; los clientes solo reciben su vista redactada.
@@ -172,3 +172,4 @@ Código bajo licencia **MIT** (ver `LICENSE`). El arte, los textos, la música y
 Cada release tiene un archivo inmutable en [`versions/`](./versions/README.md) con alcance, pruebas, enlaces, checksums y problemas conocidos. No se borran las versiones anteriores.
 
 Hecho con cariño para Venezuela y el mundo.
+

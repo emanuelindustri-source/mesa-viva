@@ -11,7 +11,7 @@ La mesa completa.
 - **Showdown nativo**: filas por jugador, mano, cartas ganadoras, bote repartido y siguiente mano.
 - Bots con fuerza de mano, pot odds, agresividad y tres dificultades.
 - `PokerCardFace` con baraja francesa, reverso y estados de carta.
-- 7 pruebas Kotlin nuevas; **85 pruebas en total** (30 web + 55 nativas).
+- 8 pruebas Kotlin nuevas; **86 pruebas en total** (30 web + 55 nativas).
 - Evidencia visual en `docs/evidence/v1.3.0/`.
 
 ### Cambiado
@@ -389,4 +389,5 @@ Primera mesa funcional.
 - El catálogo muestra 30 juegos con su estado; los jugables son los 8 anteriores.
 - El APK de CI es de depuración; la firma de release se documenta en `docs/DEPLOY.md`.
 - Reglas de juegos tradicionales adaptadas y documentadas como variante Mesa Viva.
+
 

@@ -739,4 +739,29 @@ class NativeGamesTest {
         assertEquals(0, result.state.handWinner?.seat)
         assertTrue((result.state.players[0].chips) > 800)
     }
+
+    @Test
+    fun `poker showdown splits main and side pots`() {
+        val game = PokerGame(playerCount = 3, seed = 36)
+        val base = game.newMatch()
+        fun c(rank: Int, suit: PokerSuit) = PokerCard("$suit-$rank", suit, rank)
+        val community = listOf(
+            c(2, PokerSuit.Clubs), c(7, PokerSuit.Diamonds), c(9, PokerSuit.Hearts),
+            c(11, PokerSuit.Spades), c(4, PokerSuit.Clubs),
+        )
+        val state = base.copy(
+            players = listOf(
+                base.players[0].copy(hole = listOf(c(14, PokerSuit.Spades), c(14, PokerSuit.Hearts)), totalBet = 10),
+                base.players[1].copy(hole = listOf(c(13, PokerSuit.Diamonds), c(13, PokerSuit.Hearts)), totalBet = 20),
+                base.players[2].copy(hole = listOf(c(12, PokerSuit.Diamonds), c(12, PokerSuit.Hearts)), totalBet = 20),
+            ),
+            community = community,
+            street = PokerStreet.River,
+            currentBet = 0,
+        )
+        val result = game.resolveShowdownForTest(state)
+        assertEquals(0, result.state.handWinner?.seat)
+        assertTrue((result.state.players[0].chips) > 800)
+        assertTrue((result.state.players[1].chips) > 800)
+    }
 }

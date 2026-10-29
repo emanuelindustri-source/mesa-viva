@@ -1,4 +1,4 @@
-# Relevo del proyecto · Mesa Viva
+﻿# Relevo del proyecto · Mesa Viva
 
 > **No borrar.** Este archivo existe para que cualquier chat, persona o IA sepa dónde quedó el proyecto. Se actualiza al cerrar cada versión, pero no se elimina.
 
@@ -18,8 +18,8 @@
 ### Calidad
 
 - 30/30 pruebas de motores web.
-- 55/55 pruebas Kotlin (los quince juegos, incluidos Póker, Caída y Furia).
-- **85 pruebas en total.**
+- 56/56 pruebas Kotlin (los quince juegos, incluidos Póker, Caída y Furia).
+- **86 pruebas en total.**
 - TypeScript sin errores.
 - Web compilada con Vite 6.4.5 y sincronizada dentro del APK.
 - APK debug, APK release firmado y AAB release firmado.
@@ -105,3 +105,4 @@ cd android && gradlew.bat bundleRelease
 4. No guardar tokens, contraseñas ni keystores en el repositorio.
 5. Antes de publicar: typecheck, tests web, tests Kotlin, build web, APK, AAB, CI/Pages/Android.
 6. No afirmar “100 % Compose” global hasta retirar el WebView de los 15 juegos. **Estado v1.3.0: los quince juegos jugables ya son Compose; el WebView solo queda como respaldo.**
+
