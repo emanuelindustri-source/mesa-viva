@@ -1,5 +1,10 @@
 package com.mesaviva.app.shell
 
+import com.mesaviva.app.games.BriscaPhase
+import com.mesaviva.app.games.BriscaPlay
+import com.mesaviva.app.games.BriscaSeat
+import com.mesaviva.app.games.BriscaState
+import com.mesaviva.app.games.BriscaTrick
 import com.mesaviva.app.games.DamasChecker
 import com.mesaviva.app.games.DamasColor
 import com.mesaviva.app.games.DamasGame
@@ -15,6 +20,14 @@ import com.mesaviva.app.games.DominoTile
 import com.mesaviva.app.games.MancalaPhase
 import com.mesaviva.app.games.MancalaSide
 import com.mesaviva.app.games.MancalaState
+import com.mesaviva.app.games.SpanishCard
+import com.mesaviva.app.games.SpanishSuit
+import com.mesaviva.app.games.TrucoChallenge
+import com.mesaviva.app.games.TrucoPhase
+import com.mesaviva.app.games.TrucoPlay
+import com.mesaviva.app.games.TrucoSeat
+import com.mesaviva.app.games.TrucoState
+import com.mesaviva.app.games.TrucoTrick
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -305,6 +318,322 @@ internal object RoomCodec {
                 "black" -> MancalaSide.Black
                 else -> null
             },
+        )
+    }
+
+    /* --------------------------------------------------------- baraja española */
+
+    private fun cardToJson(card: SpanishCard): JSONObject = JSONObject()
+        .put("id", card.id)
+        .put("suit", card.suit.name)
+        .put("rank", card.rank)
+
+    private fun cardFromJson(json: JSONObject?): SpanishCard? {
+        if (json == null) return null
+        val id = json.optString("id").takeIf { it.isNotBlank() } ?: return null
+        val suit = runCatching { SpanishSuit.valueOf(json.optString("suit")) }.getOrNull() ?: return null
+        val rank = json.optInt("rank", 0)
+        if (rank !in 1..12) return null
+        return SpanishCard(id, suit, rank)
+    }
+
+    private fun cardsToJson(cards: List<SpanishCard>): JSONArray = JSONArray().apply {
+        cards.forEach { put(cardToJson(it)) }
+    }
+
+    /**
+     * Cartas ocultas: no viajan los rangos ni los palos reales. Solo se envía
+     * la cantidad para que la mesa dibuje los dorsos del rival.
+     */
+    private fun hiddenCards(prefix: String, count: Int): JSONArray = JSONArray().apply {
+        repeat(count.coerceAtLeast(0)) { index ->
+            put(cardToJson(SpanishCard("$prefix-$index", SpanishSuit.Oros, 2)))
+        }
+    }
+
+    fun briscaToJson(board: BriscaState, viewerSeat: Int): JSONObject {
+        val seats = JSONArray()
+        board.seats.forEachIndexed { index, seat ->
+            val own = index == viewerSeat
+            seats.put(
+                JSONObject()
+                    .put("name", seat.name)
+                    .put("bot", seat.isBot)
+                    .put("team", seat.team ?: JSONObject.NULL)
+                    .put("handCount", board.hands.getOrElse(index) { emptyList() }.size)
+                    .put("hand", if (own) cardsToJson(board.hands.getOrElse(index) { emptyList() }) else hiddenCards("h$index", board.hands.getOrElse(index) { emptyList() }.size)),
+            )
+        }
+        val trick = JSONArray()
+        board.trick.forEach { play ->
+            trick.put(JSONObject().put("seat", play.seat).put("card", cardToJson(play.card)))
+        }
+        val lastTrick = board.lastTrick?.let { last ->
+            JSONObject()
+                .put("winner", last.winner)
+                .put("points", last.points)
+                .put("plays", JSONArray().apply {
+                    last.plays.forEach { play ->
+                        put(JSONObject().put("seat", play.seat).put("card", cardToJson(play.card)))
+                    }
+                })
+        } ?: JSONObject.NULL
+        return JSONObject()
+            .put("k", "state")
+            .put("game", RoomGame.Brisca.id)
+            .put("viewer", viewerSeat)
+            .put("seats", seats)
+            .put("scores", JSONArray(board.scores))
+            .put("deck", hiddenCards("deck", board.deck.size))
+            .put("trumpCard", board.trumpCard?.let { cardToJson(it) } ?: JSONObject.NULL)
+            .put("trumpSuit", board.trumpSuit.name)
+            .put("leader", board.leader)
+            .put("turn", board.turn)
+            .put("dealer", board.dealer)
+            .put("handNo", board.handNo)
+            .put("target", board.target)
+            .put("teams", board.teams)
+            .put("phase", when (board.phase) {
+                BriscaPhase.Playing -> "playing"
+                BriscaPhase.HandEnd -> "handend"
+                BriscaPhase.MatchEnd -> "matchend"
+            })
+            .put("trick", trick)
+            .put("lastTrick", lastTrick)
+            .put("capturedPoints", JSONArray(board.capturedPoints))
+            .put("lastPlay", board.lastPlay?.let {
+                JSONObject().put("seat", it.seat).put("card", cardToJson(it.card))
+            } ?: JSONObject.NULL)
+            .put("winner", board.winner ?: JSONObject.NULL)
+            .put("draw", board.draw)
+            .put("reason", board.reason ?: JSONObject.NULL)
+            .put("history", JSONArray(board.history))
+    }
+
+    fun briscaFromJson(json: JSONObject): BriscaState? {
+        val seatsJson = json.optJSONArray("seats") ?: return null
+        if (seatsJson.length() !in 2..4) return null
+        val seats = mutableListOf<BriscaSeat>()
+        val hands = mutableListOf<List<SpanishCard>>()
+        for (index in 0 until seatsJson.length()) {
+            val entry = seatsJson.optJSONObject(index) ?: return null
+            seats.add(
+                BriscaSeat(
+                    name = entry.optString("name", "Jugador ${index + 1}"),
+                    isBot = entry.optBoolean("bot"),
+                    team = if (entry.isNull("team")) null else entry.optInt("team"),
+                ),
+            )
+            val handJson = entry.optJSONArray("hand") ?: JSONArray()
+            hands.add((0 until handJson.length()).mapNotNull { cardFromJson(handJson.optJSONObject(it)) })
+        }
+        val scoresJson = json.optJSONArray("scores") ?: JSONArray()
+        val scores = (0 until seats.size).map { scoresJson.optInt(it, 0) }
+        val capturedJson = json.optJSONArray("capturedPoints") ?: JSONArray()
+        val captured = (0 until seats.size).map { capturedJson.optInt(it, 0) }
+        val deckJson = json.optJSONArray("deck") ?: JSONArray()
+        val deck = (0 until deckJson.length()).mapNotNull { cardFromJson(deckJson.optJSONObject(it)) }
+        val trickJson = json.optJSONArray("trick") ?: JSONArray()
+        val trick = (0 until trickJson.length()).mapNotNull { entry ->
+            val play = trickJson.optJSONObject(entry) ?: return@mapNotNull null
+            val card = cardFromJson(play.optJSONObject("card")) ?: return@mapNotNull null
+            BriscaPlay(play.optInt("seat"), card)
+        }
+        val lastTrick = json.optJSONObject("lastTrick")?.let { last ->
+            val playsJson = last.optJSONArray("plays") ?: JSONArray()
+            val plays = (0 until playsJson.length()).mapNotNull { entry ->
+                val play = playsJson.optJSONObject(entry) ?: return@mapNotNull null
+                val card = cardFromJson(play.optJSONObject("card")) ?: return@mapNotNull null
+                BriscaPlay(play.optInt("seat"), card)
+            }
+            BriscaTrick(plays, last.optInt("winner"), last.optInt("points"))
+        }
+        val lastPlay = json.optJSONObject("lastPlay")?.let {
+            val card = cardFromJson(it.optJSONObject("card")) ?: return@let null
+            BriscaPlay(it.optInt("seat"), card)
+        }
+        val historyJson = json.optJSONArray("history") ?: JSONArray()
+        val history = (0 until historyJson.length()).map { historyJson.optString(it) }
+        return BriscaState(
+            seats = seats,
+            scores = scores,
+            hands = hands,
+            deck = deck,
+            trumpCard = cardFromJson(json.optJSONObject("trumpCard")),
+            trumpSuit = runCatching { SpanishSuit.valueOf(json.optString("trumpSuit")) }.getOrDefault(SpanishSuit.Oros),
+            leader = json.optInt("leader").coerceIn(0, seats.lastIndex),
+            turn = json.optInt("turn").coerceIn(0, seats.lastIndex),
+            dealer = json.optInt("dealer").coerceIn(0, seats.lastIndex),
+            handNo = json.optInt("handNo", 1),
+            target = json.optInt("target", 100),
+            teams = json.optBoolean("teams"),
+            phase = when (json.optString("phase")) {
+                "handend" -> BriscaPhase.HandEnd
+                "matchend" -> BriscaPhase.MatchEnd
+                else -> BriscaPhase.Playing
+            },
+            trick = trick,
+            lastTrick = lastTrick,
+            capturedPoints = captured,
+            lastPlay = lastPlay,
+            winner = if (json.isNull("winner")) null else json.optInt("winner"),
+            draw = json.optBoolean("draw"),
+            reason = if (json.isNull("reason")) null else json.optString("reason"),
+            history = history,
+        )
+    }
+
+    fun trucoToJson(board: TrucoState, viewerSeat: Int): JSONObject {
+        val seats = JSONArray()
+        board.seats.forEachIndexed { index, seat ->
+            val own = index == viewerSeat
+            seats.put(
+                JSONObject()
+                    .put("name", seat.name)
+                    .put("bot", seat.isBot)
+                    .put("handCount", board.hands.getOrElse(index) { emptyList() }.size)
+                    .put("hand", if (own) cardsToJson(board.hands.getOrElse(index) { emptyList() }) else hiddenCards("th$index", board.hands.getOrElse(index) { emptyList() }.size)),
+            )
+        }
+        val current = JSONArray()
+        board.currentTrick.forEach { play ->
+            current.put(JSONObject().put("seat", play.seat).put("card", cardToJson(play.card)))
+        }
+        val tricks = JSONArray()
+        board.tricks.forEach { trick ->
+            tricks.put(
+                JSONObject()
+                    .put("winner", trick.winner ?: JSONObject.NULL)
+                    .put("plays", JSONArray().apply {
+                        trick.plays.forEach { play ->
+                            put(JSONObject().put("seat", play.seat).put("card", cardToJson(play.card)))
+                        }
+                    }),
+            )
+        }
+        val pending = board.pending?.let {
+            JSONObject()
+                .put("caller", it.caller)
+                .put("kind", it.kind)
+                .put("stake", it.stake)
+                .put("previousStake", it.previousStake)
+                .put("awaiting", it.awaiting)
+        } ?: JSONObject.NULL
+        return JSONObject()
+            .put("k", "state")
+            .put("game", RoomGame.Truco.id)
+            .put("viewer", viewerSeat)
+            .put("seats", seats)
+            .put("scores", JSONArray(board.scores))
+            .put("dealer", board.dealer)
+            .put("mano", board.mano)
+            .put("turn", board.turn)
+            .put("handNo", board.handNo)
+            .put("target", board.target)
+            .put("phase", when (board.phase) {
+                TrucoPhase.Envido -> "envido"
+                TrucoPhase.Play -> "play"
+                TrucoPhase.HandEnd -> "handend"
+                TrucoPhase.MatchEnd -> "matchend"
+            })
+            .put("trickLeader", board.trickLeader)
+            .put("currentTrick", current)
+            .put("tricks", tricks)
+            .put("trickWins", JSONArray(board.trickWins))
+            .put("handStake", board.handStake)
+            .put("trucoLevel", board.trucoLevel)
+            .put("envidoCalled", board.envidoCalled)
+            .put("envidoBet", board.envidoBet)
+            .put("envidoWinner", board.envidoWinner ?: JSONObject.NULL)
+            .put("envidoReveal", board.envidoReveal?.let { JSONArray(it) } ?: JSONObject.NULL)
+            .put("pending", pending)
+            .put("handWinner", board.handWinner ?: JSONObject.NULL)
+            .put("handPoints", board.handPoints)
+            .put("lastAction", board.lastAction ?: JSONObject.NULL)
+            .put("winner", board.winner ?: JSONObject.NULL)
+            .put("draw", board.draw)
+            .put("reason", board.reason ?: JSONObject.NULL)
+            .put("history", JSONArray(board.history))
+    }
+
+    fun trucoFromJson(json: JSONObject): TrucoState? {
+        val seatsJson = json.optJSONArray("seats") ?: return null
+        if (seatsJson.length() != 2) return null
+        val seats = mutableListOf<TrucoSeat>()
+        val hands = mutableListOf<List<SpanishCard>>()
+        for (index in 0 until 2) {
+            val entry = seatsJson.optJSONObject(index) ?: return null
+            seats.add(TrucoSeat(entry.optString("name", "Jugador ${index + 1}"), entry.optBoolean("bot")))
+            val handJson = entry.optJSONArray("hand") ?: JSONArray()
+            hands.add((0 until handJson.length()).mapNotNull { cardFromJson(handJson.optJSONObject(it)) })
+        }
+        val scoresJson = json.optJSONArray("scores") ?: JSONArray()
+        val scores = (0 until 2).map { scoresJson.optInt(it, 0) }
+        val currentJson = json.optJSONArray("currentTrick") ?: JSONArray()
+        val current = (0 until currentJson.length()).mapNotNull { index ->
+            val play = currentJson.optJSONObject(index) ?: return@mapNotNull null
+            val card = cardFromJson(play.optJSONObject("card")) ?: return@mapNotNull null
+            TrucoPlay(play.optInt("seat"), card)
+        }
+        val tricksJson = json.optJSONArray("tricks") ?: JSONArray()
+        val tricks = (0 until tricksJson.length()).mapNotNull { index ->
+            val trick = tricksJson.optJSONObject(index) ?: return@mapNotNull null
+            val playsJson = trick.optJSONArray("plays") ?: JSONArray()
+            val plays = (0 until playsJson.length()).mapNotNull { entryIndex ->
+                val play = playsJson.optJSONObject(entryIndex) ?: return@mapNotNull null
+                val card = cardFromJson(play.optJSONObject("card")) ?: return@mapNotNull null
+                TrucoPlay(play.optInt("seat"), card)
+            }
+            TrucoTrick(plays, if (trick.isNull("winner")) null else trick.optInt("winner"))
+        }
+        val winsJson = json.optJSONArray("trickWins") ?: JSONArray()
+        val wins = (0 until 2).map { winsJson.optInt(it, 0) }
+        val revealJson = json.optJSONArray("envidoReveal")
+        val reveal = revealJson?.let { array -> (0 until array.length()).map { array.optInt(it) } }
+        val pending = json.optJSONObject("pending")?.let {
+            TrucoChallenge(
+                caller = it.optInt("caller"),
+                kind = it.optString("kind", "envido"),
+                stake = it.optInt("stake", 1),
+                previousStake = it.optInt("previousStake", 1),
+                awaiting = it.optInt("awaiting").coerceIn(0, 1),
+            )
+        }
+        val historyJson = json.optJSONArray("history") ?: JSONArray()
+        val history = (0 until historyJson.length()).map { historyJson.optString(it) }
+        return TrucoState(
+            seats = seats,
+            scores = scores,
+            hands = hands,
+            dealer = json.optInt("dealer").coerceIn(0, 1),
+            mano = json.optInt("mano").coerceIn(0, 1),
+            turn = json.optInt("turn").coerceIn(0, 1),
+            handNo = json.optInt("handNo", 1),
+            target = json.optInt("target", 30),
+            phase = when (json.optString("phase")) {
+                "envido" -> TrucoPhase.Envido
+                "handend" -> TrucoPhase.HandEnd
+                "matchend" -> TrucoPhase.MatchEnd
+                else -> TrucoPhase.Play
+            },
+            trickLeader = json.optInt("trickLeader").coerceIn(0, 1),
+            currentTrick = current,
+            tricks = tricks,
+            trickWins = wins,
+            handStake = json.optInt("handStake", 1),
+            trucoLevel = json.optInt("trucoLevel", 0),
+            envidoCalled = json.optBoolean("envidoCalled"),
+            envidoBet = json.optInt("envidoBet", 0),
+            envidoWinner = if (json.isNull("envidoWinner")) null else json.optInt("envidoWinner"),
+            envidoReveal = reveal,
+            pending = pending,
+            handWinner = if (json.isNull("handWinner")) null else json.optInt("handWinner"),
+            handPoints = json.optInt("handPoints", 0),
+            lastAction = if (json.isNull("lastAction")) null else json.optString("lastAction"),
+            winner = if (json.isNull("winner")) null else json.optInt("winner"),
+            draw = json.optBoolean("draw"),
+            reason = if (json.isNull("reason")) null else json.optString("reason"),
+            history = history,
         )
     }
 }

@@ -477,7 +477,11 @@ class TrucoGame(
         val hand = handOf(state, seat)
         val high = hand.count { power(it) >= 7 }
         val wins = state.trickWins.getOrElse(seat) { 0 }
-        return high >= 2 || (wins >= 1 && high >= 1) || (state.tricks.size >= 2 && wins == 1)
+        return when {
+            state.trucoLevel >= 2 -> high >= 3 || (high >= 2 && wins >= 2)
+            state.trucoLevel == 1 -> high >= 2 && wins >= 1
+            else -> high >= 2 || (wins >= 1 && high >= 1) || (state.tricks.size >= 2 && wins == 1)
+        }
     }
 
     fun botWantsEnvido(state: TrucoState, seat: Int): Boolean {

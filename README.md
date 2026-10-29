@@ -2,7 +2,7 @@
 
 **Mesa Viva** es una aplicación de juegos de cartas y mesa con alma venezolana. Funciona sin conexión para jugar solo, contra bots o pasando el teléfono; y tiene salas en línea con código y QR para jugar con amigos. La web (15 juegos) y el APK Android (19 juegos nativos) comparten los motores de los juegos que existen en ambos.
 
-> Estado actual: **v1.9.0**. **30 juegos en el catálogo** y **19 jugables, todos 100 % Jetpack Compose**: Póker, Caída, Furia de Colores, Dominó, Dados Mentirosos, Ajedrez, Damas, Serpientes y Escaleras, Mancala, Go, Jungle, Ludo, Backgammon, Xiangqi, Damas Chinas, Reversi, Juego Real de Ur, **Brisca** y **Truco**. La cáscara nativa suma **Dominó de 2–4 con manos privadas**, **salas de hasta 4**, **relay online configurable**, **replays automáticos y visor web**, **audio en las 19 mesas** y **crónica PDF con estadísticas**. Android 16 (API 36), APK/AAB firmados y PWA offline.
+> Estado actual: **v2.0.0**. **30 juegos en el catálogo** y **19 jugables, todos 100 % Jetpack Compose**: Póker, Caída, Furia de Colores, Dominó, Dados Mentirosos, Ajedrez, Damas, Serpientes y Escaleras, Mancala, Go, Jungle, Ludo, Backgammon, Xiangqi, Damas Chinas, Reversi, Juego Real de Ur, **Brisca** y **Truco**. La cáscara nativa suma **Dominó de 2–4 con manos privadas**, **Brisca y Truco en salas**, **salas de hasta 4**, **relay online configurable**, **replays automáticos y visor web**, **audio en las 19 mesas** y **crónica PDF con estadísticas**. Android 16 (API 36), APK/AAB firmados y PWA offline.
 
 ---
 
@@ -18,7 +18,7 @@
 - **Ludo nativo (Compose)**: 2–4 jugadores, cuatro fichas, salida con 6, capturas, casillas seguras, tres seises, turno extra y meta exacta. Tablero 15×15, dados, bots y modo pasar el teléfono.
 - **Mancala nativo (Compose)**: siembra, captura, turno extra, almacenes, bots y modo local.
 - **Backgammon nativo (Compose)**: 15 fichas, barra, capturas, dobles, bear-off, pips y bots.
-- **Salas nativas (Compose)**: el anfitrión abre Damas, Mancala, **Dominó de 2–4** o **Serpientes de 2–4**, comparte un QR y los invitados entran con el escáner integrado o con `ws://` + código. Hay asientos, manos privadas en Dominó, chat, reconexión, bots de relleno, revancha y XP. Funciona por LAN sin internet o con un **relay online configurable**. La pestaña web sigue disponible para los quince juegos.
+- **Salas nativas (Compose)**: el anfitrión abre Damas, Mancala, **Dominó de 2–4**, **Serpientes de 2–4**, **Brisca de 2–4** o **Truco de 2**, comparte un QR y los invitados entran con el escáner integrado o con `ws://` + código. Hay asientos, manos privadas en Dominó, Brisca y Truco, chat, reconexión, bots de relleno, revancha y XP. Funciona por LAN sin internet o con un **relay online configurable**. La pestaña web sigue disponible para los quince juegos.
 - **Damas nativa (Compose)**: 8×8, 12 fichas por lado, captura obligatoria, cadenas, coronación, empate por 80 jugadas y bot alfa-beta.
 - **Dados Mentirosos nativo (Compose)**: 2–6 jugadores, cinco dados, pujas, “Dudo”, revelación, eliminación y privacidad al pasar el teléfono.
 - **Go nativo (Compose)**: 9×9 y 13×13, capturas, ko, komi 6.5, conteo de territorio y bot heurístico.
@@ -38,7 +38,7 @@
 - **Backgammon** con barra, capturas, dobles, bear-off y 15 fichas por bando.
 - **Xiangqi** con palacio, río, caballo bloqueado, cañón, soldados y generales enfrentados.
 - **Damas Chinas** con estrella de 121 hoyos, saltos encadenados y meta en el triángulo opuesto.
-- **Modos**: solo contra bots, pasar el teléfono (humanos y bots mezclados), sala en línea con rondas y chat, **salas nativas LAN u online** para Damas, Mancala, Dominó y Serpientes, y **reconexión automática** del invitado si se cae la conexión.
+- **Modos**: solo contra bots, pasar el teléfono (humanos y bots mezclados), sala en línea con rondas y chat, **salas nativas LAN u online** para Damas, Mancala, Dominó, Serpientes, Brisca y Truco, y **reconexión automática** del invitado si se cae la conexión.
 - **Progresión**: 10 niveles, XP real por partida, victoria, derrota o empate, con racha y mejor racha; las mesas nativas registran resultados.
 - **Crónica de partida**: últimos 5 movimientos visibles, historial completo en las mesas nativas, **replay con semilla** en Damas y Mancala, reproducción automática, **visor web**, **enlace y archivo de replay** importables y **PDF nativo** con título, fecha, movimientos, estadísticas y paginación. Se guarda en `Descargas/Mesa Viva` y se comparte con Android.
 - **Audio nativo**: música original procedural por festividad y efectos de carta, captura, coronación, dados, victoria y chat en **las 19 mesas**. Sin samples ni licencias externas; respeta los ajustes.

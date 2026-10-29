@@ -1,5 +1,30 @@
 ﻿# Changelog
 
+## 2.0.0 · 2026-10-29
+
+La mesa conectada.
+
+### Añadido
+
+- **Brisca en sala** de 2–4 jugadores con manos privadas, parejas, bots, historial, audio y PDF.
+- **Truco en sala** de 2 jugadores con envido, real envido, truco, retruco, vale cuatro y respuestas sincronizadas.
+- **Códec de cartas** que oculta la mano rival y la baraja restante; el anfitrión valida cada jugada y canto.
+- **Bot de reemplazo** si un invitado se desconecta a mitad de partida.
+- 3 pruebas nuevas del códec de cartas.
+- 6 juegos con sala nativa: Damas, Mancala, Dominó, Serpientes, Brisca y Truco.
+
+### Cambiado
+
+- Android: `versionCode=22`, `versionName=2.0.0`.
+- El inicio, catálogo y ajustes muestran la 2.0.0.
+- El lobby nativo permite elegir Brisca (2/4) y Truco (2).
+
+### Pendiente
+
+- Ludo y Damas Chinas en salas.
+- Relay público con TLS, replays web adicionales y accesibilidad completa.
+- Los 11 juegos restantes del catálogo y el teléfono físico.
+
 ## 1.9.0 · 2026-10-29
 
 La baraja completa.

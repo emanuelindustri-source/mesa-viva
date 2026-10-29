@@ -121,7 +121,7 @@ fun CatalogScreen(
         }
         item {
             Text(
-                "Mesa Viva 1.9.0 · 19 de 30 juegos · Brisca y Truco · replays web · sin anuncios",
+                "Mesa Viva 2.0.0 · 19 de 30 juegos · Brisca y Truco en salas · replays web · sin anuncios",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 8.dp),

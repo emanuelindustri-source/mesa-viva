@@ -1,6 +1,19 @@
 ﻿# Roadmap
 
-## v1.9.0 · La baraja completa (actual)
+## v2.0.0 · La mesa conectada (actual)
+
+- [x] Brisca en sala de 2–4 con manos privadas y parejas.
+- [x] Truco en sala de 2 con envido, real envido, truco, retruco y vale cuatro.
+- [x] Validación autoritativa y códec que oculta manos rivales.
+- [x] Bot de reemplazo al desconectarse un invitado.
+- [x] 6 juegos con sala nativa.
+- [x] 134 pruebas verdes (30 web + 104 Kotlin).
+- [x] APK y AAB de release firmados.
+- [x] Evidencia visual en `docs/evidence/v2.0.0/`.
+- [ ] Ludo y Damas Chinas en salas (v2.1.0).
+- [ ] Relay público con TLS, replays web adicionales y accesibilidad completa (v2.1.0).
+
+## v1.9.0 · La baraja completa
 
 - [x] Brisca nativa de 2–4 con triunfo, bazas, parejas y meta.
 - [x] Truco nativo con envido, real envido, truco, retruco y vale cuatro.
@@ -8,10 +21,8 @@
 - [x] 131 pruebas verdes (30 web + 101 Kotlin).
 - [x] APK y AAB de release firmados.
 - [x] Evidencia visual en `docs/evidence/v1.9.0/`.
-- [ ] Ludo y Damas Chinas de 3–6 en salas (v2.0.0).
-- [ ] Relay público con TLS y enlaces universales (v2.0.0).
-- [ ] Replay web de Reversi, Ur, Póker, Caída y Furia (v2.0.0).
-- [ ] Accesibilidad completa, Baseline Profile y teléfono físico (v2.0.0).
+- [x] Brisca y Truco en salas (v2.0.0).
+- [ ] Ludo y Damas Chinas en salas (v2.1.0).
 
 ## v1.8.0 · Treinta juegos
 

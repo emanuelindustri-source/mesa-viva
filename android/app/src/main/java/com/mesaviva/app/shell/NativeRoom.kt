@@ -8,6 +8,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.mesaviva.app.LanRelayServer
+import com.mesaviva.app.games.BriscaAction
+import com.mesaviva.app.games.BriscaGame
+import com.mesaviva.app.games.BriscaPhase
+import com.mesaviva.app.games.BriscaState
 import com.mesaviva.app.games.DamasChecker
 import com.mesaviva.app.games.DamasColor
 import com.mesaviva.app.games.DamasGame
@@ -24,6 +28,9 @@ import com.mesaviva.app.games.MancalaGame
 import com.mesaviva.app.games.MancalaPhase
 import com.mesaviva.app.games.MancalaSide
 import com.mesaviva.app.games.MancalaState
+import com.mesaviva.app.games.TrucoGame
+import com.mesaviva.app.games.TrucoPhase
+import com.mesaviva.app.games.TrucoState
 import org.java_websocket.client.WebSocketClient
 import org.java_websocket.handshake.ServerHandshake
 import org.json.JSONArray
@@ -36,7 +43,9 @@ enum class RoomGame(val id: String, val emoji: String, val titleEs: String, val 
     Damas("damas", "⛀", "Damas", "Checkers"),
     Mancala("mancala", "🫘", "Mancala", "Mancala"),
     Domino("domino", "🁫", "Dominó", "Dominoes"),
-    Snakes("serpientes", "🐍", "Serpientes", "Snakes");
+    Snakes("serpientes", "🐍", "Serpientes", "Snakes"),
+    Brisca("brisca", "🃏", "Brisca", "Brisca"),
+    Truco("truco", "🎴", "Truco", "Truco");
 
     fun title(language: String): String = if (language == "en") titleEn else titleEs
 
@@ -119,6 +128,15 @@ class NativeRoomController(
     var dominoState by mutableStateOf<DominoState?>(null)
         private set
 
+    var briscaState by mutableStateOf<BriscaState?>(null)
+        private set
+
+    var trucoState by mutableStateOf<TrucoState?>(null)
+        private set
+
+    var briscaPlayers by mutableStateOf(2)
+        private set
+
     var dominoPlayers by mutableStateOf(4)
         private set
 
@@ -144,6 +162,8 @@ class NativeRoomController(
     private val damas = DamasGame()
     private val mancala = MancalaGame()
     private var domino = DominoGame(4, false, 100)
+    private var brisca = BriscaGame(2, 100, true)
+    private var truco = TrucoGame(30, true)
     private val timeFormat = DateTimeFormatter.ofPattern("HH:mm")
 
     private var relay: LanRelayServer? = null
@@ -162,10 +182,17 @@ class NativeRoomController(
     val onlineGuests: List<RoomGuest> get() = guests.filter { it.online }
     val hasGuest: Boolean get() = guests.any { it.online }
     val inGame: Boolean get() = activeGame != null
+    val hasBotSeat: Boolean get() = when (activeGame) {
+        RoomGame.Brisca -> briscaState?.seats?.any { it.isBot } == true
+        RoomGame.Truco -> trucoState?.seats?.any { it.isBot } == true
+        else -> botSeat
+    }
     val canStart: Boolean
         get() = isHost && status == RoomStatus.Hosting && when (selectedGame) {
             RoomGame.Snakes -> guests.any { it.online && it.seat in 1..3 }
             RoomGame.Domino -> guests.any { it.online && it.seat in 1 until dominoPlayers }
+            RoomGame.Brisca -> guests.any { it.online && it.seat in 1 until briscaPlayers }
+            RoomGame.Truco -> guests.any { it.online && it.seat == 1 }
             else -> guests.any { it.online && it.seat == 1 }
         }
 
@@ -305,6 +332,14 @@ class NativeRoomController(
                             syncDominoSeats()
                             broadcastState()
                         }
+                        RoomGame.Brisca -> {
+                            syncBriscaSeats()
+                            broadcastState()
+                        }
+                        RoomGame.Truco -> {
+                            syncTrucoSeats()
+                            broadcastState()
+                        }
                         else -> {
                             if (seat == 1) botSeat = false
                             sendStateTo(id)
@@ -326,11 +361,19 @@ class NativeRoomController(
                     syncDominoSeats()
                     broadcastState()
                 }
+                if (inGame && activeGame == RoomGame.Brisca) {
+                    syncBriscaSeats()
+                    broadcastState()
+                }
+                if (inGame && activeGame == RoomGame.Truco) {
+                    syncTrucoSeats()
+                    broadcastState()
+                }
                 appendSystem(state.t("room.guestRejoined"))
                 NativeAudio.play(context, NativeAudio.Sfx.Chat, state.sfx)
                 if (inGame) {
                     sendPayloadTo(id, JSONObject().put("k", "seat").put("seat", guest?.seat ?: 1))
-                    if (activeGame !in setOf(RoomGame.Snakes, RoomGame.Domino)) sendStateTo(id)
+                    if (activeGame !in setOf(RoomGame.Snakes, RoomGame.Domino, RoomGame.Brisca, RoomGame.Truco)) sendStateTo(id)
                 }
             }
             "guestLeft" -> {
@@ -349,6 +392,14 @@ class NativeRoomController(
                         appendSystem(state.t("room.guestLeftBot", mapOf("name" to (guest?.name ?: state.t("room.guestFallback")))))
                     } else if (activeGame == RoomGame.Domino) {
                         syncDominoSeats()
+                        broadcastState()
+                        appendSystem(state.t("room.guestLeftBot", mapOf("name" to (guest?.name ?: state.t("room.guestFallback")))))
+                    } else if (activeGame == RoomGame.Brisca) {
+                        syncBriscaSeats()
+                        broadcastState()
+                        appendSystem(state.t("room.guestLeftBot", mapOf("name" to (guest?.name ?: state.t("room.guestFallback")))))
+                    } else if (activeGame == RoomGame.Truco) {
+                        syncTrucoSeats()
                         broadcastState()
                         appendSystem(state.t("room.guestLeftBot", mapOf("name" to (guest?.name ?: state.t("room.guestFallback")))))
                     } else if (guest?.seat == 1) {
@@ -396,6 +447,15 @@ class NativeRoomController(
             "dominoDraw" -> hostGuestDominoDraw(from)
             "dominoPass" -> hostGuestDominoPass(from)
             "dominoNextHand" -> if (activeGame == RoomGame.Domino) hostDominoNextHand()
+            "briscaPlay" -> hostGuestBriscaPlay(from, payload)
+            "briscaNextHand" -> hostGuestBriscaNextHand(from)
+            "trucoPlay" -> hostGuestTrucoPlay(from, payload)
+            "trucoEnvido" -> hostGuestTrucoEnvido(from, payload)
+            "trucoStart" -> hostGuestTrucoStart(from)
+            "trucoCall" -> hostGuestTrucoCall(from)
+            "trucoRespond" -> hostGuestTrucoRespond(from, payload)
+            "trucoFold" -> hostGuestTrucoFold(from)
+            "trucoNextHand" -> hostGuestTrucoNextHand(from)
             "rematch" -> startMatch()
         }
     }
@@ -431,6 +491,40 @@ class NativeRoomController(
                         player.copy(name = names[index], isBot = bots[index])
                     },
                     handCounts = base.players.map { it.hand.size },
+                )
+            }
+            RoomGame.Brisca -> {
+                brisca = BriscaGame(briscaPlayers.coerceIn(2, 4), 100, true, System.nanoTime())
+                val base = brisca.newMatch()
+                val names = MutableList(base.seats.size) { index ->
+                    if (index == 0) hostName.ifBlank { state.t("room.hostFallback") } else botName(index)
+                }
+                val bots = MutableList(base.seats.size) { it != 0 }
+                for (guest in guests) {
+                    if (guest.seat in 1 until base.seats.size) {
+                        names[guest.seat] = guest.name
+                        bots[guest.seat] = !guest.online
+                    }
+                }
+                briscaState = base.copy(
+                    seats = base.seats.mapIndexed { index, seat ->
+                        seat.copy(name = names[index], isBot = bots[index])
+                    },
+                )
+            }
+            RoomGame.Truco -> {
+                truco = TrucoGame(30, true, System.nanoTime())
+                val base = truco.newMatch()
+                val guest = guests.firstOrNull { it.seat == 1 && it.online }
+                val names = listOf(
+                    hostName.ifBlank { state.t("room.hostFallback") },
+                    guest?.name ?: botName(1),
+                )
+                val bots = listOf(false, guest == null)
+                trucoState = base.copy(
+                    seats = base.seats.mapIndexed { index, seat ->
+                        seat.copy(name = names[index], isBot = bots[index])
+                    },
                 )
             }
             RoomGame.Snakes -> {
@@ -503,6 +597,240 @@ class NativeRoomController(
         broadcastState()
     }
 
+    /* ---------------------------------------------------------------- cartas */
+
+    fun hostBriscaPlay(cardId: String) {
+        if (!isHost || activeGame != RoomGame.Brisca) return
+        val board = briscaState ?: return
+        if (board.seats.getOrNull(board.turn)?.isBot != false) {
+            hint = state.t("room.notYourTurn")
+            return
+        }
+        if (board.turn != 0) {
+            hint = state.t("room.notYourTurn")
+            return
+        }
+        applyBrisca(brisca.playCard(board, cardId))
+    }
+
+    fun hostBriscaNextHand() {
+        if (!isHost || activeGame != RoomGame.Brisca) return
+        val board = briscaState ?: return
+        applyBrisca(brisca.nextHand(board))
+    }
+
+    fun hostTrucoPlay(cardId: String) {
+        if (!isHost || activeGame != RoomGame.Truco) return
+        val board = trucoState ?: return
+        if (board.turn != 0 || board.pending != null) {
+            hint = state.t("room.notYourTurn")
+            return
+        }
+        applyTruco(truco.playCard(board, cardId))
+    }
+
+    fun hostTrucoCallEnvido(kind: String = "envido") {
+        if (!isHost || activeGame != RoomGame.Truco) return
+        val board = trucoState ?: return
+        if (board.turn != 0 || board.pending != null) {
+            hint = state.t("room.notYourTurn")
+            return
+        }
+        applyTruco(truco.callEnvido(board, 0, kind))
+    }
+
+    fun hostTrucoStartPlay() {
+        if (!isHost || activeGame != RoomGame.Truco) return
+        val board = trucoState ?: return
+        if (board.turn != 0 || board.pending != null || board.phase != TrucoPhase.Envido) return
+        applyTruco(truco.startPlay(board))
+    }
+
+    fun hostTrucoCallTruco() {
+        if (!isHost || activeGame != RoomGame.Truco) return
+        val board = trucoState ?: return
+        if (board.turn != 0 || board.pending != null) {
+            hint = state.t("room.notYourTurn")
+            return
+        }
+        applyTruco(truco.callTruco(board, 0))
+    }
+
+    fun hostTrucoRespond(accept: Boolean) {
+        if (!isHost || activeGame != RoomGame.Truco) return
+        val board = trucoState ?: return
+        val pending = board.pending ?: return
+        if (pending.awaiting != 0) return
+        applyTruco(truco.respond(board, accept))
+    }
+
+    fun hostTrucoFold() {
+        if (!isHost || activeGame != RoomGame.Truco) return
+        val board = trucoState ?: return
+        if (board.turn != 0 || board.pending != null) {
+            hint = state.t("room.notYourTurn")
+            return
+        }
+        applyTruco(truco.fold(board))
+    }
+
+    fun hostTrucoNextHand() {
+        if (!isHost || activeGame != RoomGame.Truco) return
+        val board = trucoState ?: return
+        applyTruco(truco.nextHand(board))
+    }
+
+    private fun applyBrisca(result: com.mesaviva.app.games.BriscaResult) {
+        if (result.error != null) {
+            hint = state.t(result.error)
+            return
+        }
+        val previous = briscaState
+        briscaState = result.state
+        hint = ""
+        if (result.state.lastTrick != null && result.state.lastTrick != previous?.lastTrick) {
+            val hostWon = result.state.lastTrick?.winner == 0 ||
+                (result.state.teams && result.state.lastTrick?.winner?.let { result.state.seats.getOrNull(it)?.team == result.state.seats.getOrNull(0)?.team } == true)
+            NativeAudio.play(context, if (hostWon) NativeAudio.Sfx.Capture else NativeAudio.Sfx.Card, state.sfx)
+            state.vibrate(context, if (hostWon) 42 else 18)
+        } else {
+            NativeAudio.play(context, NativeAudio.Sfx.Card, state.sfx)
+            state.vibrate(context, 18)
+        }
+        finishBrisca(result.state)
+        broadcastState()
+    }
+
+    private fun finishBrisca(board: BriscaState) {
+        if (board.phase != BriscaPhase.MatchEnd || awarded) return
+        awarded = true
+        val hostTeam = board.seats.getOrNull(0)?.team
+        val won = board.winner?.let { seat ->
+            if (board.teams) board.seats.getOrNull(seat)?.team == hostTeam else seat == 0
+        } ?: false
+        state.awardMatch(win = won, draw = board.draw)
+        NativeAudio.play(
+            context,
+            when {
+                board.draw -> NativeAudio.Sfx.Draw
+                won -> NativeAudio.Sfx.Win
+                else -> NativeAudio.Sfx.Lose
+            },
+            state.sfx,
+        )
+    }
+
+    private fun applyTruco(result: com.mesaviva.app.games.TrucoResult) {
+        if (result.error != null) {
+            hint = state.t(result.error)
+            return
+        }
+        val previous = trucoState
+        trucoState = result.state
+        hint = ""
+        val pendingResolved = previous?.pending != null && result.state.pending == null
+        NativeAudio.play(
+            context,
+            if (pendingResolved) NativeAudio.Sfx.Promote else NativeAudio.Sfx.Card,
+            state.sfx,
+        )
+        state.vibrate(context, if (result.state.phase == TrucoPhase.MatchEnd) 55 else 20)
+        finishTruco(result.state)
+        broadcastState()
+    }
+
+    private fun finishTruco(board: TrucoState) {
+        if (board.phase != TrucoPhase.MatchEnd || awarded) return
+        awarded = true
+        val won = board.winner == 0
+        state.awardMatch(win = won, draw = board.draw)
+        NativeAudio.play(
+            context,
+            when {
+                board.draw -> NativeAudio.Sfx.Draw
+                won -> NativeAudio.Sfx.Win
+                else -> NativeAudio.Sfx.Lose
+            },
+            state.sfx,
+        )
+    }
+
+    fun hostBotBriscaAction() {
+        if (!isHost || activeGame != RoomGame.Brisca) return
+        val board = briscaState ?: return
+        val seat = board.seats.getOrNull(board.turn) ?: return
+        if (!seat.isBot) return
+        when (val action = brisca.botAction(board)) {
+            is BriscaAction.PlayCard -> applyBrisca(brisca.playCard(board, action.cardId))
+            BriscaAction.NextHand -> applyBrisca(brisca.nextHand(board))
+            null -> Unit
+        }
+    }
+
+    fun hostBotTrucoAction() {
+        if (!isHost || activeGame != RoomGame.Truco) return
+        val board = trucoState ?: return
+        val pending = board.pending
+        if (pending != null) {
+            if (board.seats.getOrNull(pending.awaiting)?.isBot != true) return
+            val accept = if (pending.kind in setOf("envido", "realEnvido", "envidoEnvigido")) {
+                truco.botAcceptsEnvido(board, pending.awaiting, pending.stake)
+            } else {
+                truco.botAcceptsTruco(board, pending.awaiting, pending.stake)
+            }
+            applyTruco(truco.respond(board, accept))
+            return
+        }
+        val seat = board.seats.getOrNull(board.turn) ?: return
+        if (!seat.isBot) return
+        when (board.phase) {
+            TrucoPhase.Envido -> {
+                if (truco.botWantsEnvido(board, board.turn)) {
+                    applyTruco(truco.callEnvido(board, board.turn, "envido"))
+                } else {
+                    applyTruco(truco.startPlay(board))
+                }
+            }
+            TrucoPhase.Play -> {
+                if (truco.botShouldCallTruco(board, board.turn)) {
+                    applyTruco(truco.callTruco(board, board.turn))
+                } else {
+                    val card = truco.botPlayCard(board, board.turn)
+                    if (card != null) applyTruco(truco.playCard(board, card.id))
+                }
+            }
+            else -> Unit
+        }
+    }
+
+    private fun syncBriscaSeats() {
+        val board = briscaState ?: return
+        briscaState = board.copy(
+            seats = board.seats.mapIndexed { index, seat ->
+                val guest = guests.firstOrNull { it.seat == index }
+                seat.copy(
+                    name = when {
+                        index == 0 -> hostName.ifBlank { state.t("room.hostFallback") }
+                        guest != null -> guest.name
+                        else -> seat.name
+                    },
+                    isBot = if (index == 0) false else guest?.online != true,
+                )
+            },
+        )
+    }
+
+    private fun syncTrucoSeats() {
+        val board = trucoState ?: return
+        val guest = guests.firstOrNull { it.seat == 1 }
+        trucoState = board.copy(
+            seats = listOf(
+                board.seats[0].copy(name = hostName.ifBlank { state.t("room.hostFallback") }, isBot = false),
+                board.seats[1].copy(name = guest?.name ?: board.seats[1].name, isBot = guest?.online != true),
+            ),
+        )
+    }
+
     fun hostBotDamasMove() {
         if (!isHost || !botSeat || activeGame != RoomGame.Damas) return
         val current = damasState ?: return
@@ -562,6 +890,28 @@ class NativeRoomController(
                 finishSnakes(snakesState!!)
                 broadcastState()
             }
+            RoomGame.Brisca -> {
+                val current = briscaState ?: return
+                if (current.phase == BriscaPhase.MatchEnd) return
+                briscaState = current.copy(
+                    phase = BriscaPhase.MatchEnd,
+                    winner = 1,
+                    reason = "brisca.reason.resign",
+                )
+                finishBrisca(briscaState!!)
+                broadcastState()
+            }
+            RoomGame.Truco -> {
+                val current = trucoState ?: return
+                if (current.phase == TrucoPhase.MatchEnd) return
+                trucoState = current.copy(
+                    phase = TrucoPhase.MatchEnd,
+                    winner = 1,
+                    reason = "truco.reason.resign",
+                )
+                finishTruco(trucoState!!)
+                broadcastState()
+            }
             RoomGame.Domino -> {
                 val current = dominoState ?: return
                 if (current.phase == DominoPhase.MatchEnd) return
@@ -579,6 +929,10 @@ class NativeRoomController(
 
     fun chooseDominoPlayers(count: Int) {
         if (isHost && !inGame) dominoPlayers = count.coerceIn(2, 4)
+    }
+
+    fun chooseBriscaPlayers(count: Int) {
+        if (isHost && !inGame) briscaPlayers = if (count >= 4) 4 else 2
     }
 
     fun dominoEndsFor(tileIndex: Int): List<DominoEnd> {
@@ -825,6 +1179,86 @@ class NativeRoomController(
         broadcastState()
     }
 
+    private fun hostGuestBriscaPlay(fromId: String?, payload: JSONObject) {
+        if (activeGame != RoomGame.Brisca) return
+        val seat = guests.firstOrNull { it.id == fromId }?.seat ?: return
+        val board = briscaState ?: return
+        if (board.turn != seat || board.seats.getOrNull(seat)?.isBot != false) return
+        val cardId = payload.optString("card").takeIf { it.isNotBlank() } ?: return
+        applyBrisca(brisca.playCard(board, cardId))
+    }
+
+    private fun hostGuestBriscaNextHand(fromId: String?) {
+        if (activeGame != RoomGame.Brisca) return
+        val seat = guests.firstOrNull { it.id == fromId }?.seat ?: return
+        val board = briscaState ?: return
+        if (seat !in board.seats.indices || board.phase != BriscaPhase.HandEnd) return
+        applyBrisca(brisca.nextHand(board))
+    }
+
+    private fun hostGuestTrucoPlay(fromId: String?, payload: JSONObject) {
+        if (activeGame != RoomGame.Truco) return
+        val seat = guests.firstOrNull { it.id == fromId }?.seat ?: return
+        val board = trucoState ?: return
+        if (board.seats.getOrNull(seat)?.isBot != false) return
+        if (board.turn != seat || board.pending != null || board.phase != TrucoPhase.Play) return
+        val cardId = payload.optString("card").takeIf { it.isNotBlank() } ?: return
+        applyTruco(truco.playCard(board, cardId))
+    }
+
+    private fun hostGuestTrucoEnvido(fromId: String?, payload: JSONObject) {
+        if (activeGame != RoomGame.Truco) return
+        val seat = guests.firstOrNull { it.id == fromId }?.seat ?: return
+        val board = trucoState ?: return
+        if (board.seats.getOrNull(seat)?.isBot != false) return
+        if (board.turn != seat || board.pending != null || board.phase != TrucoPhase.Envido) return
+        val kind = payload.optString("kind", "envido").takeIf { it in setOf("envido", "realEnvido") } ?: "envido"
+        applyTruco(truco.callEnvido(board, seat, kind))
+    }
+
+    private fun hostGuestTrucoStart(fromId: String?) {
+        if (activeGame != RoomGame.Truco) return
+        val seat = guests.firstOrNull { it.id == fromId }?.seat ?: return
+        val board = trucoState ?: return
+        if (board.seats.getOrNull(seat)?.isBot != false) return
+        if (board.turn != seat || board.pending != null || board.phase != TrucoPhase.Envido) return
+        applyTruco(truco.startPlay(board))
+    }
+
+    private fun hostGuestTrucoCall(fromId: String?) {
+        if (activeGame != RoomGame.Truco) return
+        val seat = guests.firstOrNull { it.id == fromId }?.seat ?: return
+        val board = trucoState ?: return
+        if (board.seats.getOrNull(seat)?.isBot != false) return
+        if (board.turn != seat || board.pending != null || board.phase != TrucoPhase.Play) return
+        applyTruco(truco.callTruco(board, seat))
+    }
+
+    private fun hostGuestTrucoRespond(fromId: String?, payload: JSONObject) {
+        if (activeGame != RoomGame.Truco) return
+        val seat = guests.firstOrNull { it.id == fromId }?.seat ?: return
+        val board = trucoState ?: return
+        val pending = board.pending ?: return
+        if (pending.awaiting != seat) return
+        applyTruco(truco.respond(board, payload.optBoolean("accept", false)))
+    }
+
+    private fun hostGuestTrucoFold(fromId: String?) {
+        if (activeGame != RoomGame.Truco) return
+        val seat = guests.firstOrNull { it.id == fromId }?.seat ?: return
+        val board = trucoState ?: return
+        if (board.turn != seat || board.pending != null) return
+        applyTruco(truco.fold(board))
+    }
+
+    private fun hostGuestTrucoNextHand(fromId: String?) {
+        if (activeGame != RoomGame.Truco) return
+        val seat = guests.firstOrNull { it.id == fromId }?.seat ?: return
+        val board = trucoState ?: return
+        if (seat !in board.seats.indices || board.phase != TrucoPhase.HandEnd) return
+        applyTruco(truco.nextHand(board))
+    }
+
     private fun hostGuestResign(fromId: String?) {
         val guest = guests.firstOrNull { it.id == fromId } ?: return
         when (activeGame) {
@@ -868,6 +1302,30 @@ class NativeRoomController(
                     winnerIndices = listOf(0),
                 )
                 finishDomino(dominoState!!)
+                broadcastState()
+            }
+            RoomGame.Brisca -> {
+                val current = briscaState ?: return
+                if (guest.seat !in current.seats.indices) return
+                if (current.phase == BriscaPhase.MatchEnd) return
+                briscaState = current.copy(
+                    phase = BriscaPhase.MatchEnd,
+                    winner = 0,
+                    reason = "brisca.reason.resign",
+                )
+                finishBrisca(briscaState!!)
+                broadcastState()
+            }
+            RoomGame.Truco -> {
+                val current = trucoState ?: return
+                if (guest.seat !in current.seats.indices) return
+                if (current.phase == TrucoPhase.MatchEnd) return
+                trucoState = current.copy(
+                    phase = TrucoPhase.MatchEnd,
+                    winner = 0,
+                    reason = "truco.reason.resign",
+                )
+                finishTruco(trucoState!!)
                 broadcastState()
             }
             null -> Unit
@@ -1008,6 +1466,24 @@ class NativeRoomController(
             }
             return
         }
+        if (activeGame == RoomGame.Brisca) {
+            val board = briscaState ?: return
+            for (guest in guests) {
+                if (guest.online) {
+                    sendPayloadTo(guest.id, RoomCodec.briscaToJson(board, guest.seat))
+                }
+            }
+            return
+        }
+        if (activeGame == RoomGame.Truco) {
+            val board = trucoState ?: return
+            for (guest in guests) {
+                if (guest.online) {
+                    sendPayloadTo(guest.id, RoomCodec.trucoToJson(board, guest.seat))
+                }
+            }
+            return
+        }
         val payload = stateJson() ?: return
         sendPayloadToGuests(payload)
     }
@@ -1023,6 +1499,8 @@ class NativeRoomController(
         RoomGame.Mancala -> mancalaState?.let { mancalaJson(it) }
         RoomGame.Domino -> dominoState?.let { RoomCodec.dominoToJson(it, viewerSeat) }
         RoomGame.Snakes -> snakesState?.let { RoomCodec.snakesToJson(it) }
+        RoomGame.Brisca -> briscaState?.let { RoomCodec.briscaToJson(it, viewerSeat) }
+        RoomGame.Truco -> trucoState?.let { RoomCodec.trucoToJson(it, viewerSeat) }
         null -> null
     }
 
@@ -1189,6 +1667,8 @@ class NativeRoomController(
                 mancalaState = null
                 snakesState = null
                 dominoState = null
+                briscaState = null
+                trucoState = null
                 dominoPending = false
                 awarded = false
                 appendSystem(state.t("room.youAreInMatch"))
@@ -1286,6 +1766,58 @@ class NativeRoomController(
                 }
                 if (parsed.finished) finishSnakes(parsed)
             }
+            RoomGame.Brisca.id -> {
+                val parsed = RoomCodec.briscaFromJson(payload) ?: return
+                val previous = briscaState
+                briscaState = parsed
+                activeGame = RoomGame.Brisca
+                if (parsed.lastTrick != null && parsed.lastTrick != previous?.lastTrick) {
+                    val won = parsed.lastTrick?.winner == mySeat
+                    NativeAudio.play(context, if (won) NativeAudio.Sfx.Capture else NativeAudio.Sfx.Card, state.sfx)
+                    state.vibrate(context, if (won) 40 else 16)
+                } else if (previous != null && parsed.history.size > previous.history.size) {
+                    NativeAudio.play(context, NativeAudio.Sfx.Card, state.sfx)
+                }
+                if (parsed.phase == BriscaPhase.MatchEnd && !awarded) {
+                    awarded = true
+                    val hostTeam = parsed.seats.getOrNull(0)?.team
+                    val won = parsed.winner?.let { seat ->
+                        if (parsed.teams) parsed.seats.getOrNull(seat)?.team == hostTeam else seat == mySeat
+                    } ?: false
+                    state.awardMatch(win = won, draw = parsed.draw)
+                    NativeAudio.play(
+                        context,
+                        when {
+                            parsed.draw -> NativeAudio.Sfx.Draw
+                            won -> NativeAudio.Sfx.Win
+                            else -> NativeAudio.Sfx.Lose
+                        },
+                        state.sfx,
+                    )
+                }
+            }
+            RoomGame.Truco.id -> {
+                val parsed = RoomCodec.trucoFromJson(payload) ?: return
+                val previous = trucoState
+                trucoState = parsed
+                activeGame = RoomGame.Truco
+                if (parsed.phase == TrucoPhase.MatchEnd && !awarded) {
+                    awarded = true
+                    val won = parsed.winner == mySeat
+                    state.awardMatch(win = won, draw = parsed.draw)
+                    NativeAudio.play(
+                        context,
+                        when {
+                            parsed.draw -> NativeAudio.Sfx.Draw
+                            won -> NativeAudio.Sfx.Win
+                            else -> NativeAudio.Sfx.Lose
+                        },
+                        state.sfx,
+                    )
+                } else if (previous != null && parsed.history.size > previous.history.size) {
+                    NativeAudio.play(context, NativeAudio.Sfx.Card, state.sfx)
+                }
+            }
         }
     }
 
@@ -1330,7 +1862,90 @@ class NativeRoomController(
     fun guestResign() {
         if (!isGuest) return
         if (activeGame in setOf(RoomGame.Damas, RoomGame.Mancala) && mySeat != 1) return
+        if (activeGame == RoomGame.Brisca && mySeat !in (briscaState?.seats?.indices ?: emptyList())) return
+        if (activeGame == RoomGame.Truco && mySeat !in (trucoState?.seats?.indices ?: emptyList())) return
         sendPayload(JSONObject().put("k", "resign"))
+    }
+
+    fun guestBriscaPlay(cardId: String) {
+        if (!isGuest || activeGame != RoomGame.Brisca) return
+        val board = briscaState ?: return
+        if (board.turn != mySeat || board.phase != BriscaPhase.Playing) {
+            hint = state.t("room.notYourTurn")
+            return
+        }
+        if (board.hands.getOrElse(mySeat) { emptyList() }.none { it.id == cardId }) return
+        sendPayload(JSONObject().put("k", "briscaPlay").put("card", cardId))
+    }
+
+    fun guestBriscaNextHand() {
+        if (!isGuest || activeGame != RoomGame.Brisca) return
+        if (briscaState?.phase != BriscaPhase.HandEnd) return
+        sendPayload(JSONObject().put("k", "briscaNextHand"))
+    }
+
+    fun guestTrucoPlay(cardId: String) {
+        if (!isGuest || activeGame != RoomGame.Truco) return
+        val board = trucoState ?: return
+        if (board.turn != mySeat || board.pending != null || board.phase != TrucoPhase.Play) {
+            hint = state.t("room.notYourTurn")
+            return
+        }
+        if (board.hands.getOrElse(mySeat) { emptyList() }.none { it.id == cardId }) return
+        sendPayload(JSONObject().put("k", "trucoPlay").put("card", cardId))
+    }
+
+    fun guestTrucoEnvido(kind: String = "envido") {
+        if (!isGuest || activeGame != RoomGame.Truco) return
+        val board = trucoState ?: return
+        if (board.turn != mySeat || board.pending != null || board.phase != TrucoPhase.Envido) {
+            hint = state.t("room.notYourTurn")
+            return
+        }
+        sendPayload(JSONObject().put("k", "trucoEnvido").put("kind", kind))
+    }
+
+    fun guestTrucoStartPlay() {
+        if (!isGuest || activeGame != RoomGame.Truco) return
+        val board = trucoState ?: return
+        if (board.turn != mySeat || board.pending != null || board.phase != TrucoPhase.Envido) {
+            hint = state.t("room.notYourTurn")
+            return
+        }
+        sendPayload(JSONObject().put("k", "trucoStart"))
+    }
+
+    fun guestTrucoCall() {
+        if (!isGuest || activeGame != RoomGame.Truco) return
+        val board = trucoState ?: return
+        if (board.turn != mySeat || board.pending != null || board.phase != TrucoPhase.Play) {
+            hint = state.t("room.notYourTurn")
+            return
+        }
+        sendPayload(JSONObject().put("k", "trucoCall"))
+    }
+
+    fun guestTrucoRespond(accept: Boolean) {
+        if (!isGuest || activeGame != RoomGame.Truco) return
+        val board = trucoState ?: return
+        if (board.pending?.awaiting != mySeat) return
+        sendPayload(JSONObject().put("k", "trucoRespond").put("accept", accept))
+    }
+
+    fun guestTrucoFold() {
+        if (!isGuest || activeGame != RoomGame.Truco) return
+        val board = trucoState ?: return
+        if (board.turn != mySeat || board.pending != null) {
+            hint = state.t("room.notYourTurn")
+            return
+        }
+        sendPayload(JSONObject().put("k", "trucoFold"))
+    }
+
+    fun guestTrucoNextHand() {
+        if (!isGuest || activeGame != RoomGame.Truco) return
+        if (trucoState?.phase != TrucoPhase.HandEnd) return
+        sendPayload(JSONObject().put("k", "trucoNextHand"))
     }
 
     fun sendChat(text: String) {

@@ -1,11 +1,15 @@
 package com.mesaviva.app.shell
 
+import com.mesaviva.app.games.BriscaGame
+import com.mesaviva.app.games.BriscaPhase
 import com.mesaviva.app.games.DamasColor
 import com.mesaviva.app.games.DamasGame
 import com.mesaviva.app.games.DamasPhase
 import com.mesaviva.app.games.DominoGame
 import com.mesaviva.app.games.MancalaGame
 import com.mesaviva.app.games.MancalaSide
+import com.mesaviva.app.games.TrucoGame
+import com.mesaviva.app.games.TrucoPhase
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
@@ -228,5 +232,67 @@ class RoomCodecTest {
         val stateB = second.newMatch()
         assertEquals(first.botPit(stateA), second.botPit(stateB))
         assertTrue(first.botPit(stateA) in 0..5)
+    }
+
+    @Test
+    fun briscaCodecHidesRivalHandsAndKeepsTrump() {
+        val game = BriscaGame(playerCount = 2, target = 100, seed = 42)
+        val state = game.newMatch()
+        val json = RoomCodec.briscaToJson(state, viewerSeat = 0)
+        val seats = json.getJSONArray("seats")
+        val own = seats.getJSONObject(0).getJSONArray("hand")
+        val rival = seats.getJSONObject(1).getJSONArray("hand")
+        assertEquals(3, own.length())
+        assertEquals(3, rival.length())
+        for (index in 0 until rival.length()) {
+            assertTrue(rival.getJSONObject(index).getString("id").startsWith("h1-"))
+        }
+        val encoded = json.toString()
+        for (card in state.hands[1]) {
+            assertTrue("La carta rival no debe viajar: ${card.id}", !encoded.contains("\"id\":\"${card.id}\""))
+        }
+        assertEquals(state.trumpCard?.id, RoomCodec.briscaFromJson(json)?.trumpCard?.id)
+    }
+
+    @Test
+    fun briscaCodecRoundTripKeepsScoresTurnAndHistory() {
+        val game = BriscaGame(playerCount = 2, target = 100, seed = 11)
+        var state = game.newMatch()
+        val action = game.botAction(state)
+        if (action is com.mesaviva.app.games.BriscaAction.PlayCard) {
+            state = game.playCard(state, action.cardId).state
+        }
+        val decoded = RoomCodec.briscaFromJson(RoomCodec.briscaToJson(state, 1))
+        assertNotNull(decoded)
+        assertEquals(state.scores, decoded!!.scores)
+        assertEquals(state.turn, decoded.turn)
+        assertEquals(state.handNo, decoded.handNo)
+        assertEquals(state.history, decoded.history)
+        assertEquals(state.phase, decoded.phase)
+    }
+
+    @Test
+    fun trucoCodecHidesRivalHandAndCarriesPendingCall() {
+        val game = TrucoGame(target = 30, seed = 9)
+        var state = game.newMatch()
+        state = game.startPlay(state).state
+        state = game.callTruco(state, 0).state
+        val json = RoomCodec.trucoToJson(state, viewerSeat = 0)
+        val seats = json.getJSONArray("seats")
+        val rival = seats.getJSONObject(1).getJSONArray("hand")
+        assertEquals(3, rival.length())
+        for (index in 0 until rival.length()) {
+            assertTrue(rival.getJSONObject(index).getString("id").startsWith("th1-"))
+        }
+        val encoded = json.toString()
+        for (card in state.hands[1]) {
+            assertTrue("La carta rival no debe viajar: ${card.id}", !encoded.contains("\"id\":\"${card.id}\""))
+        }
+        val decoded = RoomCodec.trucoFromJson(json)
+        assertNotNull(decoded)
+        assertEquals(TrucoPhase.Play, decoded!!.phase)
+        assertEquals(2, decoded.pending?.stake)
+        assertEquals(1, decoded.pending?.awaiting)
+        assertEquals(state.history, decoded.history)
     }
 }

@@ -63,7 +63,8 @@ Es un proyecto de varias versiones, no un commit.
 - [x] Dominó de 2–4 con manos privadas, replay automático y visor web (v1.7.0).
 - [x] Catálogo de 30 juegos; Reversi y Ur nativos (v1.8.0).
 - [x] Brisca y Truco nativos; 19 juegos Compose (v1.9.0).
-- [ ] Ludo y Damas Chinas en salas; relay público; replays web adicionales (v2.0.0).
+- [x] Brisca y Truco en salas con manos privadas y bots (v2.0.0).
+- [ ] Ludo y Damas Chinas en salas; relay público; replays web adicionales (v2.1.0).
 
 ### Fase 4 · Retirada del WebView
 
@@ -77,6 +78,7 @@ Es un proyecto de varias versiones, no un commit.
 - v1.7.0 añade Dominó de 2–4 con manos privadas, replay automático y visor web.
 - v1.8.0 completa el catálogo de 30 juegos y suma Reversi y Ur nativos. La PWA y la sala web siguen en el WebView; el siguiente paso son Brisca/Truco, Ludo/Damas Chinas y el relay público.
 - v1.9.0 suma Brisca y Truco nativos. Los 19 juegos jugables son Compose; el WebView solo queda como respaldo de la PWA y la sala remota. El siguiente paso son Ludo/Damas Chinas en salas, el relay público y los replays web adicionales.
+- v2.0.0 lleva Brisca y Truco a las salas nativas con manos privadas, validación autoritativa y bots de reemplazo. El siguiente paso son Ludo/Damas Chinas en salas, el relay público y los replays web adicionales.
 
 ## Arquitectura propuesta
 

@@ -67,6 +67,9 @@ import com.mesaviva.app.games.DamasColor
 import com.mesaviva.app.games.DamasGame
 import com.mesaviva.app.games.DamasPhase
 import com.mesaviva.app.games.DamasState
+import com.mesaviva.app.games.BriscaGame
+import com.mesaviva.app.games.BriscaPhase
+import com.mesaviva.app.games.BriscaState
 import com.mesaviva.app.games.DominoEnd
 import com.mesaviva.app.games.DominoPhase
 import com.mesaviva.app.games.DominoState
@@ -74,6 +77,10 @@ import com.mesaviva.app.games.MancalaGame
 import com.mesaviva.app.games.MancalaPhase
 import com.mesaviva.app.games.MancalaSide
 import com.mesaviva.app.games.MancalaState
+import com.mesaviva.app.games.SpanishCard
+import com.mesaviva.app.games.TrucoGame
+import com.mesaviva.app.games.TrucoPhase
+import com.mesaviva.app.games.TrucoState
 import kotlinx.coroutines.delay
 
 @Composable
@@ -242,7 +249,7 @@ private fun NativeRoomLobby(
                     Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         Text(state.t("room.createNative"), style = MaterialTheme.typography.titleMedium)
                         Text(
-                            if (game == RoomGame.Snakes || game == RoomGame.Domino) {
+                            if (game == RoomGame.Snakes || game == RoomGame.Domino || game == RoomGame.Brisca) {
                                 state.t("room.snakesPlayers")
                             } else {
                                 state.t("room.twoPlayers")
@@ -250,8 +257,8 @@ private fun NativeRoomLobby(
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
-                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            RoomGame.entries.forEach { option ->
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            items(RoomGame.entries) { option ->
                                 FilterChip(
                                     selected = game == option,
                                     onClick = { game = option },
@@ -402,8 +409,8 @@ private fun HostLobby(
             ) {
                 Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(state.t("room.games"), style = MaterialTheme.typography.titleMedium)
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        RoomGame.entries.forEach { option ->
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        items(RoomGame.entries) { option ->
                             FilterChip(
                                 selected = session.selectedGame == option,
                                 onClick = { onSelectGame(option) },
@@ -419,6 +426,18 @@ private fun HostLobby(
                                     selected = session.dominoPlayers == count,
                                     onClick = { session.chooseDominoPlayers(count) },
                                     label = { Text(count.toString()) },
+                                )
+                            }
+                        }
+                    }
+                    if (session.selectedGame == RoomGame.Brisca) {
+                        Text(state.t("room.briscaPlayers"), style = MaterialTheme.typography.labelMedium)
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            listOf(2, 4).forEach { count ->
+                                FilterChip(
+                                    selected = session.briscaPlayers == count,
+                                    onClick = { session.chooseBriscaPlayers(count) },
+                                    label = { Text(if (count == 4) "4 · ${state.t("brisca.pairs")}" else "2") },
                                 )
                             }
                         }
@@ -622,9 +641,13 @@ private fun NativeRoomGame(
     val mancala = session.mancalaState
     val snakes = session.snakesState
     val domino = session.dominoState
+    val brisca = session.briscaState
+    val truco = session.trucoState
     val finished = (game == RoomGame.Damas && damas?.phase == DamasPhase.MatchEnd) ||
         (game == RoomGame.Mancala && mancala?.phase == MancalaPhase.MatchEnd) ||
         (game == RoomGame.Domino && domino?.phase == DominoPhase.MatchEnd) ||
+        (game == RoomGame.Brisca && brisca?.phase == BriscaPhase.MatchEnd) ||
+        (game == RoomGame.Truco && truco?.phase == TrucoPhase.MatchEnd) ||
         (game == RoomGame.Snakes && snakes?.finished == true)
 
     LaunchedEffect(finished) {
@@ -715,11 +738,31 @@ private fun NativeRoomGame(
                 if (snakes.turn == session.mySeat) state.t("room.yourTurn")
                 else state.t("room.theirTurn", mapOf("name" to name))
             }
+            game == RoomGame.Brisca && brisca != null -> {
+                val name = brisca.seats.getOrNull(brisca.turn)?.name ?: opponentName
+                if (brisca.turn == session.mySeat) state.t("room.yourTurn")
+                else state.t("room.theirTurn", mapOf("name" to name))
+            }
+            game == RoomGame.Truco && truco != null -> {
+                val pending = truco.pending
+                when {
+                    pending != null && pending.awaiting == session.mySeat -> state.t(
+                        "truco.pendingBanner",
+                        mapOf(
+                            "p" to (truco.seats.getOrNull(pending.caller)?.name ?: opponentName),
+                            "c" to TrucoGame.challengeName(pending.kind),
+                            "n" to pending.stake,
+                        ),
+                    )
+                    truco.turn == session.mySeat -> state.t("room.yourTurn")
+                    else -> state.t("room.theirTurn", mapOf("name" to (truco.seats.getOrNull(truco.turn)?.name ?: opponentName)))
+                }
+            }
             else -> state.t("room.syncState")
         }
         NativeTurnBanner(text = banner, alert = false)
 
-        if (session.isHost && session.botSeat && session.inGame && game != RoomGame.Snakes) {
+        if (session.isHost && session.hasBotSeat && session.inGame && game != RoomGame.Snakes) {
             Surface(
                 shape = RoundedCornerShape(12.dp),
                 color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.16f),
@@ -730,7 +773,9 @@ private fun NativeRoomGame(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(state.t("room.botActive"), style = MaterialTheme.typography.labelSmall, modifier = Modifier.weight(1f))
-                    TextButton(onClick = { session.hostToggleBot() }) { Text(state.t("room.botOff")) }
+                    if (game != RoomGame.Brisca && game != RoomGame.Truco) {
+                        TextButton(onClick = { session.hostToggleBot() }) { Text(state.t("room.botOff")) }
+                    }
                 }
             }
         }
@@ -775,6 +820,24 @@ private fun NativeRoomGame(
                     RoomSnakesBoard(state, session, snakes)
                 }
             }
+            RoomGame.Brisca -> {
+                if (brisca == null) {
+                    Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+                        Text(state.t("room.syncState"), style = MaterialTheme.typography.bodyMedium)
+                    }
+                } else {
+                    RoomBriscaBoard(state, session, brisca)
+                }
+            }
+            RoomGame.Truco -> {
+                if (truco == null) {
+                    Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+                        Text(state.t("room.syncState"), style = MaterialTheme.typography.bodyMedium)
+                    }
+                } else {
+                    RoomTrucoBoard(state, session, truco)
+                }
+            }
             null -> Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
                 Text(state.t("room.syncState"))
             }
@@ -790,6 +853,8 @@ private fun NativeRoomGame(
             val canResign = !finished && when (game) {
                 RoomGame.Snakes -> session.mySeat in 0..3
                 RoomGame.Domino -> session.mySeat in 0 until (session.dominoState?.players?.size ?: 0)
+                RoomGame.Brisca -> session.mySeat in 0 until (session.briscaState?.seats?.size ?: 0)
+                RoomGame.Truco -> session.mySeat in 0..1
                 null -> false
                 else -> session.isHost || session.mySeat == 1
             }
@@ -798,7 +863,7 @@ private fun NativeRoomGame(
                 enabled = canResign,
                 modifier = Modifier.weight(1f),
             ) { Text(state.t("common.resign")) }
-            if (session.isHost && session.botSeat && game != RoomGame.Snakes) {
+            if (session.isHost && session.botSeat && game != RoomGame.Snakes && game != RoomGame.Brisca && game != RoomGame.Truco) {
                 OutlinedButton(onClick = { session.hostToggleBot() }) { Text("🤖") }
             }
         }
@@ -844,6 +909,43 @@ private fun NativeRoomGame(
         if (session.isHost && !board.finished && board.bots.getOrElse(board.turn) { false }) {
             delay(760)
             session.hostBotSnakesRoll()
+        }
+    }
+
+    LaunchedEffect(
+        session.briscaState?.turn,
+        session.briscaState?.phase,
+        session.briscaState?.handNo,
+        session.briscaState?.history?.size,
+        session.briscaState?.seats?.map { it.isBot },
+    ) {
+        val board = session.briscaState ?: return@LaunchedEffect
+        val seat = board.seats.getOrNull(board.turn) ?: return@LaunchedEffect
+        if (session.isHost && board.phase == BriscaPhase.Playing && seat.isBot) {
+            delay(700)
+            session.hostBotBriscaAction()
+        }
+    }
+
+    LaunchedEffect(
+        session.trucoState?.turn,
+        session.trucoState?.phase,
+        session.trucoState?.pending,
+        session.trucoState?.history?.size,
+        session.trucoState?.seats?.map { it.isBot },
+        session.trucoState?.handNo,
+    ) {
+        val board = session.trucoState ?: return@LaunchedEffect
+        val pending = board.pending
+        val botTurn = when {
+            pending != null -> board.seats.getOrNull(pending.awaiting)?.isBot == true
+            board.phase == TrucoPhase.Envido || board.phase == TrucoPhase.Play ->
+                board.seats.getOrNull(board.turn)?.isBot == true
+            else -> false
+        }
+        if (session.isHost && botTurn) {
+            delay(760)
+            session.hostBotTrucoAction()
         }
     }
 
@@ -895,17 +997,29 @@ private fun NativeRoomGame(
     if (resultOpen && finished) {
         val draw = (game == RoomGame.Damas && damas?.draw == true) ||
             (game == RoomGame.Mancala && mancala?.whiteStore == mancala?.blackStore) ||
-            (game == RoomGame.Domino && domino?.winnerIndices?.isEmpty() == true)
+            (game == RoomGame.Domino && domino?.winnerIndices?.isEmpty() == true) ||
+            (game == RoomGame.Brisca && brisca?.draw == true) ||
+            (game == RoomGame.Truco && truco?.draw == true)
         val won = when (game) {
             RoomGame.Damas -> myColor != null && damas?.winner == myColor
             RoomGame.Mancala -> mySide != null && mancala?.winner == mySide
             RoomGame.Domino -> domino?.winnerIndices?.contains(session.mySeat) == true
             RoomGame.Snakes -> snakes?.winner == session.mySeat
+            RoomGame.Brisca -> {
+                val board = brisca
+                board?.winner?.let { seat ->
+                    if (board.teams) board.seats.getOrNull(seat)?.team == board.seats.getOrNull(session.mySeat)?.team
+                    else seat == session.mySeat
+                } == true
+            }
+            RoomGame.Truco -> truco?.winner == session.mySeat
             null -> false
         }
         val spectator = game != RoomGame.Snakes && !session.isHost && session.mySeat != 1
         val winnerName = when (game) {
             RoomGame.Snakes -> snakes?.names?.getOrNull(snakes.winner ?: -1) ?: opponentName
+            RoomGame.Brisca -> brisca?.winner?.let { brisca.seats.getOrNull(it)?.name } ?: opponentName
+            RoomGame.Truco -> truco?.winner?.let { truco.seats.getOrNull(it)?.name } ?: opponentName
             else -> opponentName
         }
         AlertDialog(
@@ -1761,5 +1875,379 @@ private fun WebRoomTab(state: ShellState, onOpenWeb: (String) -> Unit) {
                 )
             }
         }
+    }
+}
+
+/* ------------------------------------------------------ mesas de baraja en sala */
+
+@Composable
+private fun RoomBriscaBoard(
+    state: ShellState,
+    session: NativeRoomController,
+    board: BriscaState,
+) {
+    val mySeat = session.mySeat.coerceIn(0, board.seats.lastIndex)
+    val myTurn = board.turn == mySeat && board.phase == BriscaPhase.Playing && board.seats.getOrNull(mySeat)?.isBot == false
+    var historyOpen by remember { mutableStateOf(false) }
+    val hand = board.hands.getOrElse(mySeat) { emptyList() }
+        .sortedWith(compareBy({ it.suit.ordinal }, { BriscaGame.POWER[it.rank] ?: 0 }))
+
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            board.seats.forEachIndexed { index, seat ->
+                Surface(
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(8.dp),
+                    color = when {
+                        index == board.turn && board.phase == BriscaPhase.Playing ->
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
+                        seat.team != null -> Color(if (seat.team == 0) 0xFFE0A63A else 0xFF4C7BD9).copy(alpha = 0.12f)
+                        else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.28f)
+                    },
+                ) {
+                    Column(Modifier.padding(4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            if (index == mySeat) state.t("common.you") else seat.name,
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1,
+                            fontWeight = if (index == board.turn) FontWeight.Bold else FontWeight.Normal,
+                        )
+                        Text(
+                            "${board.scores.getOrElse(index) { 0 }} · ${board.hands.getOrElse(index) { emptyList() }.size}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                        )
+                    }
+                }
+            }
+        }
+
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(172.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(Color(0xFF1B4A3F), Color(0xFF0E2B26)))),
+        ) {
+            Row(Modifier.fillMaxSize().padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CardDeckBack(Modifier.size(42.dp, 62.dp), board.deck.size + if (board.trumpCard != null) 1 else 0)
+                    Text(state.t("brisca.deck"), style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.7f))
+                }
+                Spacer(Modifier.width(6.dp))
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    board.trumpCard?.let {
+                        SpanishCardFace(it, Modifier.size(40.dp, 60.dp), playable = false)
+                        Text(
+                            board.trumpSuit.symbol,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color(0xFFE0A63A),
+                        )
+                    }
+                }
+                Spacer(Modifier.width(8.dp))
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    val shown = if (board.trick.isNotEmpty()) board.trick else board.lastTrick?.plays ?: emptyList()
+                    Text(
+                        if (board.trick.isNotEmpty()) state.t("brisca.trickInPlay") else state.t("brisca.lastTrick"),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White.copy(alpha = 0.8f),
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                        shown.forEach { play ->
+                            SpanishCardFace(play.card, Modifier.size(38.dp, 57.dp), playable = false)
+                        }
+                    }
+                    board.lastTrick?.let { trick ->
+                        Text(
+                            state.t("brisca.trickWon", mapOf("p" to (board.seats.getOrNull(trick.winner)?.name ?: ""), "n" to trick.points)),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color(0xFFE0A63A),
+                        )
+                    }
+                }
+            }
+        }
+
+        Text(
+            state.t("brisca.hand", mapOf("n" to hand.size)),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            hand.forEach { card ->
+                SpanishCardFace(
+                    card = card,
+                    modifier = Modifier.size(48.dp, 72.dp),
+                    playable = myTurn,
+                    onClick = if (myTurn) {
+                        {
+                            if (session.isHost) session.hostBriscaPlay(card.id) else session.guestBriscaPlay(card.id)
+                        }
+                    } else {
+                        null
+                    },
+                )
+            }
+        }
+
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            if (board.phase == BriscaPhase.HandEnd) {
+                Button(
+                    onClick = {
+                        if (session.isHost) session.hostBriscaNextHand() else session.guestBriscaNextHand()
+                    },
+                    modifier = Modifier.weight(1f),
+                ) { Text(state.t("brisca.nextHand")) }
+            }
+            OutlinedButton(onClick = { historyOpen = true }, modifier = Modifier.weight(1f)) {
+                Text(state.t("common.history"))
+            }
+        }
+        Column(Modifier.fillMaxWidth()) {
+            NativeMoveLog(state, board.history) { historyOpen = true }
+        }
+    }
+
+    if (historyOpen) {
+        NativeHistoryDialog(
+            state,
+            board.history,
+            pdfTitle = state.t("brisca.title"),
+            pdfSubtitle = state.t("brisca.subtitle"),
+        ) { historyOpen = false }
+    }
+}
+
+@Composable
+private fun RoomTrucoBoard(
+    state: ShellState,
+    session: NativeRoomController,
+    board: TrucoState,
+) {
+    val mySeat = session.mySeat.coerceIn(0, board.seats.lastIndex)
+    val myTurn = board.turn == mySeat && board.pending == null &&
+        (board.phase == TrucoPhase.Envido || board.phase == TrucoPhase.Play)
+    val myHand = board.hands.getOrElse(mySeat) { emptyList() }
+    val hand = myHand.sortedWith(compareByDescending<SpanishCard> { BriscaGame.POWER[it.rank] ?: 0 }.thenBy { it.suit.ordinal })
+    var historyOpen by remember { mutableStateOf(false) }
+    val pending = board.pending
+    val iMustRespond = pending != null && pending.awaiting == mySeat
+
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            board.seats.forEachIndexed { index, seat ->
+                Surface(
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(8.dp),
+                    color = if (index == board.turn && board.phase == TrucoPhase.Play) {
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.28f)
+                    },
+                ) {
+                    Column(Modifier.padding(4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            if (index == mySeat) state.t("common.you") else seat.name,
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1,
+                            fontWeight = if (index == board.turn) FontWeight.Bold else FontWeight.Normal,
+                        )
+                        Text(
+                            "${board.scores.getOrElse(index) { 0 }} · ${board.hands.getOrElse(index) { emptyList() }.size}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                        )
+                    }
+                }
+            }
+            Surface(shape = RoundedCornerShape(8.dp), color = Color(0xFFE0A63A).copy(alpha = 0.16f)) {
+                Column(Modifier.padding(horizontal = 8.dp, vertical = 4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(state.t("truco.stake"), style = MaterialTheme.typography.labelSmall)
+                    Text("${board.handStake}", fontWeight = FontWeight.Bold, color = Color(0xFFE0A63A))
+                }
+            }
+        }
+
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(176.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(Color(0xFF2A1B3D), Color(0xFF120E1E)))),
+        ) {
+            Column(Modifier.fillMaxSize().padding(8.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                if (board.envidoReveal != null) {
+                    Text(
+                        state.t("truco.envidoShown", mapOf("a" to (board.envidoReveal.getOrNull(0) ?: 0), "b" to (board.envidoReveal.getOrNull(1) ?: 0))),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color(0xFFE0A63A),
+                    )
+                }
+                Text(state.t("truco.currentTrick"), style = MaterialTheme.typography.labelSmall, color = Color.White.copy(alpha = 0.7f))
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+                    if (board.currentTrick.isEmpty()) {
+                        Box(Modifier.size(46.dp, 68.dp).background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(8.dp)))
+                        Box(Modifier.size(46.dp, 68.dp).background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(8.dp)))
+                    } else {
+                        board.currentTrick.forEach { play ->
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                SpanishCardFace(play.card, Modifier.size(46.dp, 68.dp), playable = false)
+                                Text(
+                                    board.seats.getOrNull(play.seat)?.name ?: "",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color.White.copy(alpha = 0.65f),
+                                    maxLines = 1,
+                                )
+                            }
+                        }
+                    }
+                    board.tricks.takeLast(2).forEach { trick ->
+                        Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                            trick.plays.forEach { play ->
+                                SpanishCardFace(play.card, Modifier.size(32.dp, 48.dp), playable = false)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text(
+                state.t("truco.hand", mapOf("n" to hand.size)),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                state.t("truco.tanto", mapOf("n" to TrucoGame.tanto(myHand))),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            hand.forEach { card ->
+                SpanishCardFace(
+                    card = card,
+                    modifier = Modifier.size(48.dp, 72.dp),
+                    playable = myTurn && board.phase == TrucoPhase.Play,
+                    onClick = if (myTurn && board.phase == TrucoPhase.Play) {
+                        {
+                            if (session.isHost) session.hostTrucoPlay(card.id) else session.guestTrucoPlay(card.id)
+                        }
+                    } else {
+                        null
+                    },
+                )
+            }
+        }
+
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            if (board.phase == TrucoPhase.Envido && myTurn) {
+                OutlinedButton(
+                    onClick = {
+                        if (session.isHost) session.hostTrucoCallEnvido("envido") else session.guestTrucoEnvido("envido")
+                    },
+                    modifier = Modifier.weight(1f),
+                ) { Text("Envido 2") }
+                OutlinedButton(
+                    onClick = {
+                        if (session.isHost) session.hostTrucoCallEnvido("realEnvido") else session.guestTrucoEnvido("realEnvido")
+                    },
+                    modifier = Modifier.weight(1f),
+                ) { Text("Real 3") }
+                Button(
+                    onClick = {
+                        if (session.isHost) session.hostTrucoStartPlay() else session.guestTrucoStartPlay()
+                    },
+                    modifier = Modifier.weight(1f),
+                ) { Text(state.t("truco.playNoEnvido")) }
+            } else if (board.phase == TrucoPhase.Play && myTurn) {
+                if (board.trucoLevel < 3) {
+                    Button(
+                        onClick = {
+                            if (session.isHost) session.hostTrucoCallTruco() else session.guestTrucoCall()
+                        },
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Text(
+                            when (board.trucoLevel) {
+                                0 -> "Truco 2"
+                                1 -> "Retruco 3"
+                                else -> "Vale 4"
+                            },
+                        )
+                    }
+                }
+                OutlinedButton(
+                    onClick = {
+                        if (session.isHost) session.hostTrucoFold() else session.guestTrucoFold()
+                    },
+                    modifier = Modifier.weight(1f),
+                ) { Text(state.t("truco.fold")) }
+            }
+            if (board.phase == TrucoPhase.HandEnd) {
+                Button(
+                    onClick = {
+                        if (session.isHost) session.hostTrucoNextHand() else session.guestTrucoNextHand()
+                    },
+                    modifier = Modifier.weight(1f),
+                ) { Text(state.t("truco.nextHand")) }
+            }
+            OutlinedButton(onClick = { historyOpen = true }, modifier = Modifier.weight(1f)) {
+                Text(state.t("common.history"))
+            }
+        }
+        NativeMoveLog(state, board.history) { historyOpen = true }
+    }
+
+    if (iMustRespond) {
+        val challenge = pending ?: return
+        AlertDialog(
+            onDismissRequest = { },
+            title = { Text(state.t("truco.challengeTitle")) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        state.t(
+                            "truco.challengeBody",
+                            mapOf(
+                                "p" to (board.seats.getOrNull(challenge.caller)?.name ?: ""),
+                                "c" to TrucoGame.challengeName(challenge.kind),
+                                "n" to challenge.stake,
+                            ),
+                        ),
+                    )
+                    if (challenge.kind in setOf("envido", "realEnvido", "envidoEnvigido")) {
+                        Text(
+                            state.t("truco.yourTanto", mapOf("n" to TrucoGame.tanto(myHand))),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(onClick = {
+                    if (session.isHost) session.hostTrucoRespond(true) else session.guestTrucoRespond(true)
+                }) { Text(state.t("truco.accept")) }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    if (session.isHost) session.hostTrucoRespond(false) else session.guestTrucoRespond(false)
+                }) { Text(state.t("truco.reject")) }
+            },
+        )
+    }
+
+    if (historyOpen) {
+        NativeHistoryDialog(
+            state,
+            board.history,
+            pdfTitle = state.t("truco.title"),
+            pdfSubtitle = state.t("truco.subtitle"),
+        ) { historyOpen = false }
     }
 }
