@@ -601,7 +601,7 @@ function sidePots(state: PokerState): Array<{ amount: number; eligible: string[]
 function refundUncalled(state: PokerState): PokerState {
   const contributions = [...state.players.map((player) => player.totalBet)].sort((a, b) => b - a);
   const top = contributions[0] ?? 0;
-  const second = contributions.find((value) => value < top) ?? 0;
+  const second = contributions[1] ?? 0;
   if (top <= second) return state;
   const topPlayer = state.players.find((player) => player.totalBet === top);
   if (!topPlayer) return state;

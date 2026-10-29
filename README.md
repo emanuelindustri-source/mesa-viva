@@ -137,7 +137,7 @@ npm run test:relay            # requiere npm run rooms en otra terminal
 python tools/check_i18n.py   # claves usadas vs. catálogo español
 ```
 
-- 30 pruebas de motores web + 54 pruebas de motores nativos Kotlin (los quince juegos, incluidos Póker, Caída y Furia). **84 en total**.
+- 30 pruebas de motores web + 55 pruebas de motores nativos Kotlin (los quince juegos, incluidos Póker, Caída y Furia). **85 en total**.
 - TypeScript estricto, sin `any` en la capa de motores.
 - Motor determinista con semilla reproducible.
 - Host autoritativo en red; los clientes solo reciben su vista redactada.

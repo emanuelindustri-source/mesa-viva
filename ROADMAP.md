@@ -14,7 +14,7 @@
 - [x] Póker Texas Hold'em nativo en Compose, con ciegas, calles, all-in, botes laterales y showdown.
 - [x] Evaluador de la mejor mano de 5 entre 7 y bots con tres dificultades.
 - [x] Quince juegos 100 % Compose; el WebView queda como respaldo.
-- [x] 54 pruebas Kotlin + 30 web = **84**.
+- [x] 55 pruebas Kotlin + 30 web = **85**.
 - [x] APK y AAB de release firmados; Póker verificado en emulador Android 14.
 - [x] Evidencia visual en `docs/evidence/v1.3.0/`.
 - [ ] Salas nativas, PDF/replays y accesibilidad.

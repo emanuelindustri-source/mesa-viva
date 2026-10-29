@@ -516,7 +516,7 @@ class PokerGame(
     private fun refundUncalled(state: PokerState): PokerState {
         val sorted = state.players.map { it.totalBet }.sortedDescending()
         val top = sorted.getOrNull(0) ?: 0
-        val second = sorted.firstOrNull { it < top } ?: 0
+        val second = sorted.getOrNull(1) ?: 0
         if (top <= second) return state
         val topPlayer = state.players.firstOrNull { it.totalBet == top } ?: return state
         val refund = top - second
@@ -745,6 +745,9 @@ class PokerGame(
     fun evaluateHand(cards: List<PokerCard>): PokerHandEval = evaluate(cards)
 
     fun compareHands(a: PokerHandEval, b: PokerHandEval): Int = compare(a, b)
+
+    /** Expuesto para pruebas de reparto de botes y showdown. */
+    fun resolveShowdownForTest(state: PokerState): PokerResult = showdown(state)
 
     fun handName(key: String): String = when (key) {
         "poker.hand.high" -> "Carta alta"

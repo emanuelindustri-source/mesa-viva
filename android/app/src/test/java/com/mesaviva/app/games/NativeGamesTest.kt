@@ -716,4 +716,27 @@ class NativeGamesTest {
         val state = game.newMatch().copy(turn = 1)
         assertNotNull(game.botAction(state))
     }
+
+    @Test
+    fun `poker showdown awards the best kicker`() {
+        val game = PokerGame(playerCount = 2, seed = 35)
+        val base = game.newMatch()
+        fun c(rank: Int, suit: PokerSuit) = PokerCard("$suit-$rank", suit, rank)
+        val community = listOf(
+            c(4, PokerSuit.Diamonds), c(9, PokerSuit.Hearts), c(6, PokerSuit.Diamonds),
+            c(4, PokerSuit.Hearts), c(6, PokerSuit.Hearts),
+        )
+        val state = base.copy(
+            players = listOf(
+                base.players[0].copy(hole = listOf(c(14, PokerSuit.Diamonds), c(2, PokerSuit.Clubs)), folded = false, totalBet = 20),
+                base.players[1].copy(hole = listOf(c(10, PokerSuit.Clubs), c(3, PokerSuit.Clubs)), folded = false, totalBet = 20),
+            ),
+            community = community,
+            street = PokerStreet.River,
+            currentBet = 0,
+        )
+        val result = game.resolveShowdownForTest(state)
+        assertEquals(0, result.state.handWinner?.seat)
+        assertTrue((result.state.players[0].chips) > 800)
+    }
 }

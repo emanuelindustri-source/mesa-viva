@@ -18,8 +18,8 @@
 ### Calidad
 
 - 30/30 pruebas de motores web.
-- 54/54 pruebas Kotlin (los quince juegos, incluidos Póker, Caída y Furia).
-- **84 pruebas en total.**
+- 55/55 pruebas Kotlin (los quince juegos, incluidos Póker, Caída y Furia).
+- **85 pruebas en total.**
 - TypeScript sin errores.
 - Web compilada con Vite 6.4.5 y sincronizada dentro del APK.
 - APK debug, APK release firmado y AAB release firmado.
@@ -28,8 +28,8 @@
 
 ### Checksums v1.3.0
 
-- APK release firmado: `922A36A7FDF6C16723F3DDB4436CA953623706D405EA0D7E22E3418E2671987A` · 10.330.909 bytes.
-- AAB release firmado: `F062AD5013A7A7CE7FE30F10FD95DA2D8EB25A599DDA88D90131CE64CDEE41DE` · 9.973.057 bytes.
+- APK release firmado: `4F7768B325C01CEBA57E979CDA40382B91310FA2D1DF5D34ACFFE9EC35576735` · 10.330.905 bytes.
+- AAB release firmado: `634145340F43ED7430831EA7D9BE7FFB540039E0620B283CEBFF5461B5BDC8BA` · 9.973.008 bytes.
 - Artefactos locales en `artifacts/`: `mesa-viva-1.3.0-release.apk`, `mesa-viva-1.3.0-release.aab`. La release de GitHub añade `mesa-viva-1.3.0-debug.apk`.
 
 ## Compose
