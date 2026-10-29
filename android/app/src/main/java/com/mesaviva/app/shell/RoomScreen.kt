@@ -158,9 +158,9 @@ fun RoomScreen(state: ShellState, onOpenWeb: (String) -> Unit) {
                 state = state,
                 session = session,
                 joinHint = joinHint,
-                onHost = { game ->
+                onHost = { game, relay ->
                     val controller = NativeRoomController(context.applicationContext, state, RoomRole.Host)
-                    controller.host(game)
+                    controller.host(game, relay)
                     session = controller
                     joinHint = ""
                 },
@@ -199,7 +199,7 @@ private fun NativeRoomLobby(
     state: ShellState,
     session: NativeRoomController?,
     joinHint: String,
-    onHost: (RoomGame) -> Unit,
+    onHost: (RoomGame, String) -> Unit,
     onJoin: (String, String) -> Unit,
     onScan: () -> Unit,
     onClose: () -> Unit,
@@ -207,6 +207,7 @@ private fun NativeRoomLobby(
 ) {
     if (session == null) {
         var game by remember { mutableStateOf(RoomGame.Damas) }
+        var relay by remember { mutableStateOf("") }
         var url by remember { mutableStateOf("") }
         var code by remember { mutableStateOf("") }
         LazyColumn(
@@ -236,7 +237,11 @@ private fun NativeRoomLobby(
                 ) {
                     Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         Text(state.t("room.createNative"), style = MaterialTheme.typography.titleMedium)
-                        Text(state.t("room.twoPlayers"), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            if (game == RoomGame.Snakes) state.t("room.snakesPlayers") else state.t("room.twoPlayers"),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             RoomGame.entries.forEach { option ->
                                 FilterChip(
@@ -246,8 +251,21 @@ private fun NativeRoomLobby(
                                 )
                             }
                         }
+                        OutlinedTextField(
+                            value = relay,
+                            onValueChange = { relay = it.take(160) },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            label = { Text(state.t("room.relayOptional")) },
+                            placeholder = { Text("wss://tu-relay.example") },
+                        )
+                        Text(
+                            state.t("room.relayHint"),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                         Button(
-                            onClick = { onHost(game) },
+                            onClick = { onHost(game, relay) },
                             modifier = Modifier.fillMaxWidth(),
                         ) { Text("🎲 ${state.t("room.createNative")}") }
                     }
@@ -393,6 +411,13 @@ private fun HostLobby(
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Text("👤", fontSize = 18.sp)
                                 Text(guest.name, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+                                if (guest.seat in 1..3) {
+                                    Text(
+                                        state.t("room.seat", mapOf("n" to guest.seat)),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
                                 Text(
                                     state.t(if (guest.online) "room.onlineLabel" else "room.offlineLabel"),
                                     style = MaterialTheme.typography.labelSmall,
@@ -575,8 +600,10 @@ private fun NativeRoomGame(
     val game = session.activeGame
     val damas = session.damasState
     val mancala = session.mancalaState
+    val snakes = session.snakesState
     val finished = (game == RoomGame.Damas && damas?.phase == DamasPhase.MatchEnd) ||
-        (game == RoomGame.Mancala && mancala?.phase == MancalaPhase.MatchEnd)
+        (game == RoomGame.Mancala && mancala?.phase == MancalaPhase.MatchEnd) ||
+        (game == RoomGame.Snakes && snakes?.finished == true)
 
     LaunchedEffect(finished) {
         if (finished && !resultShown) {
@@ -587,8 +614,16 @@ private fun NativeRoomGame(
         }
     }
 
-    val myColor = if (session.isHost) DamasColor.White else DamasColor.Black
-    val mySide = if (session.isHost) MancalaSide.White else MancalaSide.Black
+    val myColor = when {
+        session.isHost -> DamasColor.White
+        session.mySeat == 1 -> DamasColor.Black
+        else -> null
+    }
+    val mySide = when {
+        session.isHost -> MancalaSide.White
+        session.mySeat == 1 -> MancalaSide.Black
+        else -> null
+    }
     val opponentName = if (session.isHost) {
         session.guests.firstOrNull()?.name ?: state.t("room.guestFallback")
     } else {
@@ -612,8 +647,14 @@ private fun NativeRoomGame(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
+                val transport = when {
+                    session.isHost && session.onlineRelay -> state.t("room.transportOnline")
+                    session.isHost -> state.t("room.transportLan")
+                    session.onlineRelay -> state.t("room.transportOnline")
+                    else -> state.t("room.transportGuest")
+                }
                 Text(
-                    "$myName · ${state.t("room.nativeBadge")}",
+                    "$myName · $transport",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -624,18 +665,29 @@ private fun NativeRoomGame(
         val banner = when {
             finished -> state.t("common.matchOver")
             game == RoomGame.Damas && damas != null -> {
-                if (damas.turn == myColor) state.t("room.yourTurn")
-                else state.t("room.theirTurn", mapOf("name" to opponentName))
+                when {
+                    myColor == null -> state.t("room.spectating")
+                    damas.turn == myColor -> state.t("room.yourTurn")
+                    else -> state.t("room.theirTurn", mapOf("name" to opponentName))
+                }
             }
             game == RoomGame.Mancala && mancala != null -> {
-                if (mancala.turn == mySide) state.t("room.yourTurn")
-                else state.t("room.theirTurn", mapOf("name" to opponentName))
+                when {
+                    mySide == null -> state.t("room.spectating")
+                    mancala.turn == mySide -> state.t("room.yourTurn")
+                    else -> state.t("room.theirTurn", mapOf("name" to opponentName))
+                }
+            }
+            game == RoomGame.Snakes && snakes != null -> {
+                val name = snakes.names.getOrElse(snakes.turn) { opponentName }
+                if (snakes.turn == session.mySeat) state.t("room.yourTurn")
+                else state.t("room.theirTurn", mapOf("name" to name))
             }
             else -> state.t("room.syncState")
         }
         NativeTurnBanner(text = banner, alert = false)
 
-        if (session.isHost && session.botSeat && session.inGame) {
+        if (session.isHost && session.botSeat && session.inGame && game != RoomGame.Snakes) {
             Surface(
                 shape = RoundedCornerShape(12.dp),
                 color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.16f),
@@ -660,7 +712,7 @@ private fun NativeRoomGame(
                         Text(state.t("room.syncState"), style = MaterialTheme.typography.bodyMedium)
                     }
                 } else {
-                    RoomDamasBoard(state, session, damas)
+                    RoomDamasBoard(state, session, damas, myColor)
                     NativeMoveLog(state, damas.history) { }
                 }
             }
@@ -670,7 +722,16 @@ private fun NativeRoomGame(
                         Text(state.t("room.syncState"), style = MaterialTheme.typography.bodyMedium)
                     }
                 } else {
-                    RoomMancalaBoard(state, session, mancala)
+                    RoomMancalaBoard(state, session, mancala, mySide)
+                }
+            }
+            RoomGame.Snakes -> {
+                if (snakes == null) {
+                    Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+                        Text(state.t("room.syncState"), style = MaterialTheme.typography.bodyMedium)
+                    }
+                } else {
+                    RoomSnakesBoard(state, session, snakes)
                 }
             }
             null -> Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
@@ -685,12 +746,17 @@ private fun NativeRoomGame(
             OutlinedButton(onClick = { session.returnToLobby() }, modifier = Modifier.weight(1f)) {
                 Text(state.t("room.backToLobby"))
             }
+            val canResign = !finished && when (game) {
+                RoomGame.Snakes -> session.mySeat in 0..3
+                null -> false
+                else -> session.isHost || session.mySeat == 1
+            }
             Button(
                 onClick = { resignOpen = true },
-                enabled = !finished,
+                enabled = canResign,
                 modifier = Modifier.weight(1f),
             ) { Text(state.t("common.resign")) }
-            if (session.isHost && session.botSeat) {
+            if (session.isHost && session.botSeat && game != RoomGame.Snakes) {
                 OutlinedButton(onClick = { session.hostToggleBot() }) { Text("🤖") }
             }
         }
@@ -709,6 +775,19 @@ private fun NativeRoomGame(
         if (session.isHost && session.botSeat && board.turn == MancalaSide.Black && board.phase == MancalaPhase.Play) {
             delay(620)
             session.hostBotMancalaMove()
+        }
+    }
+
+    LaunchedEffect(
+        session.snakesState?.turn,
+        session.snakesState?.positions,
+        session.snakesState?.bots,
+        session.snakesState?.finished,
+    ) {
+        val board = session.snakesState ?: return@LaunchedEffect
+        if (session.isHost && !board.finished && board.bots.getOrElse(board.turn) { false }) {
+            delay(760)
+            session.hostBotSnakesRoll()
         }
     }
 
@@ -761,18 +840,25 @@ private fun NativeRoomGame(
         val draw = (game == RoomGame.Damas && damas?.draw == true) ||
             (game == RoomGame.Mancala && mancala?.whiteStore == mancala?.blackStore)
         val won = when (game) {
-            RoomGame.Damas -> damas?.winner == myColor
-            RoomGame.Mancala -> mancala?.winner == mySide
+            RoomGame.Damas -> myColor != null && damas?.winner == myColor
+            RoomGame.Mancala -> mySide != null && mancala?.winner == mySide
+            RoomGame.Snakes -> snakes?.winner == session.mySeat
             null -> false
+        }
+        val spectator = game != RoomGame.Snakes && !session.isHost && session.mySeat != 1
+        val winnerName = when (game) {
+            RoomGame.Snakes -> snakes?.names?.getOrNull(snakes.winner ?: -1) ?: opponentName
+            else -> opponentName
         }
         AlertDialog(
             onDismissRequest = { resultOpen = false },
             title = {
                 Text(
                     when {
+                        spectator -> state.t("common.matchOver")
                         draw -> state.t("room.drawMatch")
                         won -> state.t("room.matchWon")
-                        else -> state.t("room.matchLost", mapOf("name" to opponentName))
+                        else -> state.t("room.matchLost", mapOf("name" to winnerName))
                     },
                 )
             },
@@ -784,6 +870,11 @@ private fun NativeRoomGame(
                     }
                     if (game == RoomGame.Mancala && mancala != null) {
                         Text("${state.t("mancala.you")}: ${mancala.whiteStore} · ${opponentName}: ${mancala.blackStore}")
+                    }
+                    if (game == RoomGame.Snakes && snakes != null) {
+                        snakes.names.forEachIndexed { index, name ->
+                            Text("$name: ${snakes.positions.getOrElse(index) { 0 }}")
+                        }
                     }
                     Text(
                         state.t("replay.note"),
@@ -817,10 +908,10 @@ private fun RoomDamasBoard(
     state: ShellState,
     session: NativeRoomController,
     board: DamasState,
+    myColor: DamasColor?,
 ) {
     var selected by remember { mutableStateOf<Int?>(null) }
-    val myColor = if (session.isHost) DamasColor.White else DamasColor.Black
-    val myTurn = board.phase == DamasPhase.Play && board.turn == myColor
+    val myTurn = myColor != null && board.phase == DamasPhase.Play && board.turn == myColor
     val legal = remember(board) {
         if (board.phase == DamasPhase.Play) session.damasLegalMoves() else emptyList()
     }
@@ -953,17 +1044,213 @@ private fun RoomDamasBoard(
     }
 }
 
+private val SNAKES_ROOM_COLORS = listOf(
+    Color(0xFFE0A63A),
+    Color(0xFF7FD8B4),
+    Color(0xFFE57373),
+    Color(0xFF8AB4F8),
+)
+
+@Composable
+private fun RoomSnakesBoard(
+    state: ShellState,
+    session: NativeRoomController,
+    board: SnakesRoomState,
+) {
+    val myTurn = board.turn == session.mySeat && !board.finished
+    val currentName = board.names.getOrElse(board.turn) { "—" }
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            board.names.forEachIndexed { index, name ->
+                Surface(
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(10.dp),
+                    color = if (board.turn == index && !board.finished) {
+                        SNAKES_ROOM_COLORS[index % 4].copy(alpha = 0.26f)
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.32f)
+                    },
+                ) {
+                    Column(
+                        Modifier.padding(horizontal = 4.dp, vertical = 6.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Box(
+                            Modifier
+                                .size(10.dp)
+                                .clip(CircleShape)
+                                .background(SNAKES_ROOM_COLORS[index % 4]),
+                        )
+                        Text(
+                            name,
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Text(
+                            board.positions.getOrElse(index) { 0 }.toString(),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                }
+            }
+        }
+
+        BoxWithConstraints(
+            Modifier
+                .fillMaxWidth()
+                .aspectRatio(1f)
+                .clip(RoundedCornerShape(12.dp))
+                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(12.dp)),
+        ) {
+            val cell = maxWidth / 10
+            Column(Modifier.fillMaxSize()) {
+                for (row in 0 until 10) {
+                    Row(Modifier.weight(1f).fillMaxWidth()) {
+                        for (col in 0 until 10) {
+                            val rank = 9 - row
+                            val number = rank * 10 + if (rank % 2 == 0) col + 1 else 10 - col
+                            val here = board.positions.indices.filter { board.positions[it] == number }
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight()
+                                    .background(
+                                        if ((row + col) % 2 == 0) Color(0xFFE9D8B4)
+                                        else Color(0xFFD7BE92),
+                                    )
+                                    .border(0.3.dp, Color(0xFF8A6A45).copy(alpha = 0.35f))
+                                    .semantics {
+                                        contentDescription = buildString {
+                                            append("Casilla $number")
+                                            here.forEach { index ->
+                                                append(", ")
+                                                append(board.names.getOrElse(index) { "" })
+                                            }
+                                        }
+                                    },
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(
+                                        number.toString(),
+                                        fontSize = (cell.value * 0.13f).coerceIn(7f, 11f).sp,
+                                        color = Color(0xFF5A3A22),
+                                    )
+                                    Row(horizontalArrangement = Arrangement.spacedBy(1.dp)) {
+                                        here.take(4).forEach { index ->
+                                            Box(
+                                                Modifier
+                                                    .size((cell.value * 0.12f).coerceIn(4f, 8f).dp)
+                                                    .clip(CircleShape)
+                                                    .background(SNAKES_ROOM_COLORS[index % 4]),
+                                            )
+                                        }
+                                    }
+                                }
+                                SnakesRoomRules.LADDERS[number]?.let { destination ->
+                                    Text(
+                                        "↑$destination",
+                                        fontSize = 7.sp,
+                                        color = Color(0xFF2E7D32),
+                                        modifier = Modifier.align(Alignment.TopEnd),
+                                    )
+                                }
+                                SnakesRoomRules.SNAKES[number]?.let { destination ->
+                                    Text(
+                                        "↓$destination",
+                                        fontSize = 7.sp,
+                                        color = Color(0xFFB71C1C),
+                                        modifier = Modifier.align(Alignment.BottomEnd),
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Row(
+            Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text(
+                if (board.dice > 0) "🎲 ${board.dice}" else "🎲",
+                style = MaterialTheme.typography.titleLarge,
+            )
+            Column(Modifier.weight(1f)) {
+                Text(
+                    when {
+                        board.finished -> state.t(
+                            "snakes.winner",
+                            mapOf("name" to (board.names.getOrNull(board.winner ?: -1) ?: currentName)),
+                        )
+                        myTurn -> state.t("snakes.yourTurn")
+                        else -> state.t("snakes.botTurn", mapOf("name" to currentName))
+                    },
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                val event = when (board.lastEvent) {
+                    "ladder" -> state.t(
+                        "snakes.ladder",
+                        mapOf("name" to (board.names.getOrNull(board.lastSeat ?: -1) ?: ""), "n" to board.lastTo),
+                    )
+                    "snake" -> state.t(
+                        "snakes.snake",
+                        mapOf("name" to (board.names.getOrNull(board.lastSeat ?: -1) ?: ""), "n" to board.lastTo),
+                    )
+                    "needExact" -> state.t("snakes.needExact")
+                    "win" -> state.t(
+                        "snakes.winner",
+                        mapOf("name" to (board.names.getOrNull(board.winner ?: -1) ?: "")),
+                    )
+                    "resign" -> state.t("common.matchOver")
+                    "start" -> state.t("snakes.rules")
+                    else -> if (board.lastSeat != null) {
+                        "${board.names.getOrNull(board.lastSeat) ?: ""}: ${board.lastFrom} → ${board.lastTo}"
+                    } else {
+                        state.t("snakes.rules")
+                    }
+                }
+                Text(
+                    event,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            Button(
+                onClick = {
+                    if (session.isHost) session.hostSnakesRoll() else session.guestSnakesRoll()
+                },
+                enabled = myTurn && !board.finished,
+            ) {
+                Text(state.t("snakes.roll"))
+            }
+        }
+    }
+}
+
 @Composable
 private fun RoomMancalaBoard(
     state: ShellState,
     session: NativeRoomController,
     board: MancalaState,
+    mySide: MancalaSide?,
 ) {
-    val mySide = if (session.isHost) MancalaSide.White else MancalaSide.Black
-    val otherSide = if (mySide == MancalaSide.White) MancalaSide.Black else MancalaSide.White
-    val myTurn = board.phase == MancalaPhase.Play && board.turn == mySide
+    val viewSide = mySide ?: MancalaSide.Black
+    val otherSide = if (viewSide == MancalaSide.Black) MancalaSide.White else MancalaSide.Black
+    val myTurn = mySide != null && board.phase == MancalaPhase.Play && board.turn == mySide
     val playable = remember(board, mySide) {
-        if (board.phase != MancalaPhase.Play || board.turn != mySide) emptyList()
+        if (mySide == null || board.phase != MancalaPhase.Play || board.turn != mySide) emptyList()
         else MancalaGame.sidePits(mySide).filter { board.pits.getOrElse(it) { 0 } > 0 }
     }
     Column(
@@ -975,7 +1262,8 @@ private fun RoomMancalaBoard(
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Text(
-            state.t("mancala.you") + ": " + board.pits[MancalaGame.store(mySide)],
+            (if (mySide == null) state.t("room.spectating") else state.t("mancala.you")) +
+                ": " + board.pits[MancalaGame.store(viewSide)],
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.SemiBold,
             color = Color(0xFFFFE0A3),
@@ -998,7 +1286,7 @@ private fun RoomMancalaBoard(
                     }
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                    for (pit in MancalaGame.sidePits(mySide)) {
+                    for (pit in MancalaGame.sidePits(viewSide)) {
                         MancalaPit(
                             count = board.pits[pit],
                             enabled = myTurn && pit in playable,
@@ -1008,7 +1296,11 @@ private fun RoomMancalaBoard(
                     }
                 }
             }
-            StorePit(state.t("mancala.you"), board.pits[MancalaGame.store(mySide)], Modifier.weight(0.7f))
+            StorePit(
+                if (mySide == null) state.t("room.spectating") else state.t("mancala.you"),
+                board.pits[MancalaGame.store(viewSide)],
+                Modifier.weight(0.7f),
+            )
         }
         Text(
             state.t("mancala.rules"),

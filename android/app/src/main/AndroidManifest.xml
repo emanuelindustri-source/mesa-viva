@@ -47,6 +47,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="mesaviva" android:host="join" />
+                <data android:scheme="mesaviva" android:host="replay" />
             </intent-filter>
         </activity>
 

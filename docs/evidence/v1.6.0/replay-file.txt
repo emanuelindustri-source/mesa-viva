@@ -1,0 +1,13 @@
+{
+  "app": "Mesa Viva",
+  "format": 1,
+  "game": "damas",
+  "seed": 123456,
+  "moves": [
+    40,
+    33,
+    17,
+    26
+  ],
+  "link": "mesaviva:\/\/replay?game=damas&seed=123456&moves=40-33.17-26"
+}

@@ -15,6 +15,7 @@ import androidx.core.view.WindowCompat
 import com.mesaviva.app.shell.MesaVivaApp
 import com.mesaviva.app.shell.MesaVivaTheme
 import com.mesaviva.app.shell.NativeAudio
+import com.mesaviva.app.shell.ReplayCodec
 import com.mesaviva.app.shell.ShellScreen
 import com.mesaviva.app.shell.ShellState
 
@@ -28,11 +29,11 @@ import com.mesaviva.app.shell.ShellState
 class MainActivity : ComponentActivity() {
 
     private var shell: ShellState? = null
-    private var roomLink by mutableStateOf<String?>(null)
+    private var deepLink by mutableStateOf<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        roomLink = intent?.dataString?.takeIf { it.startsWith("mesaviva://") }
+        deepLink = intent?.dataString?.takeIf { it.startsWith("mesaviva://") }
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.statusBarColor = Color.TRANSPARENT
         window.navigationBarColor = Color.TRANSPARENT
@@ -45,11 +46,24 @@ class MainActivity : ComponentActivity() {
         setContent {
             val state = remember { ShellState(this) }
             shell = state
-            LaunchedEffect(roomLink) {
-                val link = roomLink ?: return@LaunchedEffect
-                roomLink = null
-                state.roomLink = link
-                state.screen = ShellScreen.Room
+            LaunchedEffect(deepLink) {
+                val link = deepLink ?: return@LaunchedEffect
+                deepLink = null
+                when {
+                    link.startsWith("mesaviva://join") -> {
+                        state.roomLink = link
+                        state.screen = ShellScreen.Room
+                    }
+                    link.startsWith("mesaviva://replay") -> {
+                        val replay = ReplayCodec.parse(link) ?: return@LaunchedEffect
+                        state.pendingReplay = replay
+                        state.screen = if (replay.game == ReplayCodec.DAMAS) {
+                            ShellScreen.Damas
+                        } else {
+                            ShellScreen.Mancala
+                        }
+                    }
+                }
             }
             MesaVivaTheme(state) {
                 MesaVivaApp(
@@ -71,7 +85,7 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        intent.dataString?.takeIf { it.startsWith("mesaviva://") }?.let { roomLink = it }
+        intent.dataString?.takeIf { it.startsWith("mesaviva://") }?.let { deepLink = it }
     }
 
     override fun onResume() {

@@ -2,7 +2,7 @@
 
 **Mesa Viva** es una aplicación de juegos de cartas y mesa con alma venezolana. Funciona sin conexión para jugar solo, contra bots o pasando el teléfono; y tiene salas en línea con código y QR para jugar con amigos. La web y el APK Android comparten el mismo motor de juego.
 
-> Estado actual: **v1.5.0**. Quince juegos jugables y **los quince 100 % Jetpack Compose**: Serpientes y Escaleras, Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados Mentirosos, Go, Jungle, Xiangqi, Damas Chinas, Caída, Furia de Colores y Póker. La cáscara nativa suma **salas LAN nativas con QR**, **replays con semilla**, **audio procedural** y **crónica PDF con estadísticas**. Android 16 (API 36), APK/AAB firmados y PWA offline.
+> Estado actual: **v1.6.0**. Quince juegos jugables y **los quince 100 % Jetpack Compose**: Serpientes y Escaleras, Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados Mentirosos, Go, Jungle, Xiangqi, Damas Chinas, Caída, Furia de Colores y Póker. La cáscara nativa suma **salas de hasta 4 jugadores**, **relay online configurable**, **replays exportables**, **audio procedural en las 15 mesas** y **crónica PDF con estadísticas**. Android 16 (API 36), APK/AAB firmados y PWA offline.
 
 ---
 
@@ -14,7 +14,7 @@
 - **Ludo nativo (Compose)**: 2–4 jugadores, cuatro fichas, salida con 6, capturas, casillas seguras, tres seises, turno extra y meta exacta. Tablero 15×15, dados, bots y modo pasar el teléfono.
 - **Mancala nativo (Compose)**: siembra, captura, turno extra, almacenes, bots y modo local.
 - **Backgammon nativo (Compose)**: 15 fichas, barra, capturas, dobles, bear-off, pips y bots.
-- **Salas nativas LAN (Compose)**: el anfitrión abre Damas o Mancala, comparte un QR y el invitado entra con el escáner integrado o con `ws://` + código. Hay chat, reconexión, bot de relleno, revancha y XP al terminar. La pestaña web sigue disponible para los quince juegos y las salas remotas.
+- **Salas nativas (Compose)**: el anfitrión abre Damas, Mancala o **Serpientes de 2–4 jugadores**, comparte un QR y los invitados entran con el escáner integrado o con `ws://` + código. Hay asientos, chat, reconexión, bots de relleno, revancha y XP. Funciona por LAN sin internet o con un **relay online configurable**. La pestaña web sigue disponible para los quince juegos.
 - **Damas nativa (Compose)**: 8×8, 12 fichas por lado, captura obligatoria, cadenas, coronación, empate por 80 jugadas y bot alfa-beta.
 - **Dados Mentirosos nativo (Compose)**: 2–6 jugadores, cinco dados, pujas, “Dudo”, revelación, eliminación y privacidad al pasar el teléfono.
 - **Go nativo (Compose)**: 9×9 y 13×13, capturas, ko, komi 6.5, conteo de territorio y bot heurístico.
@@ -34,13 +34,13 @@
 - **Backgammon** con barra, capturas, dobles, bear-off y 15 fichas por bando.
 - **Xiangqi** con palacio, río, caballo bloqueado, cañón, soldados y generales enfrentados.
 - **Damas Chinas** con estrella de 121 hoyos, saltos encadenados y meta en el triángulo opuesto.
-- **Modos**: solo contra bots, pasar el teléfono (humanos y bots mezclados), sala en línea con rondas y chat, **sala LAN nativa sin internet** para Damas y Mancala, y **reconexión automática** del invitado si se cae la conexión.
-- **Progresión**: 10 niveles, XP real por partida, victoria, derrota o empate, con racha y mejor racha; las mesas nativas ya registran resultados.
-- **Crónica de partida**: últimos 5 movimientos visibles, historial completo en las mesas nativas, **replay con semilla** en Damas y Mancala y **PDF nativo** con título, fecha, movimientos, estadísticas y paginación. Se guarda en `Descargas/Mesa Viva` y se comparte con Android.
-- **Audio nativo**: música original procedural por festividad y efectos de carta, captura, coronación, dados, victoria y chat. Sin samples ni licencias externas; respeta los ajustes.
+- **Modos**: solo contra bots, pasar el teléfono (humanos y bots mezclados), sala en línea con rondas y chat, **salas nativas LAN u online** para Damas, Mancala y Serpientes, y **reconexión automática** del invitado si se cae la conexión.
+- **Progresión**: 10 niveles, XP real por partida, victoria, derrota o empate, con racha y mejor racha; las mesas nativas registran resultados.
+- **Crónica de partida**: últimos 5 movimientos visibles, historial completo en las mesas nativas, **replay con semilla** en Damas y Mancala, **enlace y archivo de replay** importables y **PDF nativo** con título, fecha, movimientos, estadísticas y paginación. Se guarda en `Descargas/Mesa Viva` y se comparte con Android.
+- **Audio nativo**: música original procedural por festividad y efectos de carta, captura, coronación, dados, victoria y chat en **las quince mesas**. Sin samples ni licencias externas; respeta los ajustes.
 - **Temas**: Halloween criollo (El Silbón, La Sayona, El Hachero), Navidad, Reyes, Carnaval, San Valentín, San Patricio, Semana Santa, Cruz de Mayo, Corpus Christi, independencia por país y mesa neutral. El acento puede venir de la temporada, del sistema (Material You en Android) o del color dominante del fondo de pantalla.
 - **Idiomas**: español, inglés, portugués de Brasil, portugués de Portugal, alemán, ruso, italiano, francés, chino tradicional, chino simplificado y japonés.
-- **Android**: cáscara nativa en **Jetpack Compose** (Material 3, color dinámico/festividad, inicio, catálogo, niveles, ajustes, sala y navegación), **los quince juegos nativos** (Serpientes, Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados, Go, Jungle, Xiangqi, Damas Chinas, Caída, Furia y Póker), **crónica PDF con estadísticas**, **salas LAN nativas**, **escáner QR**, **enlace `mesaviva://join`**, **audio procedural** y `GameWebActivity` como respaldo de la PWA y la sala remota con `WebViewAssetLoader`. El idioma y las preferencias de la cáscara viajan a la web; el perfil vuelve con `ShellSync`. Target Android 16 (API 36), edge-to-edge con insets, back predictivo, APK de release firmado, vibración, sensores para agitar/“lanzar” el teléfono, cámara para QR y guardado de PDF en Descargas.
+- **Android**: cáscara nativa en **Jetpack Compose** (Material 3, color dinámico/festividad, inicio, catálogo, niveles, ajustes, sala y navegación), **los quince juegos nativos** (Serpientes, Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados, Go, Jungle, Xiangqi, Damas Chinas, Caída, Furia y Póker), **crónica PDF con estadísticas**, **salas de hasta 4 jugadores**, **relay online**, **escáner QR**, **enlaces `mesaviva://join` y `mesaviva://replay`**, **audio procedural** y `GameWebActivity` como respaldo de la PWA y la sala remota con `WebViewAssetLoader`. El idioma y las preferencias de la cáscara viajan a la web; el perfil vuelve con `ShellSync`. Target Android 16 (API 36), edge-to-edge con insets, back predictivo, APK de release firmado, vibración, sensores para agitar/“lanzar” el teléfono, cámara para QR y guardado de PDF en Descargas.
 - **Privacidad**: sin cuentas, sin anuncios, sin rastreo. Las partidas locales se quedan en el dispositivo. El diagnóstico se envía solo si tú abres el correo.
 - **PWA**: instalable, service worker y funcionamiento offline.
 
@@ -138,7 +138,7 @@ npm run test:relay            # requiere npm run rooms en otra terminal
 python tools/check_i18n.py   # claves usadas vs. catálogo español
 ```
 
-- 30 pruebas de motores web + 65 pruebas Kotlin (los quince juegos, el códec de sala y la semilla de los bots). **95 en total**.
+- 30 pruebas de motores web + 78 pruebas Kotlin (juegos, códec de sala, Serpientes de 4 asientos y replays). **108 en total**.
 - TypeScript estricto, sin `any` en la capa de motores.
 - Motor determinista con semilla reproducible.
 - Host autoritativo en red; los clientes solo reciben su vista redactada.
@@ -159,7 +159,7 @@ src/theme/       festividades, Semana Santa/Carnaval, paletas y Material You
 src/i18n/        catálogos y formateo de crónicas
 src/audio/       música generativa y SFX sintetizados
 src/services/    diagnóstico, sensores, háptica, PDF, QR, PWA
-android/         app Android (Compose nativo + 15 juegos Kotlin + salas LAN + audio + WebView de respaldo)
+android/         app Android (Compose nativo + 15 juegos Kotlin + salas de 4 + replays + audio + WebView de respaldo)
 server/          relay de salas (Node + ws)
 docs/            arquitectura, roadmap, privacidad y seguridad
 ```

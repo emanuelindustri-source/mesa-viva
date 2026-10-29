@@ -90,7 +90,13 @@ fun GoScreen(state: ShellState, onBack: () -> Unit) {
             return
         }
         board = res.state
-        state.vibrate(context, if (res.state.history.lastOrNull()?.contains("×") == true) 45 else 20)
+        val captured = res.state.history.lastOrNull()?.contains("×") == true
+        NativeAudio.play(
+            context,
+            if (captured) NativeAudio.Sfx.Capture else NativeAudio.Sfx.Card,
+            state.sfx,
+        )
+        state.vibrate(context, if (captured) 45 else 20)
     }
 
     fun pass() {

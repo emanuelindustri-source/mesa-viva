@@ -69,6 +69,21 @@ fun MancalaScreen(state: ShellState, onBack: () -> Unit) {
     var sowMoves by remember { mutableStateOf(listOf<Int>()) }
     var awarded by remember { mutableStateOf(false) }
 
+    LaunchedEffect(state.pendingReplay) {
+        val replay = state.pendingReplay ?: return@LaunchedEffect
+        if (replay.game != ReplayCodec.MANCALA) return@LaunchedEffect
+        state.pendingReplay = null
+        seed = replay.seed
+        sowMoves = replay.moves
+        game = MancalaGame(seed)
+        board = game.newMatch()
+        awarded = false
+        setupOpen = false
+        winnerOpen = false
+        historyOpen = false
+        replayOpen = true
+    }
+
     fun picture(side: MancalaSide): String = when {
         side == MancalaSide.White -> state.t("mancala.you")
         allHumans -> state.t("mancala.player2")
@@ -395,6 +410,7 @@ private fun MancalaReplayDialog(
     moves: List<Int>,
     onClose: () -> Unit,
 ) {
+    val context = LocalContext.current
     val frames = remember(seed, moves) {
         val replay = MancalaGame(seed)
         var current = replay.newMatch()
@@ -407,6 +423,7 @@ private fun MancalaReplayDialog(
         }
         list
     }
+    val replayLink = remember(seed, moves) { ReplayCodec.encodeMancala(seed, moves) }
     var step by remember(frames) { mutableStateOf(frames.lastIndex.coerceAtLeast(0)) }
     val board = frames.getOrNull(step) ?: frames.last()
     AlertDialog(
@@ -457,6 +474,24 @@ private fun MancalaReplayDialog(
                         enabled = step < frames.lastIndex,
                         modifier = Modifier.weight(1f),
                     ) { Text(state.t("replay.next")) }
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(
+                        onClick = { shareReplayLink(context, replayLink, state.t("replay.share")) },
+                        modifier = Modifier.weight(1f),
+                    ) { Text(state.t("replay.share")) }
+                    OutlinedButton(
+                        onClick = {
+                            val replay = ReplayLink(ReplayCodec.MANCALA, seed, moves)
+                            val saved = saveReplayFile(context, replay, replayLink)
+                            Toast.makeText(
+                                context,
+                                state.t(if (saved != null) "replay.saved" else "replay.saveError"),
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                        },
+                        modifier = Modifier.weight(1f),
+                    ) { Text(state.t("replay.save")) }
                 }
                 Text(
                     state.t("replay.note"),

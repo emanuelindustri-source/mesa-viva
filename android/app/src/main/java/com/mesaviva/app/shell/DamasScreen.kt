@@ -75,6 +75,22 @@ fun DamasScreen(state: ShellState, onBack: () -> Unit) {
     var moves by remember { mutableStateOf(listOf<Pair<Int, Int>>()) }
     var awarded by remember { mutableStateOf(false) }
 
+    LaunchedEffect(state.pendingReplay) {
+        val replay = state.pendingReplay ?: return@LaunchedEffect
+        if (replay.game != ReplayCodec.DAMAS) return@LaunchedEffect
+        state.pendingReplay = null
+        seed = replay.seed
+        moves = ReplayCodec.damasPairs(replay)
+        game = DamasGame(seed)
+        board = game.newMatch()
+        selected = null
+        awarded = false
+        setupOpen = false
+        resultOpen = false
+        historyOpen = false
+        replayOpen = true
+    }
+
     val humanTurn = allHumans || board.turn == DamasColor.White
     val legal = remember(board, humanTurn) {
         if (board.phase == DamasPhase.Play && humanTurn) game.legalMoves(board) else emptyList()
@@ -465,6 +481,7 @@ private fun DamasReplayDialog(
     moves: List<Pair<Int, Int>>,
     onClose: () -> Unit,
 ) {
+    val context = LocalContext.current
     val frames = remember(seed, moves) {
         val replay = DamasGame(seed)
         var current = replay.newMatch()
@@ -477,6 +494,7 @@ private fun DamasReplayDialog(
         }
         list
     }
+    val replayLink = remember(seed, moves) { ReplayCodec.encodeDamas(seed, moves) }
     var step by remember(frames) { mutableStateOf(frames.lastIndex.coerceAtLeast(0)) }
     val board = frames.getOrNull(step) ?: frames.last()
     AlertDialog(
@@ -548,6 +566,24 @@ private fun DamasReplayDialog(
                         enabled = step < frames.lastIndex,
                         modifier = Modifier.weight(1f),
                     ) { Text(state.t("replay.next")) }
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(
+                        onClick = { shareReplayLink(context, replayLink, state.t("replay.share")) },
+                        modifier = Modifier.weight(1f),
+                    ) { Text(state.t("replay.share")) }
+                    OutlinedButton(
+                        onClick = {
+                            val replay = ReplayLink(ReplayCodec.DAMAS, seed, moves.flatMap { listOf(it.first, it.second) })
+                            val saved = saveReplayFile(context, replay, replayLink)
+                            Toast.makeText(
+                                context,
+                                state.t(if (saved != null) "replay.saved" else "replay.saveError"),
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                        },
+                        modifier = Modifier.weight(1f),
+                    ) { Text(state.t("replay.save")) }
                 }
                 Text(
                     state.t("replay.note"),

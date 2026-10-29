@@ -105,7 +105,18 @@ fun ChinoScreen(state: ShellState, onBack: () -> Unit) {
         }
         board = res.state
         selected = null
-        state.vibrate(context, if ((res.state.lastMove?.jumps ?: 0) > 0) 40 else 20)
+        val jumped = (res.state.lastMove?.jumps ?: 0) > 0
+        NativeAudio.play(
+            context,
+            when {
+                res.state.phase == ChinoPhase.MatchEnd && res.state.winner == 0 -> NativeAudio.Sfx.Win
+                res.state.phase == ChinoPhase.MatchEnd -> NativeAudio.Sfx.Lose
+                jumped -> NativeAudio.Sfx.Capture
+                else -> NativeAudio.Sfx.Card
+            },
+            state.sfx,
+        )
+        state.vibrate(context, if (jumped) 40 else 20)
         if (res.state.phase == ChinoPhase.MatchEnd) resultOpen = true
     }
 

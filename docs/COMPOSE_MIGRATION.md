@@ -59,7 +59,8 @@ Es un proyecto de varias versiones, no un commit.
 - [x] Caída y Furia de Colores nativos con barajas dibujadas.
 - [x] Póker nativo con ciegas, calles, botes laterales y showdown.
 - [x] Mesa compartida, chat y salas nativas LAN para Damas y Mancala (v1.5.0).
-- [ ] Salas nativas de 3–8 jugadores y relay online (v1.6.0).
+- [x] Serpientes de 2–4 jugadores, relay online configurable y replays exportables (v1.6.0).
+- [ ] Salas nativas de Dominó, Ludo y Damas Chinas; relay público (v1.7.0).
 
 ### Fase 4 · Retirada del WebView
 
@@ -68,7 +69,8 @@ Es un proyecto de varias versiones, no un commit.
 - Reducir tamaño y mejorar arranque.
 - Estado: 15 de 15 juegos jugables fuera del WebView; el WebView queda como respaldo de la PWA y la sala remota.
 - v1.4.0 añade crónica PDF nativa en las quince mesas y accesibilidad básica de cartas y turnos.
-- v1.5.0 añade salas LAN nativas para Damas y Mancala, replays con semilla, audio procedural y PDF con estadísticas. La sala remota y la PWA siguen en el WebView; el siguiente paso es el relay online nativo y las salas de 3–8 jugadores.
+- v1.5.0 añade salas LAN nativas para Damas y Mancala, replays con semilla, audio procedural y PDF con estadísticas.
+- v1.6.0 añade Serpientes de 2–4 jugadores, relay online configurable, replays exportables e importables y audio en las quince mesas. La PWA y la sala web siguen en el WebView; el siguiente paso son Dominó/Ludo/Damas Chinas de 3–8 y el relay público.
 
 ## Arquitectura propuesta
 

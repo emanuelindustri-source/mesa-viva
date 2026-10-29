@@ -1,5 +1,39 @@
 ﻿# Changelog
 
+## 1.6.0 · 2026-10-29
+
+La mesa grande.
+
+### Añadido
+
+- **Serpientes y Escaleras nativo para 2–4 jugadores** en salas LAN/online, con asientos, turnos, bots de relleno, escaleras, serpientes, número exacto y XP.
+- **Relay online configurable** al crear la sala; si se deja vacío se usa el relay LAN del teléfono.
+- **Replays exportables**: enlace `mesaviva://replay`, archivo JSON en `Descargas/Mesa Viva`, compartición e importación desde Ajustes o enlace profundo.
+- **Audio en las quince mesas**: Ajedrez, Ludo, Go, Jungle, Xiangqi y Damas Chinas se suman a los efectos procedurales.
+- Asientos visibles en el lobby y espectadores en Damas/Mancala.
+- Casillas de Serpientes descritas para lectores de pantalla.
+- 13 pruebas nuevas de reglas, códec y replays.
+- Medición de arranque en frío en emulador.
+
+### Cambiado
+
+- Android: `versionCode=18`, `versionName=1.6.0`.
+- La cabecera distingue LAN, online y sala conectada.
+- El catálogo y los ajustes muestran 1.6.0.
+
+### Corregido
+
+- El anfitrión solo acepta jugadas de los asientos que corresponden.
+- Un invitado nuevo puede ocupar un asiento y los bots cubren los huecos.
+- El replay valida estrictamente el formato y los rangos.
+
+### Pendiente
+
+- Dominó, Ludo y Damas Chinas de 3–8 jugadores.
+- Relay público desplegado y enlaces universales.
+- Reproductor de replay automático y visor web.
+- Accesibilidad completa y teléfono físico.
+
 ## 1.5.0 · 2026-10-29
 
 La mesa conectada.

@@ -96,6 +96,7 @@ fun LudoScreen(state: ShellState, onBack: () -> Unit) {
     fun doRoll() {
         val res = game.roll(board)
         board = res.state
+        NativeAudio.play(context, NativeAudio.Sfx.Dice, state.sfx)
         val player = board.players.getOrNull(board.turn)
         if (res.error == "ludo.error.threeSixes") {
             addLog(state.t("ludo.log.threeSixes", mapOf("p" to (player?.name ?: ""))))
@@ -127,11 +128,21 @@ fun LudoScreen(state: ShellState, onBack: () -> Unit) {
         if (captured > 0) {
             addLog(state.t("ludo.log.capture", mapOf("p" to (player?.name ?: ""), "n" to captured)))
             state.vibrate(context, 60)
+            NativeAudio.play(context, NativeAudio.Sfx.Capture, state.sfx)
+        } else {
+            NativeAudio.play(context, NativeAudio.Sfx.Card, state.sfx)
         }
         if (move != null && move.to >= LudoGame.FINISH) {
             addLog(state.t("ludo.log.finish", mapOf("p" to (player?.name ?: ""))))
         }
-        if (res.state.phase == LudoPhase.MatchEnd) winnerOpen = true
+        if (res.state.phase == LudoPhase.MatchEnd) {
+            winnerOpen = true
+            NativeAudio.play(
+                context,
+                if (res.state.winnerIndex == 0) NativeAudio.Sfx.Win else NativeAudio.Sfx.Lose,
+                state.sfx,
+            )
+        }
     }
 
     LaunchedEffect(board.turn, board.phase, board.dice, board.tokens, board.lastMove) {

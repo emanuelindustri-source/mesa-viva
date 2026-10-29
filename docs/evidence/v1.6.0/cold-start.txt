@@ -1,0 +1,9 @@
+﻿Mesa Viva 1.6.0 - arranque en frio
+Emulador Pixel_7_API_34 (Android 14, API 34), APK release firmada.
+Comando: adb shell am start -W -n com.mesaviva.app/.MainActivity tras am force-stop.
+
+Run 1: LaunchState COLD, TotalTime 3278 ms, WaitTime 3312 ms
+Run 2: LaunchState COLD, TotalTime 2616 ms, WaitTime 2640 ms
+Run 3: LaunchState COLD, TotalTime 2737 ms, WaitTime 2765 ms
+
+Medicion manual, no macrobenchmark. Sin Baseline Profile todavia.

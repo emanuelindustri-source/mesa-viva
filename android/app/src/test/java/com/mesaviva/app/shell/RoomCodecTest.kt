@@ -101,6 +101,71 @@ class RoomCodecTest {
     }
 
     @Test
+    fun snakesLadderMovesTheSeatAndPassesTheTurn() {
+        val state = SnakesRoomRules.newMatch(
+            listOf("Ana", "Beto", "Carla", "Diego"),
+            listOf(false, false, true, true),
+        )
+        val next = SnakesRoomRules.roll(state, 0, 3)
+        assertEquals(22, next.positions[0])
+        assertEquals("ladder", next.lastEvent)
+        assertEquals(1, next.turn)
+        assertEquals(3, next.dice)
+    }
+
+    @Test
+    fun snakesSnakeSendsTheSeatBack() {
+        val base = SnakesRoomRules.newMatch(listOf("Ana", "Beto"), listOf(false, false))
+        val state = base.copy(positions = listOf(14, 0))
+        val next = SnakesRoomRules.roll(state, 0, 3)
+        assertEquals(4, next.positions[0])
+        assertEquals("snake", next.lastEvent)
+        assertEquals(1, next.turn)
+    }
+
+    @Test
+    fun snakesNeedsTheExactNumberToWin() {
+        val base = SnakesRoomRules.newMatch(listOf("Ana", "Beto"), listOf(false, false))
+        val state = base.copy(positions = listOf(98, 0))
+        val next = SnakesRoomRules.roll(state, 0, 3)
+        assertEquals(98, next.positions[0])
+        assertEquals("needExact", next.lastEvent)
+        assertEquals(1, next.turn)
+    }
+
+    @Test
+    fun snakesRejectsAnOutOfTurnRoll() {
+        val state = SnakesRoomRules.newMatch(listOf("Ana", "Beto"), listOf(false, false))
+        val next = SnakesRoomRules.roll(state, 1, 6)
+        assertEquals(state, next)
+    }
+
+    @Test
+    fun snakesWinsOnExactlyOneHundred() {
+        val base = SnakesRoomRules.newMatch(listOf("Ana", "Beto"), listOf(false, false))
+        val state = base.copy(positions = listOf(99, 0))
+        val next = SnakesRoomRules.roll(state, 0, 1)
+        assertEquals(100, next.positions[0])
+        assertEquals(0, next.winner)
+        assertEquals("win", next.lastEvent)
+        assertTrue(next.finished)
+    }
+
+    @Test
+    fun snakesRoundTripKeepsFourSeats() {
+        val state = SnakesRoomRules.newMatch(
+            listOf("Ana", "Beto", "Carla", "Diego"),
+            listOf(false, true, true, true),
+        )
+        val decoded = RoomCodec.snakesFromJson(RoomCodec.snakesToJson(state))
+        assertNotNull(decoded)
+        assertEquals(state.names, decoded!!.names)
+        assertEquals(state.bots, decoded.bots)
+        assertEquals(state.positions, decoded.positions)
+        assertEquals(state.turn, decoded.turn)
+    }
+
+    @Test
     fun damasBotsAreDeterministicWithTheSameSeed() {
         val first = DamasGame(2026)
         val second = DamasGame(2026)

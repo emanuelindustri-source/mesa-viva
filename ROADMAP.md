@@ -1,16 +1,30 @@
 ﻿# Roadmap
 
-## v1.6.0 · La mesa grande (próxima)
+## v1.7.0 · La mesa llena (próxima)
 
-- [ ] Salas nativas de 3–8 jugadores: Dominó, Ludo, Serpientes y Damas Chinas.
-- [ ] Relay online nativo y reconexión entre redes.
-- [ ] Replay exportable y PDF con línea de tiempo.
-- [ ] Accesibilidad completa y audio en las quince mesas.
-- [ ] Teléfono físico, LAN real y checklist de Play Store.
-- [ ] Perfil de rendimiento y arranque en frío.
-- [ ] Retirada del WebView de respaldo al desacoplar la PWA y la sala remota.
+- [ ] Dominó, Ludo y Damas Chinas de 3–8 jugadores.
+- [ ] Relay público con TLS, límites y enlaces universales.
+- [ ] Reproductor de replay automático y visor web.
+- [ ] Accesibilidad completa en las quince mesas.
+- [ ] Teléfono físico y checklist de Play Store.
+- [ ] Baseline Profile y macrobenchmark de arranque.
 
-## v1.5.0 · La mesa conectada (actual)
+## v1.6.0 · La mesa grande (actual)
+
+- [x] Serpientes y Escaleras nativo para 2–4 jugadores con asientos y bots.
+- [x] Relay online configurable además de LAN.
+- [x] Replays exportables: enlace, archivo e importación.
+- [x] Audio procedural en las quince mesas.
+- [x] Descripciones de casillas de Serpientes.
+- [x] 108 pruebas verdes (30 web + 78 Kotlin).
+- [x] Arranque en frío medido en 2,6–3,3 s.
+- [x] APK y AAB de release firmados.
+- [x] Evidencia visual en `docs/evidence/v1.6.0/`.
+- [ ] Dominó, Ludo y Damas Chinas de 3–8 jugadores (v1.7.0).
+- [ ] Relay público y replay automático (v1.7.0).
+- [ ] Teléfono físico bloqueado por MIUI.
+
+## v1.5.0 · La mesa conectada
 
 - [x] Salas nativas LAN host/invitado para Damas y Mancala, con QR, chat y reconexión.
 - [x] Escáner QR integrado y enlace `mesaviva://join`.
@@ -22,9 +36,6 @@
 - [x] 95 pruebas verdes (30 web + 65 Kotlin).
 - [x] Gradle 8.14.4, APK y AAB de release firmados.
 - [x] Evidencia visual y PDF real en `docs/evidence/v1.5.0/`.
-- [ ] Salas nativas de 3–8 jugadores y relay online nativo (v1.6.0).
-- [ ] Teléfono físico bloqueado por MIUI.
-- [ ] Accesibilidad completa y replay exportable.
 
 ## v1.4.0 · Crónica y accesibilidad
 

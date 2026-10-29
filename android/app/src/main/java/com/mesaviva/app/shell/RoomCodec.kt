@@ -124,6 +124,45 @@ internal object RoomCodec {
             null -> JSONObject.NULL
         })
 
+    fun snakesToJson(board: SnakesRoomState): JSONObject = JSONObject()
+        .put("k", "state")
+        .put("game", RoomGame.Snakes.id)
+        .put("names", JSONArray(board.names))
+        .put("bots", JSONArray(board.bots))
+        .put("positions", JSONArray(board.positions))
+        .put("turn", board.turn)
+        .put("dice", board.dice)
+        .put("winner", board.winner ?: JSONObject.NULL)
+        .put("lastSeat", board.lastSeat ?: JSONObject.NULL)
+        .put("lastFrom", board.lastFrom)
+        .put("lastTo", board.lastTo)
+        .put("lastEvent", board.lastEvent)
+
+    fun snakesFromJson(json: JSONObject): SnakesRoomState? {
+        val namesJson = json.optJSONArray("names") ?: return null
+        val botsJson = json.optJSONArray("bots") ?: return null
+        val positionsJson = json.optJSONArray("positions") ?: return null
+        if (namesJson.length() !in 2..4) return null
+        if (positionsJson.length() != namesJson.length()) return null
+        val names = (0 until namesJson.length()).map { namesJson.optString(it) }
+        val bots = (0 until namesJson.length()).map { botsJson.optBoolean(it) }
+        val positions = (0 until positionsJson.length()).map { positionsJson.optInt(it) }
+        if (positions.any { it !in 0..100 }) return null
+        val winner = if (json.isNull("winner")) null else json.optInt("winner").takeIf { it in names.indices }
+        return SnakesRoomState(
+            names = names,
+            bots = bots,
+            positions = positions,
+            turn = json.optInt("turn").coerceIn(0, names.lastIndex),
+            dice = json.optInt("dice").coerceIn(0, 6),
+            winner = winner,
+            lastSeat = if (json.isNull("lastSeat")) null else json.optInt("lastSeat").takeIf { it in names.indices },
+            lastFrom = json.optInt("lastFrom").coerceIn(0, 100),
+            lastTo = json.optInt("lastTo").coerceIn(0, 100),
+            lastEvent = json.optString("lastEvent", "move"),
+        )
+    }
+
     fun mancalaFromJson(json: JSONObject): MancalaState? {
         val pits = json.optJSONArray("pits") ?: return null
         if (pits.length() != 14) return null

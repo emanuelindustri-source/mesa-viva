@@ -89,6 +89,7 @@ class ShellState(context: Context) {
 
     var screen by mutableStateOf(ShellScreen.Home)
     var roomLink by mutableStateOf<String?>(null)
+    var pendingReplay by mutableStateOf<ReplayLink?>(null)
     var language by mutableStateOf(prefs.getString("language", defaultLanguage) ?: defaultLanguage)
     var dynamicColor by mutableStateOf(prefs.getBoolean("dynamicColor", true))
     var haptics by mutableStateOf(prefs.getBoolean("haptics", true))

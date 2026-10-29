@@ -90,11 +90,22 @@ fun ChessScreen(state: ShellState, onBack: () -> Unit) {
     val kingSquare = remember(board) { game.findKing(board.board, board.turn) }
 
     fun apply(from: Int, to: Int, promo: ChessPieceType? = null) {
+        val piecesBefore = board.board.count { it != null }
         val next = game.move(board, from, to, promo) ?: return
         board = next
         selected = null
         promotion = null
         state.vibrate(context, 24)
+        NativeAudio.play(
+            context,
+            when {
+                next.phase == ChessPhase.MatchEnd && next.outcome?.winner == ChessColor.White -> NativeAudio.Sfx.Win
+                next.phase == ChessPhase.MatchEnd -> NativeAudio.Sfx.Lose
+                next.board.count { it != null } < piecesBefore -> NativeAudio.Sfx.Capture
+                else -> NativeAudio.Sfx.Card
+            },
+            state.sfx,
+        )
         if (next.phase == ChessPhase.MatchEnd) resultOpen = true
     }
 

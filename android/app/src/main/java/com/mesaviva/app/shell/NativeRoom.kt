@@ -28,7 +28,8 @@ import java.time.format.DateTimeFormatter
 
 enum class RoomGame(val id: String, val emoji: String, val titleEs: String, val titleEn: String) {
     Damas("damas", "⛀", "Damas", "Checkers"),
-    Mancala("mancala", "🫘", "Mancala", "Mancala");
+    Mancala("mancala", "🫘", "Mancala", "Mancala"),
+    Snakes("serpientes", "🐍", "Serpientes", "Snakes");
 
     fun title(language: String): String = if (language == "en") titleEn else titleEs
 
@@ -46,6 +47,7 @@ data class RoomGuest(
     val name: String,
     val avatar: String,
     val online: Boolean,
+    val seat: Int = 1,
 )
 
 data class RoomChat(
@@ -104,6 +106,12 @@ class NativeRoomController(
     var mancalaState by mutableStateOf<MancalaState?>(null)
         private set
 
+    var snakesState by mutableStateOf<SnakesRoomState?>(null)
+        private set
+
+    var mySeat by mutableStateOf(if (role == RoomRole.Host) 0 else 1)
+        private set
+
     var hint by mutableStateOf("")
         private set
 
@@ -111,6 +119,9 @@ class NativeRoomController(
         private set
 
     var botSeat by mutableStateOf(false)
+        private set
+
+    var onlineRelay by mutableStateOf(false)
         private set
 
     private val main = Handler(Looper.getMainLooper())
@@ -121,6 +132,7 @@ class NativeRoomController(
     private var relay: LanRelayServer? = null
     private var client: WebSocketClient? = null
     private var guestId: String? = null
+    private var snakesRandom = kotlin.random.Random(System.nanoTime())
     private var pendingUrl: String? = null
     private var pendingCode: String? = null
     private var reconnectAttempts = 0
@@ -133,7 +145,11 @@ class NativeRoomController(
     val onlineGuests: List<RoomGuest> get() = guests.filter { it.online }
     val hasGuest: Boolean get() = guests.any { it.online }
     val inGame: Boolean get() = activeGame != null
-    val canStart: Boolean get() = isHost && hasGuest && status == RoomStatus.Hosting
+    val canStart: Boolean
+        get() = isHost && status == RoomStatus.Hosting && when (selectedGame) {
+            RoomGame.Snakes -> guests.any { it.online && it.seat in 1..3 }
+            else -> guests.any { it.online && it.seat == 1 }
+        }
 
     private fun myName(): String = state.name.ifBlank {
         if (isHost) state.t("room.hostFallback") else state.t("room.guestFallback")
@@ -141,12 +157,26 @@ class NativeRoomController(
 
     /* ------------------------------------------------------------- anfitrión */
 
-    fun host(game: RoomGame) {
+    fun host(game: RoomGame, relayUrl: String? = null) {
         if (!isHost || status != RoomStatus.Idle) return
         selectedGame = game
         hostName = myName()
         code = newCode()
         status = RoomStatus.Connecting
+        if (!relayUrl.isNullOrBlank()) {
+            val remote = normalizeWsUrl(relayUrl)
+            if (remote == null) {
+                status = RoomStatus.Error
+                error = state.t("room.errorConnect")
+                appendSystem(state.t("room.errorConnect"))
+                return
+            }
+            shareUrl = remote
+            onlineRelay = true
+            appendSystem(state.t("room.connectingRoom"))
+            connectHost(remote)
+            return
+        }
         appendSystem(state.t("room.opening"))
         val thread = Thread {
             val server = try {
@@ -238,25 +268,41 @@ class NativeRoomController(
                 if (id.isBlank()) return
                 val name = msg.optString("name", state.t("room.guestFallback")).take(24)
                 val avatar = msg.optString("avatar", "tucan")
-                guests = guests.filterNot { it.id == id } + RoomGuest(id, name, avatar, online = true)
+                val seat = nextSeat()
+                guests = guests.filterNot { it.id == id } + RoomGuest(id, name, avatar, online = true, seat = seat)
                 appendSystem(state.t("room.guestJoined", mapOf("name" to name)))
                 NativeAudio.play(context, NativeAudio.Sfx.Chat, state.sfx)
                 sendPayloadTo(id, JSONObject()
                     .put("k", "welcome")
                     .put("host", hostName)
-                    .put("game", selectedGame.id))
+                    .put("game", selectedGame.id)
+                    .put("seat", seat))
                 if (inGame) {
-                    botSeat = false
-                    sendStateTo(id)
+                    if (activeGame == RoomGame.Snakes) {
+                        syncSnakesSeats()
+                        broadcastState()
+                    } else {
+                        if (seat == 1) botSeat = false
+                        sendStateTo(id)
+                    }
+                    sendPayloadTo(id, JSONObject().put("k", "seat").put("seat", seat))
                 }
             }
             "guestRejoined" -> {
                 val id = msg.optString("guestId")
+                val guest = guests.firstOrNull { it.id == id }
                 guests = guests.map { if (it.id == id) it.copy(online = true) else it }
-                botSeat = false
+                if (guest?.seat == 1) botSeat = false
+                if (inGame && activeGame == RoomGame.Snakes) {
+                    syncSnakesSeats()
+                    broadcastState()
+                }
                 appendSystem(state.t("room.guestRejoined"))
                 NativeAudio.play(context, NativeAudio.Sfx.Chat, state.sfx)
-                if (inGame) sendStateTo(id)
+                if (inGame) {
+                    sendPayloadTo(id, JSONObject().put("k", "seat").put("seat", guest?.seat ?: 1))
+                    if (activeGame != RoomGame.Snakes) sendStateTo(id)
+                }
             }
             "guestLeft" -> {
                 val id = msg.optString("guestId")
@@ -268,8 +314,14 @@ class NativeRoomController(
                     guests = guests.map { if (it.id == id) it.copy(online = false) else it }
                 }
                 if (inGame) {
-                    botSeat = true
-                    appendSystem(state.t("room.guestLeftBot", mapOf("name" to (guest?.name ?: state.t("room.guestFallback")))))
+                    if (activeGame == RoomGame.Snakes) {
+                        syncSnakesSeats()
+                        broadcastState()
+                        appendSystem(state.t("room.guestLeftBot", mapOf("name" to (guest?.name ?: state.t("room.guestFallback")))))
+                    } else if (guest?.seat == 1) {
+                        botSeat = true
+                        appendSystem(state.t("room.guestLeftBot", mapOf("name" to (guest?.name ?: state.t("room.guestFallback")))))
+                    }
                 } else {
                     appendSystem(state.t("room.guestLeft"))
                 }
@@ -303,16 +355,17 @@ class NativeRoomController(
                     NativeAudio.play(context, NativeAudio.Sfx.Chat, state.sfx)
                 }
             }
-            "move" -> hostGuestDamasMove(payload)
-            "sow" -> hostGuestMancalaSow(payload)
-            "resign" -> hostGuestResign()
+            "move" -> hostGuestDamasMove(from, payload)
+            "sow" -> hostGuestMancalaSow(from, payload)
+            "resign" -> hostGuestResign(from)
+            "snakesRoll" -> hostGuestSnakesRoll(from)
             "rematch" -> startMatch()
         }
     }
 
     fun startMatch() {
         if (!isHost) return
-        if (!hasGuest) {
+        if (!canStart) {
             hint = state.t("room.needGuest")
             return
         }
@@ -323,11 +376,33 @@ class NativeRoomController(
         when (selectedGame) {
             RoomGame.Damas -> damasState = damas.newMatch()
             RoomGame.Mancala -> mancalaState = mancala.newMatch()
+            RoomGame.Snakes -> {
+                snakesRandom = kotlin.random.Random(System.nanoTime())
+                val names = MutableList(4) { index ->
+                    if (index == 0) hostName.ifBlank { state.t("room.hostFallback") } else botName(index)
+                }
+                val bots = MutableList(4) { it != 0 }
+                for (guest in guests) {
+                    if (guest.seat in 1..3) {
+                        names[guest.seat] = guest.name
+                        bots[guest.seat] = !guest.online
+                    }
+                }
+                snakesState = SnakesRoomRules.newMatch(names, bots)
+            }
         }
         appendSystem(state.t("room.matchStarted", mapOf("game" to selectedGame.title(state.language))))
         NativeAudio.play(context, NativeAudio.Sfx.Card, state.sfx)
-        val start = JSONObject().put("k", "start").put("game", selectedGame.id)
-        sendPayloadToGuests(start)
+        for (guest in guests) {
+            if (!guest.online) continue
+            sendPayloadTo(
+                guest.id,
+                JSONObject()
+                    .put("k", "start")
+                    .put("game", selectedGame.id)
+                    .put("seat", guest.seat),
+            )
+        }
         broadcastState()
     }
 
@@ -423,18 +498,26 @@ class NativeRoomController(
                 finishMancala(mancalaState!!, hostWon = false)
                 broadcastState()
             }
+            RoomGame.Snakes -> {
+                val current = snakesState ?: return
+                if (current.finished) return
+                snakesState = current.copy(winner = 1, lastEvent = "resign")
+                finishSnakes(snakesState!!)
+                broadcastState()
+            }
             null -> Unit
         }
     }
 
     fun hostToggleBot() {
-        if (!isHost || !inGame) return
+        if (!isHost || !inGame || activeGame == RoomGame.Snakes) return
         botSeat = !botSeat
         hint = state.t(if (botSeat) "room.botActive" else "room.botOff")
     }
 
-    private fun hostGuestDamasMove(payload: JSONObject) {
+    private fun hostGuestDamasMove(fromId: String?, payload: JSONObject) {
         if (activeGame != RoomGame.Damas || botSeat) return
+        if (guests.firstOrNull { it.id == fromId }?.seat != 1) return
         val current = damasState ?: return
         if (current.turn != DamasColor.Black) return
         val from = payload.optInt("from", -1)
@@ -451,8 +534,9 @@ class NativeRoomController(
         broadcastState()
     }
 
-    private fun hostGuestMancalaSow(payload: JSONObject) {
+    private fun hostGuestMancalaSow(fromId: String?, payload: JSONObject) {
         if (activeGame != RoomGame.Mancala || botSeat) return
+        if (guests.firstOrNull { it.id == fromId }?.seat != 1) return
         val current = mancalaState ?: return
         if (current.turn != MancalaSide.Black) return
         val pit = payload.optInt("pit", -1)
@@ -467,9 +551,19 @@ class NativeRoomController(
         broadcastState()
     }
 
-    private fun hostGuestResign() {
+    private fun hostGuestResign(fromId: String?) {
+        val guest = guests.firstOrNull { it.id == fromId } ?: return
         when (activeGame) {
+            RoomGame.Snakes -> {
+                if (guest.seat !in 1..3) return
+                val current = snakesState ?: return
+                if (current.finished) return
+                snakesState = current.copy(winner = 0, lastEvent = "resign")
+                finishSnakes(snakesState!!)
+                broadcastState()
+            }
             RoomGame.Damas -> {
+                if (guest.seat != 1) return
                 val current = damasState ?: return
                 if (current.phase == DamasPhase.MatchEnd) return
                 damasState = current.copy(
@@ -481,6 +575,7 @@ class NativeRoomController(
                 broadcastState()
             }
             RoomGame.Mancala -> {
+                if (guest.seat != 1) return
                 val current = mancalaState ?: return
                 if (current.phase == MancalaPhase.MatchEnd) return
                 mancalaState = current.copy(
@@ -492,6 +587,91 @@ class NativeRoomController(
             }
             null -> Unit
         }
+    }
+
+    fun hostSnakesRoll() {
+        if (!isHost || activeGame != RoomGame.Snakes) return
+        if (snakesState?.turn != 0) return
+        rollSnakes(0)
+    }
+
+    fun hostBotSnakesRoll() {
+        if (!isHost || activeGame != RoomGame.Snakes) return
+        val current = snakesState ?: return
+        if (current.finished) return
+        if (current.bots.getOrElse(current.turn) { false }) rollSnakes(current.turn)
+    }
+
+    fun guestSnakesRoll() {
+        if (!isGuest || activeGame != RoomGame.Snakes) return
+        val current = snakesState ?: return
+        if (current.finished || current.turn != mySeat) return
+        sendPayload(JSONObject().put("k", "snakesRoll"))
+    }
+
+    private fun hostGuestSnakesRoll(fromId: String?) {
+        if (activeGame != RoomGame.Snakes) return
+        val guest = guests.firstOrNull { it.id == fromId } ?: return
+        if (guest.seat !in 1..3) return
+        if (snakesState?.turn != guest.seat) return
+        rollSnakes(guest.seat)
+    }
+
+    private fun rollSnakes(seat: Int) {
+        val current = snakesState ?: return
+        if (current.finished || current.turn != seat) return
+        val dice = snakesRandom.nextInt(1, 7)
+        val next = SnakesRoomRules.roll(current, seat, dice)
+        if (next == current) return
+        snakesState = next
+        NativeAudio.play(context, NativeAudio.Sfx.Dice, state.sfx)
+        state.vibrate(context, if (next.lastEvent == "snake") 55 else 24)
+        when (next.lastEvent) {
+            "ladder" -> NativeAudio.play(context, NativeAudio.Sfx.Promote, state.sfx)
+            "snake" -> NativeAudio.play(context, NativeAudio.Sfx.Capture, state.sfx)
+            "win" -> finishSnakes(next)
+            else -> Unit
+        }
+        broadcastState()
+    }
+
+    private fun finishSnakes(board: SnakesRoomState) {
+        val winner = board.winner ?: return
+        if (awarded) return
+        awarded = true
+        if (isHost) {
+            state.awardMatch(win = winner == 0)
+            NativeAudio.play(context, if (winner == 0) NativeAudio.Sfx.Win else NativeAudio.Sfx.Lose, state.sfx)
+        } else {
+            state.awardMatch(win = winner == mySeat)
+            NativeAudio.play(context, if (winner == mySeat) NativeAudio.Sfx.Win else NativeAudio.Sfx.Lose, state.sfx)
+        }
+    }
+
+    private fun syncSnakesSeats() {
+        val current = snakesState ?: return
+        val names = MutableList(4) { index ->
+            if (index == 0) hostName.ifBlank { state.t("room.hostFallback") } else botName(index)
+        }
+        val bots = MutableList(4) { it != 0 }
+        for (guest in guests) {
+            if (guest.seat in 1..3) {
+                names[guest.seat] = guest.name
+                bots[guest.seat] = !guest.online
+            }
+        }
+        snakesState = current.copy(names = names, bots = bots)
+    }
+
+    private fun botName(seat: Int): String = when (seat) {
+        1 -> "Bot Sayona"
+        2 -> "Bot Silbón"
+        else -> "Bot Hacha"
+    }
+
+    private fun nextSeat(): Int {
+        val used = guests.map { it.seat }.toSet()
+        return (1..3).firstOrNull { it !in used } ?: 0
     }
 
     private fun finishDamas(board: DamasState, hostWon: Boolean) {
@@ -546,6 +726,7 @@ class NativeRoomController(
     private fun stateJson(): JSONObject? = when (activeGame) {
         RoomGame.Damas -> damasState?.let { damasJson(it) }
         RoomGame.Mancala -> mancalaState?.let { mancalaJson(it) }
+        RoomGame.Snakes -> snakesState?.let { RoomCodec.snakesToJson(it) }
         null -> null
     }
 
@@ -573,19 +754,19 @@ class NativeRoomController(
 
     fun join(wsUrl: String, roomCode: String): Boolean {
         if (!isGuest || status != RoomStatus.Idle) return false
-        var url = wsUrl.trim()
-        if (!url.startsWith("ws://") && !url.startsWith("wss://")) {
-            if (url.startsWith("http://")) url = "ws://" + url.removePrefix("http://")
-            else if (url.startsWith("https://")) url = "wss://" + url.removePrefix("https://")
-            else url = "ws://$url"
+        val url = normalizeWsUrl(wsUrl)
+        if (url == null) {
+            hint = state.t("room.errorConnect")
+            return false
         }
         val cleanCode = roomCode.uppercase().replace(Regex("[^A-Z0-9]"), "").take(6)
         if (cleanCode.length < 4) {
             hint = state.t("room.invalidCode")
             return false
         }
-        pendingUrl = url.trimEnd('/')
+        pendingUrl = url
         pendingCode = cleanCode
+        onlineRelay = !isLocalRelay(url)
         reconnectAttempts = 0
         status = RoomStatus.Connecting
         appendSystem(state.t("room.connectingRoom"))
@@ -699,12 +880,18 @@ class NativeRoomController(
         when (payload.optString("k")) {
             "welcome" -> {
                 hostName = payload.optString("host", state.t("room.hostFallback"))
+                mySeat = payload.optInt("seat", mySeat).coerceIn(0, 3)
                 appendSystem(state.t("room.welcomeHost", mapOf("name" to hostName)))
+            }
+            "seat" -> {
+                mySeat = payload.optInt("seat", mySeat).coerceIn(0, 3)
             }
             "start" -> {
                 activeGame = RoomGame.fromId(payload.optString("game"))
+                mySeat = payload.optInt("seat", mySeat).coerceIn(0, 3)
                 damasState = null
                 mancalaState = null
+                snakesState = null
                 awarded = false
                 appendSystem(state.t("room.youAreInMatch"))
                 NativeAudio.play(context, NativeAudio.Sfx.Card, state.sfx)
@@ -730,7 +917,7 @@ class NativeRoomController(
                 if (parsed.history.size > (previous?.history?.size ?: 0)) {
                     playDamasSfx(previous ?: parsed, parsed)
                 }
-                if (parsed.phase == DamasPhase.MatchEnd && !awarded) {
+                if (parsed.phase == DamasPhase.MatchEnd && !awarded && mySeat == 1) {
                     awarded = true
                     val won = parsed.winner == DamasColor.Black
                     state.awardMatch(win = won, draw = parsed.draw)
@@ -749,7 +936,7 @@ class NativeRoomController(
                 if (previous != null && parsed.pits != previous.pits) {
                     NativeAudio.play(context, NativeAudio.Sfx.Card, state.sfx)
                 }
-                if (parsed.phase == MancalaPhase.MatchEnd && !awarded) {
+                if (parsed.phase == MancalaPhase.MatchEnd && !awarded && mySeat == 1) {
                     awarded = true
                     val draw = parsed.whiteStore == parsed.blackStore
                     val won = parsed.winner == MancalaSide.Black
@@ -761,11 +948,26 @@ class NativeRoomController(
                     }
                 }
             }
+            RoomGame.Snakes.id -> {
+                val parsed = RoomCodec.snakesFromJson(payload) ?: return
+                val previous = snakesState
+                snakesState = parsed
+                activeGame = RoomGame.Snakes
+                if (previous?.dice != parsed.dice && parsed.dice > 0) {
+                    NativeAudio.play(context, NativeAudio.Sfx.Dice, state.sfx)
+                    when (parsed.lastEvent) {
+                        "ladder" -> NativeAudio.play(context, NativeAudio.Sfx.Promote, state.sfx)
+                        "snake" -> NativeAudio.play(context, NativeAudio.Sfx.Capture, state.sfx)
+                        else -> Unit
+                    }
+                }
+                if (parsed.finished) finishSnakes(parsed)
+            }
         }
     }
 
     fun guestDamasMove(from: Int, to: Int) {
-        if (!isGuest || activeGame != RoomGame.Damas) return
+        if (!isGuest || activeGame != RoomGame.Damas || mySeat != 1) return
         val current = damasState ?: return
         if (current.turn != DamasColor.Black) {
             hint = state.t("room.notYourTurn")
@@ -784,7 +986,7 @@ class NativeRoomController(
     }
 
     fun guestMancalaSow(pit: Int) {
-        if (!isGuest || activeGame != RoomGame.Mancala) return
+        if (!isGuest || activeGame != RoomGame.Mancala || mySeat != 1) return
         val current = mancalaState ?: return
         if (current.turn != MancalaSide.Black) {
             hint = state.t("room.notYourTurn")
@@ -804,6 +1006,7 @@ class NativeRoomController(
 
     fun guestResign() {
         if (!isGuest) return
+        if (activeGame in setOf(RoomGame.Damas, RoomGame.Mancala) && mySeat != 1) return
         sendPayload(JSONObject().put("k", "resign"))
     }
 
@@ -878,6 +1081,7 @@ class NativeRoomController(
         activeGame = null
         damasState = null
         mancalaState = null
+        snakesState = null
         awarded = false
         botSeat = false
     }
@@ -911,5 +1115,26 @@ class NativeRoomController(
     private fun newCode(): String {
         val alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
         return (1..5).map { alphabet.random() }.joinToString("")
+    }
+
+    private fun isLocalRelay(url: String): Boolean {
+        val host = runCatching { URI(url).host }.getOrNull() ?: return false
+        if (host == "localhost" || host == "127.0.0.1" || host == "10.0.2.2") return true
+        if (host.startsWith("10.") || host.startsWith("192.168.")) return true
+        if (host.startsWith("172.")) {
+            val second = host.split(".").getOrNull(1)?.toIntOrNull() ?: 0
+            if (second in 16..31) return true
+        }
+        return false
+    }
+
+    private fun normalizeWsUrl(raw: String): String? {
+        var url = raw.trim().trimEnd('/')
+        if (url.isEmpty()) return null
+        if (url.startsWith("http://")) url = "ws://" + url.removePrefix("http://")
+        else if (url.startsWith("https://")) url = "wss://" + url.removePrefix("https://")
+        else if (!url.startsWith("ws://") && !url.startsWith("wss://")) url = "ws://$url"
+        if (!url.startsWith("ws://") && !url.startsWith("wss://")) return null
+        return runCatching { URI(url) }.getOrNull()?.toString()
     }
 }

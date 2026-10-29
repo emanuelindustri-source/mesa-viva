@@ -95,7 +95,18 @@ fun JungleScreen(state: ShellState, onBack: () -> Unit) {
         }
         board = res.state
         selected = null
-        state.vibrate(context, if (res.state.history.lastOrNull()?.contains("x") == true) 42 else 22)
+        val captured = res.state.history.lastOrNull()?.contains("x") == true
+        NativeAudio.play(
+            context,
+            when {
+                res.state.phase == JunglePhase.MatchEnd && res.state.winner == JungleSide.Red -> NativeAudio.Sfx.Win
+                res.state.phase == JunglePhase.MatchEnd -> NativeAudio.Sfx.Lose
+                captured -> NativeAudio.Sfx.Capture
+                else -> NativeAudio.Sfx.Card
+            },
+            state.sfx,
+        )
+        state.vibrate(context, if (captured) 42 else 22)
         if (res.state.phase == JunglePhase.MatchEnd) resultOpen = true
     }
 
