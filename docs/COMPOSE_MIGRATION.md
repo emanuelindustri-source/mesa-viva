@@ -4,7 +4,7 @@
 
 Mesa Viva es una app Android **Kotlin nativa con una mesa WebView residual**. La lógica de Póker y la PWA siguen en React/TypeScript dentro de `android/app/src/main/assets/www`. La app usa Kotlin para cámara, sensores, vibración, PDF, Material You y el relay LAN.
 
-Desde **v1.2.0**, `MainActivity` es una cáscara nativa completa en Compose (inicio, catálogo, niveles, ajustes, sala y navegación) y `GameWebActivity` hospeda la mesa compartida en WebView. **Catorce juegos** son 100 % Compose: Serpientes y Escaleras, Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados Mentirosos, Go, Jungle, Xiangqi, Damas Chinas, Caída y Furia de Colores. Solo Póker sigue en WebView.
+Desde **v1.3.0**, `MainActivity` es una cáscara nativa completa en Compose (inicio, catálogo, niveles, ajustes, sala y navegación) y `GameWebActivity` queda como respaldo de la PWA y la sala online. **Los quince juegos** son 100 % Compose: Serpientes y Escaleras, Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados Mentirosos, Go, Jungle, Xiangqi, Damas Chinas, Caída, Furia de Colores y Póker.
 
 “Compose por completo” significa reescribir en Kotlin/Compose:
 
@@ -51,21 +51,21 @@ Es un proyecto de varias versiones, no un commit.
 - Cada juego Compose se activa por bandera; el WebView sigue disponible.
 - Comparar rendimiento, accesibilidad y tamaño.
 
-### Fase 3 · Resto de juegos (v1.1.0–v1.2.0)
+### Fase 3 · Resto de juegos (v1.1.0–v1.3.0, completada)
 
 - [x] Damas, Dados, Go, Jungle, Xiangqi y Damas Chinas nativos.
 - [x] Animaciones con `Canvas`, `animate*AsState`, tableros táctiles y háptica.
 - [x] Historial completo y últimas cinco jugadas en las nuevas mesas.
 - [x] Caída y Furia de Colores nativos con barajas dibujadas.
-- [ ] Póker nativo (v1.3.0).
-- [ ] Mesa compartida, chat y salas nativas (v1.3.0).
+- [x] Póker nativo con ciegas, calles, botes laterales y showdown.
+- [ ] Mesa compartida, chat y salas nativas (v1.4.0).
 
 ### Fase 4 · Retirada del WebView
 
 - Eliminar assets web del APK cuando haya paridad.
 - Mantener la PWA web como producto independiente.
 - Reducir tamaño y mejorar arranque.
-- Estado: 14 de 15 juegos fuera del WebView; solo Póker sigue en la mesa web.
+- Estado: 15 de 15 juegos jugables fuera del WebView; el WebView queda como respaldo de la PWA y la sala online.
 
 ## Arquitectura propuesta
 
@@ -100,4 +100,4 @@ android/app/src/main/java/com/mesaviva/app/
 
 ## Decisión
 
-La fase 3 avanza en v1.2.0 con estrategia **híbrida**: cáscara Compose + WebView para Póker. Catorce juegos demuestran la viabilidad; falta Póker para retirar el WebView de los 15 juegos.
+La fase 3 se cierra en v1.3.0: los quince juegos jugables corren en Compose. El WebView sigue como respaldo de la PWA y de la sala online hasta desacoplar esa capa en v1.4.0.

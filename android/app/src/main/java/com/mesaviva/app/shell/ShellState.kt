@@ -29,6 +29,7 @@ enum class ShellScreen {
     Dados,
     Caida,
     Furia,
+    Poker,
     Room,
 }
 

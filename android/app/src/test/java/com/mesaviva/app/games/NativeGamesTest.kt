@@ -632,4 +632,88 @@ class NativeGamesTest {
         val state = game.newMatch().copy(turn = 1)
         assertNotNull(game.botAction(state))
     }
+
+    @Test
+    fun `poker deck has fifty two unique cards`() {
+        val deck = PokerGame.deck()
+        assertEquals(52, deck.size)
+        assertEquals(52, deck.map { it.id }.toSet().size)
+        assertEquals("A♠", PokerGame.cardLabel(PokerCard("s", PokerSuit.Spades, 14)))
+    }
+
+    @Test
+    fun `poker starts with two hole cards and blinds`() {
+        val game = PokerGame(playerCount = 4, seed = 30)
+        val state = game.newMatch()
+        assertEquals(4, state.players.size)
+        assertTrue(state.players.all { it.hole.size == 2 })
+        assertEquals(30, game.potTotal(state))
+        assertEquals(20, state.currentBet)
+        assertEquals(PokerStreet.Preflop, state.street)
+    }
+
+    @Test
+    fun `poker evaluates hand categories`() {
+        val game = PokerGame(playerCount = 2, seed = 31)
+        fun card(rank: Int, suit: PokerSuit) = PokerCard("$suit-$rank", suit, rank)
+        val royal = listOf(
+            card(14, PokerSuit.Spades), card(13, PokerSuit.Spades), card(12, PokerSuit.Spades),
+            card(11, PokerSuit.Spades), card(10, PokerSuit.Spades),
+        )
+        assertEquals(8, game.evaluateHand(royal).category)
+        val quads = listOf(
+            card(9, PokerSuit.Spades), card(9, PokerSuit.Hearts), card(9, PokerSuit.Diamonds),
+            card(9, PokerSuit.Clubs), card(2, PokerSuit.Spades),
+        )
+        assertEquals(7, game.evaluateHand(quads).category)
+        val full = listOf(
+            card(8, PokerSuit.Spades), card(8, PokerSuit.Hearts), card(8, PokerSuit.Diamonds),
+            card(3, PokerSuit.Clubs), card(3, PokerSuit.Spades),
+        )
+        assertEquals(6, game.evaluateHand(full).category)
+        val flush = listOf(
+            card(14, PokerSuit.Hearts), card(9, PokerSuit.Hearts), card(7, PokerSuit.Hearts),
+            card(4, PokerSuit.Hearts), card(2, PokerSuit.Hearts),
+        )
+        assertEquals(5, game.evaluateHand(flush).category)
+        val straight = listOf(
+            card(9, PokerSuit.Spades), card(8, PokerSuit.Hearts), card(7, PokerSuit.Diamonds),
+            card(6, PokerSuit.Clubs), card(5, PokerSuit.Spades),
+        )
+        assertEquals(4, game.evaluateHand(straight).category)
+        val pair = listOf(
+            card(10, PokerSuit.Spades), card(10, PokerSuit.Hearts), card(7, PokerSuit.Diamonds),
+            card(4, PokerSuit.Clubs), card(2, PokerSuit.Spades),
+        )
+        assertEquals(1, game.evaluateHand(pair).category)
+    }
+
+    @Test
+    fun `poker fold awards the pot`() {
+        val game = PokerGame(playerCount = 2, seed = 32)
+        val state = game.newMatch()
+        val result = game.fold(state)
+        assertEquals(null, result.error)
+        assertEquals(PokerStreet.HandEnd, result.state.street)
+        assertEquals(1, result.state.handWinner?.seat)
+        assertEquals(810, result.state.players[1].chips)
+    }
+
+    @Test
+    fun `poker check and call keep the hand alive`() {
+        val game = PokerGame(playerCount = 2, seed = 33)
+        val state = game.newMatch()
+        val called = game.call(state)
+        assertEquals(null, called.error)
+        val checked = game.check(called.state)
+        assertEquals(null, checked.error)
+        assertEquals(PokerStreet.Flop, checked.state.street)
+    }
+
+    @Test
+    fun `poker bot returns an action`() {
+        val game = PokerGame(playerCount = 4, seed = 34)
+        val state = game.newMatch().copy(turn = 1)
+        assertNotNull(game.botAction(state))
+    }
 }

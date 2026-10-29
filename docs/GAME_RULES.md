@@ -1,6 +1,6 @@
 # Reglas y variantes
 
-Las reglas completas viven dentro de la app (botón **Reglas** en cada mesa) y en el catálogo. Esta página resume la variante implementada en v1.2.0. Caída y Furia de Colores ya tienen mesa nativa en Jetpack Compose.
+Las reglas completas viven dentro de la app (botón **Reglas** en cada mesa) y en el catálogo. Esta página resume la variante implementada en v1.3.0. Los quince juegos jugables tienen mesa nativa en Jetpack Compose, incluido Póker.
 
 ## Caída (Venezuela, 2–4 jugadores)
 
@@ -61,9 +61,18 @@ Las reglas completas viven dentro de la app (botón **Reglas** en cada mesa) y e
 - Última semilla en tu almacén → repites. Última semilla en un hoyo vacío tuyo → capturas ese hoyo y el opuesto.
 - Cuando un lado se queda vacío, el otro recoge sus semillas. Gana quien tenga más en el almacén.
 
+## Póker Texas Hold'em (2–6 jugadores)
+
+- Baraja francesa de 52 cartas. Ciegas pequeña 10 y grande 20; el botón de dealer rota.
+- Cada jugador recibe dos cartas privadas. El flop reparte tres comunitarias, el turn una y el river una.
+- Acciones: retirarse, pasar, igualar, subir con mínimo y all-in.
+- Botes laterales cuando hay all-in; las apuestas no igualadas se devuelven antes del showdown.
+- Gana la mejor mano de cinco entre las siete disponibles; se evalúan carta alta, pareja, doble pareja, trío, escalera, color, full, póker y escalera de color.
+- Sin dinero real: solo fichas de práctica.
+
 ## Próximos juegos
 
-El catálogo de la app enlaza las reglas de Ludo, Backgammon, Damas Chinas, Go, Xiangqi, Shogi, Janggi, Jungle, Luzhanqi, Ur, Tren Mexicano, Chickenfoot, Aeroplane Chess, Póker, Mahjong, Riichi, Mahjong con naipes, Ajedrez para tres y Soroban. Se implementarán por oleadas, priorizando reglas claras, bots y una mesa digna.
+El catálogo de la app enlaza las reglas de Ludo, Backgammon, Damas Chinas, Go, Xiangqi, Shogi, Janggi, Jungle, Luzhanqi, Ur, Tren Mexicano, Chickenfoot, Aeroplane Chess, Mahjong, Riichi, Mahjong con naipes, Ajedrez para tres y Soroban. Se implementarán por oleadas, priorizando reglas claras, bots y una mesa digna.
 
 ## Derechos
 

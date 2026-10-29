@@ -1,5 +1,42 @@
 ﻿# Changelog
 
+## 1.3.0 · 2026-10-29
+
+La mesa completa.
+
+### Añadido
+
+- **Póker Texas Hold'em nativo en Compose**: baraja francesa de 52 cartas, 2–6 jugadores, ciegas 10/20, dealer rotativo, preflop/flop/turn/river, subidas con mínimo, all-in, botes laterales, devolución de apuestas no igualadas y showdown.
+- **Evaluador de la mejor mano de 5 entre 7**: carta alta, pareja, doble pareja, trío, escalera, color, full, póker y escalera de color.
+- **Showdown nativo**: filas por jugador, mano, cartas ganadoras, bote repartido y siguiente mano.
+- Bots con fuerza de mano, pot odds, agresividad y tres dificultades.
+- `PokerCardFace` con baraja francesa, reverso y estados de carta.
+- 6 pruebas Kotlin nuevas; **84 pruebas en total** (30 web + 54 nativas).
+- Evidencia visual en `docs/evidence/v1.3.0/`.
+
+### Cambiado
+
+- Android: `versionCode=15`, `versionName=1.3.0`.
+- El inicio y el catálogo pasan a **15 juegos 100 % Compose**.
+- Póker se marca como nativo; ya no queda ningún juego jugable en WebView.
+- El WebView queda como respaldo de la PWA y de la sala online.
+- La web se compila con Vite 6.4.5 y se sincroniza dentro del APK.
+
+### Corregido
+
+- Póker mantiene el bote, las apuestas y el turno después de cada calle.
+- El color activo de Furia ya cambia al jugar una carta de otro color, en Kotlin y en la web.
+- Las manos ajenas permanecen ocultas y la mano del jugador activo se muestra en modo pasar el teléfono.
+- El showdown devuelve apuestas no igualadas antes de repartir botes laterales.
+- La mesa de Póker muestra ciegas, bote, apuesta actual y cartas comunitarias.
+
+### Pendiente
+
+- Salas nativas y reconexión.
+- Crónica nativa con PDF y replays con semilla.
+- Accesibilidad completa, audio nativo y prueba en teléfono físico.
+- Gradle 8.14.4+ y perfil de rendimiento.
+
 ## 1.2.0 · 2026-10-29
 
 La mesa completa.

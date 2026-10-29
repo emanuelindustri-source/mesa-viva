@@ -2,13 +2,13 @@
 
 **Mesa Viva** es una aplicación de juegos de cartas y mesa con alma venezolana. Funciona sin conexión para jugar solo, contra bots o pasando el teléfono; y tiene salas en línea con código y QR para jugar con amigos. La web y el APK Android comparten el mismo motor de juego.
 
-> Estado actual: **v1.2.0**. Quince juegos jugables, Póker Texas Hold'em sin dinero real y **catorce juegos 100 % Jetpack Compose**: Serpientes y Escaleras, Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados Mentirosos, Go, Jungle, Xiangqi, Damas Chinas, **Caída** y **Furia de Colores**. La cáscara nativa suma **Sala de juegos con QR** y sincroniza idioma y preferencias con la mesa web. Android 16 (API 36), APK/AAB firmados y PWA offline.
+> Estado actual: **v1.3.0**. Quince juegos jugables y **los quince 100 % Jetpack Compose**: Serpientes y Escaleras, Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados Mentirosos, Go, Jungle, Xiangqi, Damas Chinas, Caída, Furia de Colores y **Póker**. La cáscara nativa suma **Sala de juegos con QR** y sincroniza idioma y preferencias con la mesa web. Android 16 (API 36), APK/AAB firmados y PWA offline.
 
 ---
 
 ## Lo que ya puedes hacer
 
-- **Póker de la casa**: Texas Hold'em 2–6 jugadores, ciegas 10/20, cuatro calles, subidas con mínimo, all-in, botes laterales, devolución de apuestas no igualadas, evaluación de la mejor mano de 5 entre 7 y bots con tres dificultades. Solo fichas de práctica: sin dinero real.
+- **Póker de la casa nativo (Compose)**: Texas Hold'em 2–6 jugadores, ciegas 10/20, cuatro calles, subidas con mínimo, all-in, botes laterales, devolución de apuestas no igualadas, evaluación de la mejor mano de 5 entre 7, showdown y bots con tres dificultades. Solo fichas de práctica: sin dinero real.
 - **Dominó nativo (Compose)**: doble 6, 2–4 jugadores, parejas, pozo, tranca, cierre de mano, meta configurable y bots. Fichas dibujadas con pips, mesa de fieltro, selección de extremo y vibración.
 - **Ajedrez nativo (Compose)**: reglas completas (enroque, al paso, promoción elegible, jaque, mate, ahogado, 50 movimientos, triple repetición y material insuficiente), historial SAN, tres dificultades y bot alfa-beta.
 - **Ludo nativo (Compose)**: 2–4 jugadores, cuatro fichas, salida con 6, capturas, casillas seguras, tres seises, turno extra y meta exacta. Tablero 15×15, dados, bots y modo pasar el teléfono.
@@ -39,7 +39,7 @@
 - **Crónica de partida**: últimos 5 movimientos visibles e historial completo en las mesas nativas; PDF con infografía en la mesa web.
 - **Temas**: Halloween criollo (El Silbón, La Sayona, El Hachero), Navidad, Reyes, Carnaval, San Valentín, San Patricio, Semana Santa, Cruz de Mayo, Corpus Christi, independencia por país y mesa neutral. El acento puede venir de la temporada, del sistema (Material You en Android) o del color dominante del fondo de pantalla.
 - **Idiomas**: español, inglés, portugués de Brasil, portugués de Portugal, alemán, ruso, italiano, francés, chino tradicional, chino simplificado y japonés.
-- **Android**: cáscara nativa en **Jetpack Compose** (Material 3, color dinámico/festividad, inicio, catálogo, niveles, ajustes, sala y navegación), **catorce juegos nativos** (Serpientes, Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados, Go, Jungle, Xiangqi, Damas Chinas, Caída y Furia), y mesa compartida en `GameWebActivity` con `WebViewAssetLoader`. Solo Póker sigue en la capa web. El idioma y las preferencias de la cáscara viajan a la web; el perfil vuelve con `ShellSync`. Target Android 16 (API 36), edge-to-edge con insets, back predictivo, APK de release firmado, vibración, sensores para agitar/“lanzar” el teléfono, cámara para QR y guardado de PDF en Descargas.
+- **Android**: cáscara nativa en **Jetpack Compose** (Material 3, color dinámico/festividad, inicio, catálogo, niveles, ajustes, sala y navegación), **los quince juegos nativos** (Serpientes, Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados, Go, Jungle, Xiangqi, Damas Chinas, Caída, Furia y Póker) y `GameWebActivity` como respaldo de la PWA y la sala online con `WebViewAssetLoader`. El idioma y las preferencias de la cáscara viajan a la web; el perfil vuelve con `ShellSync`. Target Android 16 (API 36), edge-to-edge con insets, back predictivo, APK de release firmado, vibración, sensores para agitar/“lanzar” el teléfono, cámara para QR y guardado de PDF en Descargas.
 - **Privacidad**: sin cuentas, sin anuncios, sin rastreo. Las partidas locales se quedan en el dispositivo. El diagnóstico se envía solo si tú abres el correo.
 - **PWA**: instalable, service worker y funcionamiento offline.
 
@@ -137,7 +137,7 @@ npm run test:relay            # requiere npm run rooms en otra terminal
 python tools/check_i18n.py   # claves usadas vs. catálogo español
 ```
 
-- 30 pruebas de motores web + 48 pruebas de motores nativos Kotlin (Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados, Go, Jungle, Xiangqi, Damas Chinas, Caída y Furia). **78 en total**.
+- 30 pruebas de motores web + 54 pruebas de motores nativos Kotlin (los quince juegos, incluidos Póker, Caída y Furia). **84 en total**.
 - TypeScript estricto, sin `any` en la capa de motores.
 - Motor determinista con semilla reproducible.
 - Host autoritativo en red; los clientes solo reciben su vista redactada.
@@ -158,7 +158,7 @@ src/theme/       festividades, Semana Santa/Carnaval, paletas y Material You
 src/i18n/        catálogos y formateo de crónicas
 src/audio/       música generativa y SFX sintetizados
 src/services/    diagnóstico, sensores, háptica, PDF, QR, PWA
-android/         app Android (Compose nativo + 14 juegos Kotlin + GameWebActivity + relay LAN)
+android/         app Android (Compose nativo + 15 juegos Kotlin + WebView de respaldo + relay LAN)
 server/          relay de salas (Node + ws)
 docs/            arquitectura, roadmap, privacidad y seguridad
 ```

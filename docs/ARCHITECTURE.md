@@ -54,7 +54,7 @@ Los motores son funciones puras sobre el estado (con el RNG explícito). Las vis
 - `i18n`: español como base, inglés completo, 9 locales adicionales con fallback en inglés.
 
 ### `android`
-Cáscara nativa en **Jetpack Compose** (`MainActivity`, `shell/`): inicio, catálogo, niveles, ajustes, sala, navegación, tema Material 3 y catorce juegos nativos (Serpientes, Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados, Go, Jungle, Xiangqi, Damas Chinas, Caída y Furia) con motores Kotlin en `games/`. `RoomScreen` genera QR local con ZXing. `GameWebActivity` hospeda la mesa compartida con `WebViewAssetLoader`, desde un origen HTTPS seguro, e inyecta `MesaViva` para vibración, sensores, color del sistema y PDF; gestiona cámara y selector de archivos. `ShellSync` importa el perfil de `localStorage` al volver de la mesa y la URL de la mesa recibe idioma/preferencias de la cáscara.
+Cáscara nativa en **Jetpack Compose** (`MainActivity`, `shell/`): inicio, catálogo, niveles, ajustes, sala, navegación, tema Material 3 y los quince juegos nativos (Serpientes, Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados, Go, Jungle, Xiangqi, Damas Chinas, Caída, Furia y Póker) con motores Kotlin en `games/`. `RoomScreen` genera QR local con ZXing. `GameWebActivity` hospeda la mesa compartida con `WebViewAssetLoader`, desde un origen HTTPS seguro, e inyecta `MesaViva` para vibración, sensores, color del sistema y PDF; gestiona cámara y selector de archivos. `ShellSync` importa el perfil de `localStorage` al volver de la mesa y la URL de la mesa recibe idioma/preferencias de la cáscara.
 
 ### `server`
 Relay Node + `ws`. En producción debe ir detrás de TLS (`wss`). El estado de la partida no se guarda: si el host se desconecta, la sala se cierra.

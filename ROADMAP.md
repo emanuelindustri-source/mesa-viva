@@ -1,18 +1,27 @@
 # Roadmap
 
-## v1.3.0 · La mesa conectada (próxima)
+## v1.4.0 · La mesa conectada (próxima)
 
 - [ ] Salas nativas host/invitado para al menos dos juegos Compose, con reconexión visible.
-- [ ] Póker 100 % Compose para cerrar la paridad.
 - [ ] Crónica nativa con PDF y replays con semilla.
 - [ ] Accesibilidad completa, audio nativo y localización de historiales.
 - [ ] Teléfono físico, LAN real, AAB y checklist de Play Store.
 - [ ] Gradle 8.14.4+, perfil de rendimiento y arranque en frío.
-- [ ] Retirada del WebView al completar la paridad de los 15 juegos.
+- [ ] Retirada del WebView de respaldo al desacoplar la PWA y la sala online.
 
-## v1.2.0 · La mesa completa (actual)
+## v1.3.0 · La mesa completa (actual)
 
-- [x] Caída y Furia de Colores nativas en Compose.
+- [x] Póker Texas Hold'em nativo en Compose, con ciegas, calles, all-in, botes laterales y showdown.
+- [x] Evaluador de la mejor mano de 5 entre 7 y bots con tres dificultades.
+- [x] Quince juegos 100 % Compose; el WebView queda como respaldo.
+- [x] 54 pruebas Kotlin + 30 web = **84**.
+- [x] APK y AAB de release firmados; Póker verificado en emulador Android 14.
+- [x] Evidencia visual en `docs/evidence/v1.3.0/`.
+- [ ] Salas nativas, PDF/replays y accesibilidad.
+- [ ] Teléfono físico bloqueado por MIUI.
+- [ ] Gradle 8.14.4+ y perfil de rendimiento.
+
+## v1.2.0 · La mesa completa
 - [x] Baraja española y baraja de colores dibujadas, con partículas de polvo.
 - [x] 14 juegos 100 % Compose; Póker sigue en WebView.
 - [x] 48 pruebas Kotlin + 30 web = **78**.

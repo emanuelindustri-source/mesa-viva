@@ -79,6 +79,7 @@ fun MesaVivaApp(
         ShellScreen.Dados,
         ShellScreen.Caida,
         ShellScreen.Furia,
+        ShellScreen.Poker,
     )
     Scaffold(
         containerColor = Color.Transparent,
@@ -124,6 +125,7 @@ fun MesaVivaApp(
                     "dados" -> ShellScreen.Dados
                     "caida" -> ShellScreen.Caida
                     "furia" -> ShellScreen.Furia
+                    "poker" -> ShellScreen.Poker
                     else -> ShellScreen.Catalog
                 }
             }
@@ -148,6 +150,7 @@ fun MesaVivaApp(
                     ShellScreen.Dados -> DadosScreen(state) { state.screen = ShellScreen.Home }
                     ShellScreen.Caida -> CaidaScreen(state) { state.screen = ShellScreen.Home }
                     ShellScreen.Furia -> FuriaScreen(state) { state.screen = ShellScreen.Home }
+                    ShellScreen.Poker -> PokerScreen(state) { state.screen = ShellScreen.Home }
                 }
             }
         }
@@ -185,7 +188,7 @@ private fun HomeScreen(
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     QuickCard("♠️", state.t("home.poker"), state.t("home.pokerDesc"), Modifier.weight(1f)) {
-                        onOpenWeb("/setup/poker")
+                        onNative("poker")
                     }
                     QuickCard("🎨", state.t("furia.title"), state.t("furia.subtitle"), Modifier.weight(1f)) {
                         onNative("furia")

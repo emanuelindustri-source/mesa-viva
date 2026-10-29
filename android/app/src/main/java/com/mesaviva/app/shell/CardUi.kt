@@ -35,6 +35,8 @@ import androidx.compose.ui.unit.sp
 import com.mesaviva.app.games.FuriaAction
 import com.mesaviva.app.games.FuriaCard
 import com.mesaviva.app.games.FuriaSuit
+import com.mesaviva.app.games.PokerCard
+import com.mesaviva.app.games.PokerSuit
 import com.mesaviva.app.games.SpanishCard
 import com.mesaviva.app.games.SpanishSuit
 import kotlin.math.cos
@@ -238,6 +240,70 @@ fun FuriaCardFace(
                     fontSize = (side * 0.13f).sp,
                     modifier = Modifier.align(Alignment.BottomEnd).padding(4.dp),
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun PokerCardFace(
+    card: PokerCard,
+    modifier: Modifier = Modifier,
+    faceDown: Boolean = false,
+    playable: Boolean = true,
+    onClick: (() -> Unit)? = null,
+) {
+    val shape = RoundedCornerShape(8.dp)
+    val base = Modifier
+        .then(modifier)
+        .clip(shape)
+        .then(if (onClick != null && playable) Modifier.clickable(onClick = onClick) else Modifier)
+    if (faceDown) {
+        Box(
+            base
+                .background(Brush.linearGradient(listOf(Color(0xFF0E3B34), Color(0xFF1F6A58), Color(0xFF0E3B34))))
+                .border(1.5.dp, Color(0xFFE0A63A).copy(alpha = 0.8f), shape),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text("♠", color = Color(0xFFE0A63A).copy(alpha = 0.85f), fontSize = 22.sp)
+        }
+        return
+    }
+    val red = card.suit == PokerSuit.Hearts || card.suit == PokerSuit.Diamonds
+    val ink = if (red) Color(0xFFB03A32) else Color(0xFF22201C)
+    Box(
+        base
+            .background(Color(0xFFFFFCF3))
+            .border(1.5.dp, Color(0xFFCDB98F), shape)
+            .then(if (playable) Modifier else Modifier.background(Color.Black.copy(alpha = 0.15f))),
+    ) {
+        BoxWithConstraints(Modifier.fillMaxSize().padding(4.dp)) {
+            val side = minOf(maxWidth.value, maxHeight.value)
+            Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.SpaceBetween) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Column {
+                        Text(
+                            com.mesaviva.app.games.PokerGame.rankLabel(card.rank),
+                            color = ink,
+                            fontSize = (side * 0.22f).sp,
+                            fontWeight = FontWeight.Bold,
+                            lineHeight = (side * 0.22f).sp,
+                        )
+                        Text(card.suit.symbol, color = ink, fontSize = (side * 0.18f).sp, lineHeight = (side * 0.18f).sp)
+                    }
+                    Text(card.suit.symbol, color = ink.copy(alpha = 0.55f), fontSize = (side * 0.15f).sp)
+                }
+                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Text(card.suit.symbol, color = ink, fontSize = (side * 0.45f).sp, lineHeight = (side * 0.45f).sp)
+                }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    Text(
+                        com.mesaviva.app.games.PokerGame.rankLabel(card.rank),
+                        color = ink,
+                        fontSize = (side * 0.18f).sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
             }
         }
     }
