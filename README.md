@@ -2,7 +2,7 @@
 
 **Mesa Viva** es una aplicación de juegos de cartas y mesa con alma venezolana. Funciona sin conexión para jugar solo, contra bots o pasando el teléfono; y tiene salas en línea con código y QR para jugar con amigos. La web y el APK Android comparten el mismo motor de juego.
 
-> Estado actual: **v1.3.0**. Quince juegos jugables y **los quince 100 % Jetpack Compose**: Serpientes y Escaleras, Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados Mentirosos, Go, Jungle, Xiangqi, Damas Chinas, Caída, Furia de Colores y **Póker**. La cáscara nativa suma **Sala de juegos con QR** y sincroniza idioma y preferencias con la mesa web. Android 16 (API 36), APK/AAB firmados y PWA offline.
+> Estado actual: **v1.4.0**. Quince juegos jugables y **los quince 100 % Jetpack Compose**: Serpientes y Escaleras, Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados Mentirosos, Go, Jungle, Xiangqi, Damas Chinas, Caída, Furia de Colores y Póker. La cáscara nativa suma **Sala de juegos con QR**, **crónica PDF nativa** y accesibilidad básica. Android 16 (API 36), APK/AAB firmados y PWA offline.
 
 ---
 
@@ -36,10 +36,10 @@
 - **Damas Chinas** con estrella de 121 hoyos, saltos encadenados y meta en el triángulo opuesto.
 - **Modos**: solo contra bots, pasar el teléfono (humanos y bots mezclados), sala en línea con rondas y chat, **sala LAN sin internet** en Android y **reconexión automática** del invitado si se cae la conexión.
 - **Progresión**: 10 niveles, XP por partida, victoria, dificultad, puntos y racha; recompensas desbloqueables.
-- **Crónica de partida**: últimos 5 movimientos visibles e historial completo en las mesas nativas; PDF con infografía en la mesa web.
+- **Crónica de partida**: últimos 5 movimientos visibles, historial completo en las mesas nativas y **PDF nativo** con título, fecha, movimientos y paginación. Se guarda en `Descargas/Mesa Viva` y se comparte con Android.
 - **Temas**: Halloween criollo (El Silbón, La Sayona, El Hachero), Navidad, Reyes, Carnaval, San Valentín, San Patricio, Semana Santa, Cruz de Mayo, Corpus Christi, independencia por país y mesa neutral. El acento puede venir de la temporada, del sistema (Material You en Android) o del color dominante del fondo de pantalla.
 - **Idiomas**: español, inglés, portugués de Brasil, portugués de Portugal, alemán, ruso, italiano, francés, chino tradicional, chino simplificado y japonés.
-- **Android**: cáscara nativa en **Jetpack Compose** (Material 3, color dinámico/festividad, inicio, catálogo, niveles, ajustes, sala y navegación), **los quince juegos nativos** (Serpientes, Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados, Go, Jungle, Xiangqi, Damas Chinas, Caída, Furia y Póker) y `GameWebActivity` como respaldo de la PWA y la sala online con `WebViewAssetLoader`. El idioma y las preferencias de la cáscara viajan a la web; el perfil vuelve con `ShellSync`. Target Android 16 (API 36), edge-to-edge con insets, back predictivo, APK de release firmado, vibración, sensores para agitar/“lanzar” el teléfono, cámara para QR y guardado de PDF en Descargas.
+- **Android**: cáscara nativa en **Jetpack Compose** (Material 3, color dinámico/festividad, inicio, catálogo, niveles, ajustes, sala y navegación), **los quince juegos nativos** (Serpientes, Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados, Go, Jungle, Xiangqi, Damas Chinas, Caída, Furia y Póker), **crónica PDF**, descripciones de cartas y `GameWebActivity` como respaldo de la PWA y la sala online con `WebViewAssetLoader`. El idioma y las preferencias de la cáscara viajan a la web; el perfil vuelve con `ShellSync`. Target Android 16 (API 36), edge-to-edge con insets, back predictivo, APK de release firmado, vibración, sensores para agitar/“lanzar” el teléfono, cámara para QR y guardado de PDF en Descargas.
 - **Privacidad**: sin cuentas, sin anuncios, sin rastreo. Las partidas locales se quedan en el dispositivo. El diagnóstico se envía solo si tú abres el correo.
 - **PWA**: instalable, service worker y funcionamiento offline.
 

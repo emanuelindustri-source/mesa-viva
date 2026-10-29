@@ -421,7 +421,12 @@ fun DadosScreen(state: ShellState, onBack: () -> Unit) {
     }
 
     if (historyOpen) {
-        NativeHistoryDialog(state, board.history.map { dadosLogText(state, board, it) }) { historyOpen = false }
+        NativeHistoryDialog(
+            state,
+            board.history.map { dadosLogText(state, board, it) },
+            pdfTitle = state.t("dados.title"),
+            pdfSubtitle = state.t("dados.subtitle"),
+        ) { historyOpen = false }
     }
 
     if (resultOpen && board.phase == DadosPhase.MatchEnd) {

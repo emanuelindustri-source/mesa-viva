@@ -303,7 +303,12 @@ fun GoScreen(state: ShellState, onBack: () -> Unit) {
         )
     }
 
-    if (historyOpen) NativeHistoryDialog(state, board.history) { historyOpen = false }
+    if (historyOpen) NativeHistoryDialog(
+        state,
+        board.history,
+        pdfTitle = state.t("go.title"),
+        pdfSubtitle = state.t("go.subtitle"),
+    ) { historyOpen = false }
 
     if (resultOpen && board.phase == GoPhase.MatchEnd) {
         AlertDialog(

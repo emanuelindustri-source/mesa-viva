@@ -325,7 +325,12 @@ fun XiangqiScreen(state: ShellState, onBack: () -> Unit) {
         )
     }
 
-    if (historyOpen) NativeHistoryDialog(state, board.history) { historyOpen = false }
+    if (historyOpen) NativeHistoryDialog(
+        state,
+        board.history,
+        pdfTitle = state.t("xiangqi.title"),
+        pdfSubtitle = state.t("xiangqi.subtitle"),
+    ) { historyOpen = false }
 
     if (resultOpen && board.phase == XqPhase.MatchEnd) {
         AlertDialog(

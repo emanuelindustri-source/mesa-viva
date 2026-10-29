@@ -457,7 +457,12 @@ fun FuriaScreen(state: ShellState, onBack: () -> Unit) {
         )
     }
 
-    if (historyOpen) NativeHistoryDialog(state, board.history) { historyOpen = false }
+    if (historyOpen) NativeHistoryDialog(
+        state,
+        board.history,
+        pdfTitle = state.t("furia.title"),
+        pdfSubtitle = state.t("furia.subtitle"),
+    ) { historyOpen = false }
 
     if (resultOpen && board.phase == FuriaPhase.MatchEnd) {
         AlertDialog(

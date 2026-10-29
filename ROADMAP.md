@@ -1,15 +1,28 @@
 ﻿# Roadmap
 
-## v1.4.0 · La mesa conectada (próxima)
+## v1.5.0 · La mesa conectada (próxima)
 
 - [ ] Salas nativas host/invitado para al menos dos juegos Compose, con reconexión visible.
-- [ ] Crónica nativa con PDF y replays con semilla.
+- [ ] Replays con semilla y exportación.
 - [ ] Accesibilidad completa, audio nativo y localización de historiales.
 - [ ] Teléfono físico, LAN real, AAB y checklist de Play Store.
 - [ ] Gradle 8.14.4+, perfil de rendimiento y arranque en frío.
 - [ ] Retirada del WebView de respaldo al desacoplar la PWA y la sala online.
 
-## v1.3.0 · La mesa completa (actual)
+## v1.4.0 · Crónica y accesibilidad (actual)
+
+- [x] Crónica PDF nativa en las quince mesas, con Descargas y compartición.
+- [x] PDF multipágina con título, fecha, historial y paginación.
+- [x] Descripciones semánticas de cartas y turno como región viva.
+- [x] Historial completo en Ludo, Mancala, Backgammon, Dominó y Serpientes.
+- [x] 86 pruebas verdes (30 web + 56 Kotlin).
+- [x] APK y AAB de release firmados; PDF verificado en emulador Android 14.
+- [x] Evidencia visual y PDF real en `docs/evidence/v1.4.0/`.
+- [ ] Salas nativas y replays (v1.5.0).
+- [ ] Teléfono físico bloqueado por MIUI.
+- [ ] Accesibilidad completa y audio nativo.
+
+## v1.3.0 · Póker y paridad total
 
 - [x] Póker Texas Hold'em nativo en Compose, con ciegas, calles, all-in, botes laterales y showdown.
 - [x] Evaluador de la mejor mano de 5 entre 7 y bots con tres dificultades.

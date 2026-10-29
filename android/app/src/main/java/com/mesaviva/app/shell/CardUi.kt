@@ -27,6 +27,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -34,8 +36,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mesaviva.app.games.FuriaAction
 import com.mesaviva.app.games.FuriaCard
+import com.mesaviva.app.games.FuriaGame
 import com.mesaviva.app.games.FuriaSuit
 import com.mesaviva.app.games.PokerCard
+import com.mesaviva.app.games.PokerGame
 import com.mesaviva.app.games.PokerSuit
 import com.mesaviva.app.games.SpanishCard
 import com.mesaviva.app.games.SpanishSuit
@@ -81,6 +85,13 @@ fun SpanishCardFace(
         .then(modifier)
         .clip(shape)
         .then(if (onClick != null && playable) Modifier.clickable(onClick = onClick) else Modifier)
+        .semantics {
+            contentDescription = if (faceDown) {
+                "Carta boca abajo"
+            } else {
+                "${card.rankLabel()} de ${card.suit.name.lowercase()}"
+            }
+        }
     if (faceDown) {
         Box(
             base
@@ -169,6 +180,9 @@ fun FuriaCardFace(
         .then(modifier)
         .clip(shape)
         .then(if (onClick != null && playable) Modifier.clickable(onClick = onClick) else Modifier)
+        .semantics {
+            contentDescription = if (faceDown) "Carta boca abajo" else FuriaGame.cardLabel(card)
+        }
     if (faceDown) {
         Box(
             base.background(
@@ -258,6 +272,9 @@ fun PokerCardFace(
         .then(modifier)
         .clip(shape)
         .then(if (onClick != null && playable) Modifier.clickable(onClick = onClick) else Modifier)
+        .semantics {
+            contentDescription = if (faceDown) "Carta boca abajo" else PokerGame.cardLabel(card)
+        }
     if (faceDown) {
         Box(
             base

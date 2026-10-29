@@ -1,5 +1,6 @@
 package com.mesaviva.app.shell
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,6 +22,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
@@ -71,7 +76,7 @@ fun NativeTurnBanner(
         } else {
             MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.28f)
         },
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite },
     ) {
         Text(
             text,
@@ -125,8 +130,11 @@ fun NativeMoveLog(
 fun NativeHistoryDialog(
     state: ShellState,
     entries: List<String>,
+    pdfTitle: String = state.t("common.history"),
+    pdfSubtitle: String = state.t("app.name"),
     onClose: () -> Unit,
 ) {
+    val context = LocalContext.current
     AlertDialog(
         onDismissRequest = onClose,
         title = { Text(state.t("common.history")) },
@@ -146,7 +154,20 @@ fun NativeHistoryDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onClose) { Text(state.t("common.close")) }
+            Row {
+                TextButton(onClick = {
+                    val export = exportChroniclePdf(context, pdfTitle, pdfSubtitle, entries)
+                    if (export == null) {
+                        Toast.makeText(context, state.t("common.pdfError"), Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, state.t("common.pdfSaved"), Toast.LENGTH_SHORT).show()
+                        shareChroniclePdf(context, export, state.t("common.sharePdf"))
+                    }
+                }) {
+                    Text(state.t("common.pdf"))
+                }
+                TextButton(onClick = onClose) { Text(state.t("common.close")) }
+            }
         },
     )
 }

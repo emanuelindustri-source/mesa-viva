@@ -74,12 +74,21 @@ fun DominoScreen(state: ShellState, onBack: () -> Unit) {
     var selectedTile by remember { mutableStateOf<Int?>(null) }
     var setupOpen by remember { mutableStateOf(true) }
     var resultOpen by remember { mutableStateOf(false) }
+    var historyOpen by remember { mutableStateOf(false) }
+    var log by remember { mutableStateOf(listOf<String>()) }
+
+    LaunchedEffect(board.messageKey, board.messageParams) {
+        if (board.messageKey.isNotBlank()) {
+            log = (log + state.t(board.messageKey, board.messageParams)).takeLast(200)
+        }
+    }
 
     fun start(config: DominoSetup) {
         setup = config
         game = DominoGame(config.players, config.teams, config.target)
         board = game.newMatch()
         selectedTile = null
+        log = emptyList()
         setupOpen = false
         resultOpen = false
     }
@@ -295,7 +304,17 @@ fun DominoScreen(state: ShellState, onBack: () -> Unit) {
 
         Row(Modifier.fillMaxWidth().padding(bottom = 12.dp), horizontalArrangement = Arrangement.Center) {
             OutlinedButton(onClick = { setupOpen = true }) { Text(state.t("domino.newMatch")) }
+            OutlinedButton(onClick = { historyOpen = true }) { Text(state.t("common.history")) }
         }
+    }
+
+    if (historyOpen) {
+        NativeHistoryDialog(
+            state,
+            log,
+            pdfTitle = state.t("domino.title"),
+            pdfSubtitle = state.t("domino.subtitle"),
+        ) { historyOpen = false }
     }
 
     if (setupOpen) {

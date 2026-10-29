@@ -62,6 +62,7 @@ fun MancalaScreen(state: ShellState, onBack: () -> Unit) {
     var board by remember { mutableStateOf(game.newMatch()) }
     var setupOpen by remember { mutableStateOf(true) }
     var winnerOpen by remember { mutableStateOf(false) }
+    var historyOpen by remember { mutableStateOf(false) }
     var log by remember { mutableStateOf(listOf<String>()) }
 
     fun picture(side: MancalaSide): String = when {
@@ -71,7 +72,7 @@ fun MancalaScreen(state: ShellState, onBack: () -> Unit) {
     }
 
     fun addLog(text: String) {
-        log = (log + text).takeLast(5)
+        log = (log + text).takeLast(200)
     }
 
     fun start(asHumans: Boolean) {
@@ -123,6 +124,7 @@ fun MancalaScreen(state: ShellState, onBack: () -> Unit) {
                 )
             }
             OutlinedButton(onClick = { setupOpen = true }) { Text(state.t("mancala.newMatch")) }
+            OutlinedButton(onClick = { historyOpen = true }) { Text(state.t("common.history")) }
         }
 
         Text(
@@ -222,6 +224,15 @@ fun MancalaScreen(state: ShellState, onBack: () -> Unit) {
                 }
             }
         }
+    }
+
+    if (historyOpen) {
+        NativeHistoryDialog(
+            state,
+            log,
+            pdfTitle = state.t("mancala.title"),
+            pdfSubtitle = state.t("mancala.subtitle"),
+        ) { historyOpen = false }
     }
 
     if (setupOpen) {

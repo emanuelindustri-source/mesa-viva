@@ -68,10 +68,11 @@ fun BackgammonScreen(state: ShellState, onBack: () -> Unit) {
     var selected by remember { mutableStateOf<Int?>(null) }
     var setupOpen by remember { mutableStateOf(true) }
     var winnerOpen by remember { mutableStateOf(false) }
+    var historyOpen by remember { mutableStateOf(false) }
     var log by remember { mutableStateOf(listOf<String>()) }
 
     fun addLog(text: String) {
-        log = (log + text).takeLast(5)
+        log = (log + text).takeLast(200)
     }
 
     fun sideName(side: BgSide): String = when {
@@ -332,6 +333,7 @@ fun BackgammonScreen(state: ShellState, onBack: () -> Unit) {
                 enabled = board.phase == BgPhase.Roll && (board.turn == BgSide.White || allHumans),
             ) { Text(state.t("bg.roll")) }
             OutlinedButton(onClick = { setupOpen = true }) { Text(state.t("bg.newMatch")) }
+            OutlinedButton(onClick = { historyOpen = true }) { Text(state.t("common.history")) }
         }
 
         if (log.isNotEmpty()) {
@@ -346,6 +348,15 @@ fun BackgammonScreen(state: ShellState, onBack: () -> Unit) {
                 }
             }
         }
+    }
+
+    if (historyOpen) {
+        NativeHistoryDialog(
+            state,
+            log,
+            pdfTitle = state.t("bg.title"),
+            pdfSubtitle = state.t("bg.subtitle"),
+        ) { historyOpen = false }
     }
 
     if (setupOpen) {

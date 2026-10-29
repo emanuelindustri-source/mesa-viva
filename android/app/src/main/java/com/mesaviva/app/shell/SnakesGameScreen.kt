@@ -99,6 +99,8 @@ fun SnakesGameScreen(state: ShellState, onBack: () -> Unit) {
     var rolling by remember { mutableStateOf(false) }
     var winner by remember { mutableStateOf<SnakesPlayer?>(null) }
     var message by remember { mutableStateOf("") }
+    var historyOpen by remember { mutableStateOf(false) }
+    var log by remember { mutableStateOf(listOf<String>()) }
 
     fun label(key: String, vararg params: Pair<String, Any?>): String =
         ShellStrings.t(state.language, key, params.toMap())
@@ -109,6 +111,7 @@ fun SnakesGameScreen(state: ShellState, onBack: () -> Unit) {
         dice = 0
         winner = null
         message = ""
+        log = emptyList()
         rolling = false
     }
 
@@ -336,7 +339,21 @@ fun SnakesGameScreen(state: ShellState, onBack: () -> Unit) {
             textAlign = TextAlign.Start,
             modifier = Modifier.fillMaxWidth(),
         )
+        TextButton(onClick = { historyOpen = true }) { Text(state.t("common.history")) }
         Spacer(Modifier.height(14.dp))
+    }
+
+    LaunchedEffect(message) {
+        if (message.isNotBlank()) log = (log + message).takeLast(200)
+    }
+
+    if (historyOpen) {
+        NativeHistoryDialog(
+            state,
+            log,
+            pdfTitle = state.t("snakes.title"),
+            pdfSubtitle = state.t("snakes.subtitle"),
+        ) { historyOpen = false }
     }
 
     winner?.let { champion ->

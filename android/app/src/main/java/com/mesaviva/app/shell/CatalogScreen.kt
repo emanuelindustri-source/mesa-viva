@@ -121,7 +121,7 @@ fun CatalogScreen(
         }
         item {
             Text(
-                "Mesa Viva 1.3.0 · 15 juegos jugables · 15 nativos · 11 idiomas · sin anuncios",
+                "Mesa Viva 1.4.0 · 15 juegos jugables · 15 nativos · 11 idiomas · sin anuncios",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 8.dp),

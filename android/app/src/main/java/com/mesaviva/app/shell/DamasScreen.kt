@@ -315,7 +315,12 @@ fun DamasScreen(state: ShellState, onBack: () -> Unit) {
     }
 
     if (historyOpen) {
-        NativeHistoryDialog(state, board.history) { historyOpen = false }
+        NativeHistoryDialog(
+            state,
+            board.history,
+            pdfTitle = state.t("damas.title"),
+            pdfSubtitle = state.t("damas.subtitle"),
+        ) { historyOpen = false }
     }
 
     if (resultOpen && board.phase == DamasPhase.MatchEnd) {

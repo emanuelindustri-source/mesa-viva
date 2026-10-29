@@ -66,6 +66,7 @@ Es un proyecto de varias versiones, no un commit.
 - Mantener la PWA web como producto independiente.
 - Reducir tamaño y mejorar arranque.
 - Estado: 15 de 15 juegos jugables fuera del WebView; el WebView queda como respaldo de la PWA y la sala online.
+- v1.4.0 añade crónica PDF nativa en las quince mesas y accesibilidad básica de cartas y turnos.
 
 ## Arquitectura propuesta
 

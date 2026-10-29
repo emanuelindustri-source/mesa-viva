@@ -466,7 +466,12 @@ fun CaidaScreen(state: ShellState, onBack: () -> Unit) {
         )
     }
 
-    if (historyOpen) NativeHistoryDialog(state, board.history) { historyOpen = false }
+    if (historyOpen) NativeHistoryDialog(
+        state,
+        board.history,
+        pdfTitle = state.t("caida.title"),
+        pdfSubtitle = state.t("caida.subtitle"),
+    ) { historyOpen = false }
 
     if (resultOpen && board.phase == CaidaPhase.MatchEnd) {
         AlertDialog(

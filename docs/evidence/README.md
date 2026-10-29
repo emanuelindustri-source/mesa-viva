@@ -10,6 +10,7 @@ Capturas de las versiones publicadas. Se conservan para auditoría y para que cu
 | v1.1.0 | [`v1.1.0/`](./v1.1.0/) | Damas, Go, Jungle, Xiangqi, Damas Chinas y Dados nativos, movimientos y revelación |
 | v1.2.0 | [`v1.2.0/`](./v1.2.0/) | Caída y Furia nativas, baraja española, baraja de colores, entregas y jugadas |
 | v1.3.0 | [`v1.3.0/`](./v1.3.0/) | Póker nativo, ciegas, flop, showdown y los quince juegos Compose |
+| v1.4.0 | [`v1.4.0/`](./v1.4.0/) | Crónica PDF nativa, Descargas, compartición y accesibilidad |
 
 Reglas:
 

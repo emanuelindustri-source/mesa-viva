@@ -1,5 +1,40 @@
 ﻿# Changelog
 
+## 1.4.0 · 2026-10-29
+
+Crónica y accesibilidad.
+
+### Añadido
+
+- **Crónica PDF nativa en las 15 mesas**: título, subtítulo, fecha, historial completo numerado, paginación y pie de página.
+- Guardado en `Descargas/Mesa Viva` en Android 10+; en Android 8–9 se usa almacenamiento privado y `FileProvider`.
+- Compartición del PDF con `ACTION_SEND` desde Mesa Viva.
+- `FileProvider` y `res/xml/file_paths.xml`.
+- Descripciones semánticas en cartas españolas, de Furia y de Póker.
+- Banner de turno como región viva para lectores de pantalla.
+- Historial completo en Ludo, Mancala, Backgammon, Dominó y Serpientes.
+- Evidencia visual y PDF real en `docs/evidence/v1.4.0/`.
+
+### Cambiado
+
+- Android: `versionCode=16`, `versionName=1.4.0`.
+- El inicio, el catálogo y los ajustes pasan a 1.4.0.
+- La web se compila con Vite 6.4.5 y se sincroniza dentro del APK.
+
+### Corregido
+
+- El PDF se genera sin permisos de almacenamiento en Android 10+.
+- El historial de las mesas clásicas ya no se limita a cinco líneas.
+- La crónica incluye nombre del juego y contexto, no solo “History”.
+- La compartición del PDF respeta el selector del sistema.
+
+### Pendiente
+
+- Salas nativas y replays con semilla.
+- Accesibilidad completa y audio nativo.
+- Teléfono físico bloqueado por MIUI.
+- Gradle 8.14.4+ y perfil de rendimiento.
+
 ## 1.3.0 · 2026-10-29
 
 La mesa completa.

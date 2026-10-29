@@ -421,26 +421,12 @@ fun ChessScreen(state: ShellState, onBack: () -> Unit) {
     }
 
     if (historyOpen) {
-        AlertDialog(
-            onDismissRequest = { historyOpen = false },
-            title = { Text(state.t("chess.history")) },
-            text = {
-                if (board.history.isEmpty()) {
-                    Text(state.t("chess.noMoves"))
-                } else {
-                    LazyColumn(Modifier.height(280.dp)) {
-                        itemsIndexed(board.history) { index, san ->
-                            Text(
-                                state.t("chess.moveNumber", mapOf("n" to (index + 1), "san" to san)),
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(vertical = 2.dp),
-                            )
-                        }
-                    }
-                }
-            },
-            confirmButton = { TextButton(onClick = { historyOpen = false }) { Text(state.t("common.close")) } },
-        )
+        NativeHistoryDialog(
+            state,
+            board.history,
+            pdfTitle = state.t("chess.title"),
+            pdfSubtitle = state.t("chess.subtitle"),
+        ) { historyOpen = false }
     }
 
     if (resultOpen && board.phase == ChessPhase.MatchEnd) {

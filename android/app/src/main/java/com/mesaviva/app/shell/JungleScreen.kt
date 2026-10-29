@@ -337,7 +337,12 @@ fun JungleScreen(state: ShellState, onBack: () -> Unit) {
         )
     }
 
-    if (historyOpen) NativeHistoryDialog(state, board.history) { historyOpen = false }
+    if (historyOpen) NativeHistoryDialog(
+        state,
+        board.history,
+        pdfTitle = state.t("jungle.title"),
+        pdfSubtitle = state.t("jungle.subtitle"),
+    ) { historyOpen = false }
 
     if (resultOpen && board.phase == JunglePhase.MatchEnd) {
         AlertDialog(

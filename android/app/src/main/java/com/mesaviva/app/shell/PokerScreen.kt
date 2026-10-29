@@ -421,7 +421,12 @@ fun PokerScreen(state: ShellState, onBack: () -> Unit) {
         )
     }
 
-    if (historyOpen) NativeHistoryDialog(state, board.history) { historyOpen = false }
+    if (historyOpen) NativeHistoryDialog(
+        state,
+        board.history,
+        pdfTitle = state.t("poker.title"),
+        pdfSubtitle = state.t("poker.subtitle"),
+    ) { historyOpen = false }
 
     if (resultOpen && board.street == PokerStreet.MatchEnd) {
         AlertDialog(

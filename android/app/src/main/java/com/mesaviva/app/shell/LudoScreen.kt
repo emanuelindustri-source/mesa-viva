@@ -77,10 +77,11 @@ fun LudoScreen(state: ShellState, onBack: () -> Unit) {
     var board by remember { mutableStateOf(game.newMatch()) }
     var setupOpen by remember { mutableStateOf(true) }
     var winnerOpen by remember { mutableStateOf(false) }
+    var historyOpen by remember { mutableStateOf(false) }
     var log by remember { mutableStateOf(listOf<String>()) }
 
     fun addLog(text: String) {
-        log = (log + text).takeLast(5)
+        log = (log + text).takeLast(200)
     }
 
     fun start(config: LudoSetup) {
@@ -293,6 +294,7 @@ fun LudoScreen(state: ShellState, onBack: () -> Unit) {
                 Text("🎲 ${state.t("ludo.roll")}")
             }
             OutlinedButton(onClick = { setupOpen = true }) { Text(state.t("ludo.newMatch")) }
+            OutlinedButton(onClick = { historyOpen = true }) { Text(state.t("common.history")) }
             Button(onClick = { winnerOpen = false; board = game.resign(board).state; winnerOpen = true }) {
                 Text(state.t("ludo.resign"))
             }
@@ -310,6 +312,15 @@ fun LudoScreen(state: ShellState, onBack: () -> Unit) {
                 }
             }
         }
+    }
+
+    if (historyOpen) {
+        NativeHistoryDialog(
+            state,
+            log,
+            pdfTitle = state.t("ludo.title"),
+            pdfSubtitle = state.t("ludo.subtitle"),
+        ) { historyOpen = false }
     }
 
     if (setupOpen) {
