@@ -1,6 +1,6 @@
 # Evidencia visual · v2.1.0
 
-Capturas del emulador `Pixel_7_API_34` (Android 14, API 34) con la APK de release firmada `mesa-viva-2.1.0-release.apk` y un invitado WebSocket real contra el relay LAN del anfitrión.
+Capturas del emulador `Pixel_7_API_34` (Android 14, API 34) con la build 2.1.0. Inicio y ajustes se capturaron con la APK de release firmada; la mesa de Ludo se capturó durante la prueba de sala con la build equivalente.
 
 | Archivo | Contenido |
 |---|---|
