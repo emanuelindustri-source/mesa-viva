@@ -1,5 +1,29 @@
 ﻿# Changelog
 
+## 2.2.0 · 2026-10-30
+
+La estrella conectada.
+
+### Añadido
+
+- **Damas Chinas en sala** de 2–6 jugadores con estrella de 121 hoyos, saltos encadenados, bots y meta opuesta.
+- Validación autoritativa de turno, origen, destino y salto en el anfitrión.
+- Bot de reemplazo para asientos vacíos o invitados desconectados.
+- 8 juegos con sala nativa: Damas, Mancala, Dominó, Serpientes, Brisca, Truco, Ludo y Damas Chinas.
+- 1 prueba nueva del códec de Damas Chinas.
+
+### Cambiado
+
+- Android: `versionCode=24`, `versionName=2.2.0`.
+- El lobby nativo incluye Damas Chinas con selector de 2–6 jugadores.
+- Los asientos de invitado se amplían hasta el 5.
+- El inicio y el catálogo muestran la 2.2.0.
+
+### Pendiente
+
+- Relay público con TLS, replays web adicionales y accesibilidad completa.
+- Los 11 juegos restantes y el teléfono físico.
+
 ## 2.1.0 · 2026-10-29
 
 Salas grandes.

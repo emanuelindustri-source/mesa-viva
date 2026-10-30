@@ -1,6 +1,17 @@
 ﻿# Roadmap
 
-## v2.1.0 · Salas grandes (actual)
+## v2.2.0 · La estrella conectada (actual)
+
+- [x] Damas Chinas de 2–6 jugadores en sala.
+- [x] Ocho juegos con sala nativa.
+- [x] Validación autoritativa y bots de reemplazo.
+- [x] 136 pruebas verdes (30 web + 106 Kotlin).
+- [x] APK y AAB de release firmados.
+- [x] Evidencia visual en `docs/evidence/v2.2.0/`.
+- [ ] Relay público con TLS (v2.3.0).
+- [ ] Replay web adicional, accesibilidad y catálogo restante (v2.3.0).
+
+## v2.1.0 · Salas grandes
 
 - [x] Ludo de 2–4 en sala con dados, capturas y turnos extra.
 - [x] Siete juegos con sala nativa.
@@ -8,8 +19,8 @@
 - [x] 135 pruebas verdes (30 web + 105 Kotlin).
 - [x] APK y AAB de release firmados.
 - [x] Evidencia visual en `docs/evidence/v2.1.0/`.
-- [ ] Damas Chinas en sala (v2.2.0).
-- [ ] Relay público con TLS, replays web adicionales y accesibilidad completa (v2.2.0).
+- [x] Damas Chinas en sala (v2.2.0).
+- [ ] Relay público con TLS, replays web adicionales y accesibilidad completa (v2.3.0).
 
 ## v2.0.0 · La mesa conectada
 

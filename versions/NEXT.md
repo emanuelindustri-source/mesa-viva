@@ -4,11 +4,11 @@
 
 ## Estado actual
 
-- **Versión publicada:** 2.1.0.
+- **Versión publicada:** 2.2.0.
 - **Catálogo:** 30 juegos.
 - **Juegos jugables:** 19, todos 100 % Jetpack Compose.
 - **Juegos en WebView:** 0 (el WebView queda como respaldo de la PWA y de la sala remota).
-- **Salas nativas:** Damas y Mancala (2), Dominó (2–4), Serpientes (2–4), Brisca (2–4), Truco (2) y Ludo (2–4), por LAN o relay online configurable.
+- **Salas nativas:** Damas y Mancala (2), Dominó (2–4), Serpientes (2–4), Brisca (2–4), Truco (2), Ludo (2–4) y Damas Chinas (2–6), por LAN o relay online configurable.
 - **Manos privadas:** Dominó, Brisca y Truco.
 - **Replays:** semilla, paso a paso, automático, enlace, archivo JSON, importación y visor web de Damas/Mancala.
 - **Crónica PDF:** 19 mesas, con tarjeta de estadísticas.
@@ -17,50 +17,49 @@
 - **Portada:** <https://emanuelindustri-source.github.io/mesa-viva/>
 - **Juego web:** <https://emanuelindustri-source.github.io/mesa-viva/play/>
 - **Replay web:** <https://emanuelindustri-source.github.io/mesa-viva/replay/>
-- **Release:** <https://github.com/emanuelindustri-source/mesa-viva/releases/tag/v2.1.0>
-- **VERSION:** `2.1.0`
-- **Android:** `versionCode=23`, `versionName=2.1.0`, compileSdk/targetSdk 36.
+- **Release:** <https://github.com/emanuelindustri-source/mesa-viva/releases/tag/v2.2.0>
+- **VERSION:** `2.2.0`
+- **Android:** `versionCode=24`, `versionName=2.2.0`, compileSdk/targetSdk 36.
 - **Gradle:** 8.14.4.
 
 ### Calidad
 
 - 30/30 pruebas de motores web.
-- 105/105 pruebas Kotlin (juegos, salas, replays, Reversi, Ur, Brisca, Truco, Ludo y códecs).
-- **135 pruebas en total.**
+- 106/106 pruebas Kotlin (juegos, salas, replays, Reversi, Ur, Brisca, Truco, Ludo, Damas Chinas y códecs).
+- **136 pruebas en total.**
 - TypeScript sin errores.
 - Web compilada con Vite 6.4.5 y sincronizada dentro del APK.
 - APK debug, APK release firmado y AAB release firmado.
-- Ludo, Brisca y Truco en sala probados con anfitrión Android y un invitado WebSocket real.
+- Damas Chinas, Ludo, Brisca y Truco en sala probados con anfitrión Android y un invitado WebSocket real.
 - 19 juegos nativos en el catálogo; 11 pendientes.
 - Teléfono físico `22101316G`: detectado por `adb`, pero MIUI rechaza la instalación USB.
 
-### Checksums v2.1.0
+### Checksums v2.2.0
 
-- APK release firmado: `E0BCA77B2FB712BC0A6E44145B0F486A4E1EDA55B05D415AECF8FCE9DB831E20` · 10.767.513 bytes.
-- AAB release firmado: `381D4F64A70D393D8FC687CFD1341126823ACD94BD407A8AD9942671F8BFF3AC` · 10.393.122 bytes.
-- Artefactos locales en `artifacts/`: `mesa-viva-2.1.0-release.apk`, `mesa-viva-2.1.0-release.aab`. La release de GitHub añade `mesa-viva-2.1.0-debug.apk`.
+- APK release firmado: `32598679B87F5A6E4237A40B6DA67ADC1EFCDA5FF934415E8343C9477C3E8981` · 10.783.897 bytes.
+- AAB release firmado: `9284A08769951E0D88D02277EDFE6566EF2FA23A3B1EB88D60A63C0125182116` · 10.406.360 bytes.
+- Artefactos locales en `artifacts/`: `mesa-viva-2.2.0-release.apk`, `mesa-viva-2.2.0-release.aab`. La release de GitHub añade `mesa-viva-2.2.0-debug.apk`.
 
 ## Compose
 
 - **Cáscara nativa completa:** inicio, catálogo, niveles, ajustes, sala y navegación.
 - **19 juegos 100 % Compose:** Póker, Caída, Furia, Dominó, Dados, Ajedrez, Damas, Serpientes, Mancala, Go, Jungle, Ludo, Backgammon, Xiangqi, Damas Chinas, Reversi, Ur, **Brisca** y **Truco**.
-- **Salas nativas:** Damas, Mancala, Dominó, Serpientes, Brisca, Truco y Ludo.
+- **Salas nativas:** Damas, Mancala, Dominó, Serpientes, Brisca, Truco, Ludo y Damas Chinas.
 - **Replay automático** y **visor web** de Damas/Mancala.
 - **Crónica PDF** en cada mesa.
 - **Audio nativo** en las 19 mesas.
 - **XP real** al terminar.
 - **Accesibilidad:** cartas, fichas, casillas, puntos y tableros descritos.
-- **Pendiente:** Damas Chinas en sala y los 11 juegos restantes.
+- **Pendiente:** los 11 juegos restantes.
 
-## Siguiente versión: 2.2.0
+## Siguiente versión: 2.3.0
 
-Ver [`v2.2.0.md`](./v2.2.0.md). Incluye:
+Ver [`v2.3.0.md`](./v2.3.0.md). Incluye:
 
-1. Damas Chinas en salas de 2–6.
-2. Relay público y enlaces universales.
-3. Replay web de Reversi, Ur, Póker, Caída y Furia.
-4. Accesibilidad completa, teléfono físico y Baseline Profile.
-5. Shogi, Janggi y el resto del catálogo.
+1. Relay público y enlaces universales.
+2. Replay web de Reversi, Ur, Póker, Caída y Furia.
+3. Accesibilidad completa, teléfono físico y Baseline Profile.
+4. Shogi, Janggi, Mahjong y el resto del catálogo.
 
 ## Dónde está cada cosa
 

@@ -65,7 +65,8 @@ Es un proyecto de varias versiones, no un commit.
 - [x] Brisca y Truco nativos; 19 juegos Compose (v1.9.0).
 - [x] Brisca y Truco en salas con manos privadas y bots (v2.0.0).
 - [x] Ludo en sala de 2–4 con dados y capturas (v2.1.0).
-- [ ] Damas Chinas en sala; relay público; replays web adicionales (v2.2.0).
+- [x] Damas Chinas en sala de 2–6 (v2.2.0).
+- [ ] Relay público; replays web adicionales; catálogo restante (v2.3.0).
 
 ### Fase 4 · Retirada del WebView
 
@@ -81,6 +82,7 @@ Es un proyecto de varias versiones, no un commit.
 - v1.9.0 suma Brisca y Truco nativos. Los 19 juegos jugables son Compose; el WebView solo queda como respaldo de la PWA y la sala remota. El siguiente paso son Ludo/Damas Chinas en salas, el relay público y los replays web adicionales.
 - v2.0.0 lleva Brisca y Truco a las salas nativas con manos privadas, validación autoritativa y bots de reemplazo. El siguiente paso son Ludo/Damas Chinas en salas, el relay público y los replays web adicionales.
 - v2.1.0 suma Ludo de 2–4 a las salas nativas. Siete juegos tienen sala. El siguiente paso es Damas Chinas en sala, el relay público y los replays web adicionales.
+- v2.2.0 suma Damas Chinas de 2–6 a las salas nativas. Ocho juegos tienen sala. El siguiente paso es el relay público, los replays web adicionales y el catálogo restante.
 
 ## Arquitectura propuesta
 

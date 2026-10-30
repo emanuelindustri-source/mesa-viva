@@ -2,10 +2,12 @@ package com.mesaviva.app.shell
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -54,8 +56,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -72,6 +78,9 @@ import com.mesaviva.app.games.DamasState
 import com.mesaviva.app.games.BriscaGame
 import com.mesaviva.app.games.BriscaPhase
 import com.mesaviva.app.games.BriscaState
+import com.mesaviva.app.games.ChinoGame
+import com.mesaviva.app.games.ChinoPhase
+import com.mesaviva.app.games.ChinoState
 import com.mesaviva.app.games.DominoEnd
 import com.mesaviva.app.games.DominoPhase
 import com.mesaviva.app.games.DominoState
@@ -87,6 +96,8 @@ import com.mesaviva.app.games.TrucoGame
 import com.mesaviva.app.games.TrucoPhase
 import com.mesaviva.app.games.TrucoState
 import kotlinx.coroutines.delay
+import kotlin.math.hypot
+import kotlin.math.min
 
 @Composable
 fun RoomScreen(state: ShellState, onOpenWeb: (String) -> Unit) {
@@ -254,7 +265,7 @@ private fun NativeRoomLobby(
                     Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         Text(state.t("room.createNative"), style = MaterialTheme.typography.titleMedium)
                         Text(
-                            if (game == RoomGame.Snakes || game == RoomGame.Domino || game == RoomGame.Brisca || game == RoomGame.Ludo) {
+                            if (game == RoomGame.Snakes || game == RoomGame.Domino || game == RoomGame.Brisca || game == RoomGame.Ludo || game == RoomGame.Chino) {
                                 state.t("room.snakesPlayers")
                             } else {
                                 state.t("room.twoPlayers")
@@ -454,6 +465,18 @@ private fun HostLobby(
                                 FilterChip(
                                     selected = session.ludoPlayers == count,
                                     onClick = { session.chooseLudoPlayers(count) },
+                                    label = { Text(count.toString()) },
+                                )
+                            }
+                        }
+                    }
+                    if (session.selectedGame == RoomGame.Chino) {
+                        Text(state.t("room.chinoPlayers"), style = MaterialTheme.typography.labelMedium)
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            listOf(2, 3, 4, 5, 6).forEach { count ->
+                                FilterChip(
+                                    selected = session.chinoPlayers == count,
+                                    onClick = { session.chooseChinoPlayers(count) },
                                     label = { Text(count.toString()) },
                                 )
                             }
@@ -661,12 +684,14 @@ private fun NativeRoomGame(
     val brisca = session.briscaState
     val truco = session.trucoState
     val ludo = session.ludoState
+    val chino = session.chinoState
     val finished = (game == RoomGame.Damas && damas?.phase == DamasPhase.MatchEnd) ||
         (game == RoomGame.Mancala && mancala?.phase == MancalaPhase.MatchEnd) ||
         (game == RoomGame.Domino && domino?.phase == DominoPhase.MatchEnd) ||
         (game == RoomGame.Brisca && brisca?.phase == BriscaPhase.MatchEnd) ||
         (game == RoomGame.Truco && truco?.phase == TrucoPhase.MatchEnd) ||
         (game == RoomGame.Ludo && ludo?.phase == LudoPhase.MatchEnd) ||
+        (game == RoomGame.Chino && chino?.phase == ChinoPhase.MatchEnd) ||
         (game == RoomGame.Snakes && snakes?.finished == true)
 
     LaunchedEffect(finished) {
@@ -783,6 +808,14 @@ private fun NativeRoomGame(
                 else if (ludo.turn == session.mySeat) state.t("room.yourTurn")
                 else state.t("room.theirTurn", mapOf("name" to (player?.name ?: opponentName)))
             }
+            game == RoomGame.Chino && chino != null -> {
+                val name = session.chinoNames.getOrElse(chino.turn) { opponentName }
+                when {
+                    session.chinoBots.getOrElse(chino.turn) { false } -> state.t("room.botPlaying", mapOf("name" to name))
+                    chino.turn == session.mySeat -> state.t("room.yourTurn")
+                    else -> state.t("room.theirTurn", mapOf("name" to name))
+                }
+            }
             else -> state.t("room.syncState")
         }
         NativeTurnBanner(text = banner, alert = false)
@@ -872,6 +905,15 @@ private fun NativeRoomGame(
                     RoomLudoBoard(state, session, ludo)
                 }
             }
+            RoomGame.Chino -> {
+                if (chino == null) {
+                    Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+                        Text(state.t("room.syncState"), style = MaterialTheme.typography.bodyMedium)
+                    }
+                } else {
+                    RoomChinoBoard(state, session, chino)
+                }
+            }
             null -> Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
                 Text(state.t("room.syncState"))
             }
@@ -890,6 +932,7 @@ private fun NativeRoomGame(
                 RoomGame.Brisca -> session.mySeat in 0 until (session.briscaState?.seats?.size ?: 0)
                 RoomGame.Truco -> session.mySeat in 0..1
                 RoomGame.Ludo -> session.mySeat in 0 until (session.ludoState?.players?.size ?: 0)
+                RoomGame.Chino -> session.mySeat in 0 until (session.chinoState?.playerCount ?: 0)
                 null -> false
                 else -> session.isHost || session.mySeat == 1
             }
@@ -998,6 +1041,19 @@ private fun NativeRoomGame(
         session.hostBotLudoAction()
     }
 
+    LaunchedEffect(
+        session.chinoState?.turn,
+        session.chinoState?.phase,
+        session.chinoState?.history?.size,
+        session.chinoBots,
+    ) {
+        val board = session.chinoState ?: return@LaunchedEffect
+        if (!session.isHost || board.phase == ChinoPhase.MatchEnd) return@LaunchedEffect
+        if (session.chinoBots.getOrElse(board.turn) { false }.not()) return@LaunchedEffect
+        delay(620)
+        session.hostBotChinoMove()
+    }
+
     if (chatOpen) {
         AlertDialog(
             onDismissRequest = { chatOpen = false },
@@ -1049,7 +1105,8 @@ private fun NativeRoomGame(
             (game == RoomGame.Domino && domino?.winnerIndices?.isEmpty() == true) ||
             (game == RoomGame.Brisca && brisca?.draw == true) ||
             (game == RoomGame.Truco && truco?.draw == true) ||
-            (game == RoomGame.Ludo && ludo?.winnerIndex == null)
+            (game == RoomGame.Ludo && ludo?.winnerIndex == null) ||
+            (game == RoomGame.Chino && chino?.draw == true)
         val won = when (game) {
             RoomGame.Damas -> myColor != null && damas?.winner == myColor
             RoomGame.Mancala -> mySide != null && mancala?.winner == mySide
@@ -1064,6 +1121,7 @@ private fun NativeRoomGame(
             }
             RoomGame.Truco -> truco?.winner == session.mySeat
             RoomGame.Ludo -> ludo?.winnerIndex == session.mySeat
+            RoomGame.Chino -> chino?.winner == session.mySeat
             null -> false
         }
         val spectator = game != RoomGame.Snakes && !session.isHost && session.mySeat != 1
@@ -1072,6 +1130,7 @@ private fun NativeRoomGame(
             RoomGame.Brisca -> brisca?.winner?.let { brisca.seats.getOrNull(it)?.name } ?: opponentName
             RoomGame.Truco -> truco?.winner?.let { truco.seats.getOrNull(it)?.name } ?: opponentName
             RoomGame.Ludo -> ludo?.winnerIndex?.let { ludo.players.getOrNull(it)?.name } ?: opponentName
+            RoomGame.Chino -> chino?.winner?.let { session.chinoNames.getOrNull(it) } ?: opponentName
             else -> opponentName
         }
         AlertDialog(
@@ -2435,3 +2494,173 @@ private fun RoomLudoBoard(
         )
     }
 }
+
+@Composable
+private fun RoomChinoBoard(
+    state: ShellState,
+    session: NativeRoomController,
+    board: ChinoState,
+) {
+    val game = remember { ChinoGame() }
+    val mySeat = session.mySeat.coerceIn(0, board.playerCount - 1)
+    val myTurn = board.phase == ChinoPhase.Play && board.turn == mySeat &&
+        session.chinoBots.getOrElse(mySeat) { false }.not()
+    val legal = remember(board, myTurn) {
+        if (myTurn) game.legalFor(board) else emptyList()
+    }
+    var selected by remember { mutableStateOf<Int?>(null) }
+    val destinations = remember(selected, legal) {
+        if (selected == null) emptySet() else legal.filter { it.from == selected }.map { it.to }.toSet()
+    }
+    LaunchedEffect(board.lastMove) { selected = null }
+
+    fun tap(index: Int) {
+        if (!myTurn) return
+        if (selected != null && index in destinations) {
+            val from = selected ?: return
+            if (session.isHost) session.hostChinoMove(from, index) else session.guestChinoMove(from, index)
+            selected = null
+            return
+        }
+        selected = if (board.pieces.getOrNull(index) == mySeat) {
+            if (selected == index) null else index
+        } else {
+            null
+        }
+    }
+
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        BoxWithConstraints(
+            Modifier
+                .fillMaxWidth()
+                .aspectRatio(1.12f)
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.22f))
+                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), RoundedCornerShape(12.dp)),
+        ) {
+            val density = LocalDensity.current
+            val widthPx = with(density) { maxWidth.toPx() }
+            val heightPx = with(density) { maxHeight.toPx() }
+            val layout = remember(widthPx, heightPx) {
+                val cells = ChinoGame.CELLS
+                val minX = cells.minOf { it.x }
+                val maxX = cells.maxOf { it.x }
+                val minY = cells.minOf { it.y }
+                val maxY = cells.maxOf { it.y }
+                val margin = widthPx * 0.05f
+                val scale = min(
+                    (widthPx - margin * 2f) / (maxX - minX),
+                    (heightPx - margin * 2f) / (maxY - minY),
+                )
+                val offsetX = (widthPx - (maxX - minX) * scale) / 2f - minX * scale
+                val offsetY = (heightPx - (maxY - minY) * scale) / 2f - minY * scale
+                RoomChinoLayout(
+                    centers = cells.map { Offset(offsetX + it.x * scale, offsetY + it.y * scale) },
+                    radius = scale * 0.34f,
+                )
+            }
+
+            Canvas(
+                Modifier
+                    .fillMaxSize()
+                    .pointerInput(board, layout, myTurn) {
+                        detectTapGestures { tap ->
+                            var best = -1
+                            var bestDistance = Float.MAX_VALUE
+                            for (index in layout.centers.indices) {
+                                val distance = hypot(
+                                    (tap.x - layout.centers[index].x).toDouble(),
+                                    (tap.y - layout.centers[index].y).toDouble(),
+                                ).toFloat()
+                                if (distance < bestDistance) {
+                                    bestDistance = distance
+                                    best = index
+                                }
+                            }
+                            if (best >= 0 && bestDistance <= layout.radius * 2.2f) tap(best)
+                        }
+                    },
+            ) {
+                val lineColor = Color(0x335A3A1A)
+                val drawn = mutableSetOf<Pair<Int, Int>>()
+                for (from in layout.centers.indices) {
+                    for (to in ChinoGame.NEIGHBORS[from]) {
+                        val key = min(from, to) to maxOf(from, to)
+                        if (drawn.add(key)) drawLine(lineColor, layout.centers[from], layout.centers[to], 1.2f)
+                    }
+                }
+                for ((index, cell) in ChinoGame.CELLS.withIndex()) {
+                    val center = layout.centers[index]
+                    val triangleColor = cell.triangle?.let { CHINO_COLORS[it % CHINO_COLORS.size].copy(alpha = 0.14f) }
+                        ?: Color(0x22FFFFFF)
+                    drawCircle(triangleColor, layout.radius * 1.02f, center)
+                    drawCircle(Color(0x554A2E16), layout.radius * 1.02f, center, style = Stroke(1f))
+                    if (index in destinations) {
+                        drawCircle(Color(0x66FFFFFF), layout.radius * 0.32f, center)
+                    }
+                    val seat = board.pieces[index]
+                    if (seat != null) {
+                        val color = CHINO_COLORS[seat % CHINO_COLORS.size]
+                        drawCircle(Color(0x44000000), layout.radius * 1.02f, center + Offset(1.5f, 2.5f))
+                        drawCircle(color, layout.radius * 0.92f, center)
+                        drawCircle(Color.White.copy(alpha = 0.55f), layout.radius * 0.92f, center, style = Stroke(1.5f))
+                    }
+                }
+                board.lastMove?.let { last ->
+                    if (last.from in layout.centers.indices) {
+                        drawCircle(Color(0x66E0A63A), layout.radius * 1.1f, layout.centers[last.from])
+                    }
+                    if (last.to in layout.centers.indices) {
+                        drawCircle(Color(0x88E0A63A), layout.radius * 1.12f, layout.centers[last.to])
+                    }
+                }
+                selected?.let { index ->
+                    if (index in layout.centers.indices) {
+                        drawCircle(Color(0x88E0A63A), layout.radius * 1.25f, layout.centers[index])
+                    }
+                }
+            }
+        }
+
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+            for (index in 0 until board.playerCount) {
+                Surface(
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(8.dp),
+                    color = CHINO_COLORS[index % CHINO_COLORS.size].copy(alpha = 0.14f),
+                ) {
+                    Column(Modifier.padding(3.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            if (index == mySeat) state.t("common.you") else session.chinoNames.getOrElse(index) { "J${index + 1}" },
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1,
+                            fontWeight = if (index == board.turn) FontWeight.Bold else FontWeight.Normal,
+                        )
+                        Text(
+                            "${game.reachedTarget(board, index)}/10",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = CHINO_COLORS[index % CHINO_COLORS.size],
+                        )
+                    }
+                }
+            }
+        }
+
+        Text(
+            when {
+                board.phase == ChinoPhase.MatchEnd ->
+                    state.t("chino.winner", mapOf("p" to (session.chinoNames.getOrNull(board.winner ?: 0) ?: "")))
+                board.turn == mySeat -> state.t("chino.yourTurn")
+                else -> state.t("room.theirTurn", mapOf("name" to (session.chinoNames.getOrElse(board.turn) { "" })))
+            },
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        NativeMoveLog(state, board.history) { }
+    }
+}
+
+private data class RoomChinoLayout(
+    val centers: List<Offset>,
+    val radius: Float,
+)

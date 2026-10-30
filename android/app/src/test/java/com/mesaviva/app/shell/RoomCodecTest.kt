@@ -6,6 +6,8 @@ import com.mesaviva.app.games.DamasColor
 import com.mesaviva.app.games.DamasGame
 import com.mesaviva.app.games.DamasPhase
 import com.mesaviva.app.games.DominoGame
+import com.mesaviva.app.games.ChinoGame
+import com.mesaviva.app.games.ChinoPhase
 import com.mesaviva.app.games.LudoColor
 import com.mesaviva.app.games.LudoGame
 import com.mesaviva.app.games.LudoPhase
@@ -317,5 +319,25 @@ class RoomCodecTest {
         assertEquals(state.dice, decoded.dice)
         assertEquals(state.phase, decoded.phase)
         assertTrue(decoded.tokens.any { it.color == LudoColor.Red })
+    }
+
+    @Test
+    fun chinoCodecRoundTripKeepsStarTurnAndMove() {
+        val game = ChinoGame(seed = 19)
+        var state = game.newMatch(2)
+        val move = game.legalFor(state).first()
+        state = game.move(state, move.from, move.to).state
+        val json = RoomCodec.chinoToJson(state, listOf("Host", "Guest"), listOf(false, false))
+        val decoded = RoomCodec.chinoFromJson(json)
+        assertNotNull(decoded)
+        assertEquals(state.pieces, decoded!!.pieces)
+        assertEquals(state.playerCount, decoded.playerCount)
+        assertEquals(state.turn, decoded.turn)
+        assertEquals(state.lastMove, decoded.lastMove)
+        assertEquals(state.history, decoded.history)
+        assertEquals(ChinoPhase.Play, decoded.phase)
+        val players = json.getJSONArray("players")
+        assertEquals("Host", players.getJSONObject(0).getString("name"))
+        assertEquals("Guest", players.getJSONObject(1).getString("name"))
     }
 }

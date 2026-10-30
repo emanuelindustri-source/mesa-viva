@@ -121,7 +121,7 @@ fun CatalogScreen(
         }
         item {
             Text(
-                "Mesa Viva 2.1.0 · 19 de 30 juegos · Ludo, Brisca y Truco en salas · sin anuncios",
+                "Mesa Viva 2.2.0 · 19 de 30 juegos · Damas Chinas, Ludo, Brisca y Truco en salas · sin anuncios",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 8.dp),

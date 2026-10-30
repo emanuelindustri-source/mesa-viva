@@ -5,6 +5,10 @@ import com.mesaviva.app.games.BriscaPlay
 import com.mesaviva.app.games.BriscaSeat
 import com.mesaviva.app.games.BriscaState
 import com.mesaviva.app.games.BriscaTrick
+import com.mesaviva.app.games.ChinoGame
+import com.mesaviva.app.games.ChinoMove
+import com.mesaviva.app.games.ChinoPhase
+import com.mesaviva.app.games.ChinoState
 import com.mesaviva.app.games.DamasChecker
 import com.mesaviva.app.games.DamasColor
 import com.mesaviva.app.games.DamasGame
@@ -739,6 +743,68 @@ internal object RoomCodec {
             sixStreak = json.optInt("sixStreak", 0),
             lastMove = lastMove,
             winnerIndex = if (json.isNull("winnerIndex")) null else json.optInt("winnerIndex").takeIf { it in players.indices },
+        )
+    }
+
+    /* ------------------------------------------------------ damas chinas */
+
+    fun chinoToJson(board: ChinoState, names: List<String>, bots: List<Boolean>): JSONObject {
+        val pieces = JSONArray()
+        board.pieces.forEach { seat ->
+            pieces.put(seat ?: JSONObject.NULL)
+        }
+        val players = JSONArray()
+        for (index in 0 until board.playerCount) {
+            players.put(
+                JSONObject()
+                    .put("name", names.getOrElse(index) { "Jugador ${index + 1}" })
+                    .put("bot", bots.getOrElse(index) { index != 0 }),
+            )
+        }
+        val lastMove = board.lastMove?.let {
+            JSONObject().put("from", it.from).put("to", it.to).put("jumps", it.jumps)
+        } ?: JSONObject.NULL
+        return JSONObject()
+            .put("k", "state")
+            .put("game", RoomGame.Chino.id)
+            .put("pieces", pieces)
+            .put("players", players)
+            .put("playerCount", board.playerCount)
+            .put("turn", board.turn)
+            .put("phase", if (board.phase == ChinoPhase.MatchEnd) "matchend" else "play")
+            .put("lastMove", lastMove)
+            .put("winner", board.winner ?: JSONObject.NULL)
+            .put("draw", board.draw)
+            .put("reason", board.reason ?: JSONObject.NULL)
+            .put("history", JSONArray(board.history))
+    }
+
+    fun chinoFromJson(json: JSONObject): ChinoState? {
+        val piecesJson = json.optJSONArray("pieces") ?: return null
+        if (piecesJson.length() != ChinoGame.CELLS.size) return null
+        val pieces = (0 until piecesJson.length()).map { index ->
+            if (piecesJson.isNull(index)) null else piecesJson.optInt(index)
+        }
+        if (pieces.any { it != null && it !in 0..5 }) return null
+        val count = json.optInt("playerCount", 2).coerceIn(2, 6)
+        val lastMove = json.optJSONObject("lastMove")?.let {
+            val from = it.optInt("from", -1)
+            val to = it.optInt("to", -1)
+            if (from !in pieces.indices || to !in pieces.indices) null
+            else ChinoMove(from, to, it.optInt("jumps", 0))
+        }
+        val historyJson = json.optJSONArray("history") ?: JSONArray()
+        val history = (0 until historyJson.length()).map { historyJson.optString(it) }
+        return ChinoState(
+            pieces = pieces,
+            playerCount = count,
+            turn = json.optInt("turn").coerceIn(0, count - 1),
+            phase = if (json.optString("phase") == "matchend") ChinoPhase.MatchEnd else ChinoPhase.Play,
+            lastMove = lastMove,
+            winner = if (json.isNull("winner")) null else json.optInt("winner").takeIf { it in 0 until count },
+            draw = json.optBoolean("draw"),
+            reason = if (json.isNull("reason")) null else json.optString("reason"),
+            history = history,
         )
     }
 }

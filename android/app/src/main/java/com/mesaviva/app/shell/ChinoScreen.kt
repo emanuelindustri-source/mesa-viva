@@ -51,7 +51,7 @@ import kotlinx.coroutines.withContext
 import kotlin.math.hypot
 import kotlin.math.min
 
-private val CHINO_COLORS = listOf(
+internal val CHINO_COLORS = listOf(
     Color(0xFFD9534F),
     Color(0xFF4C7BD9),
     Color(0xFF4FA36B),

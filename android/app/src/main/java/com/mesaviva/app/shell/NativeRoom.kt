@@ -12,6 +12,9 @@ import com.mesaviva.app.games.BriscaAction
 import com.mesaviva.app.games.BriscaGame
 import com.mesaviva.app.games.BriscaPhase
 import com.mesaviva.app.games.BriscaState
+import com.mesaviva.app.games.ChinoGame
+import com.mesaviva.app.games.ChinoPhase
+import com.mesaviva.app.games.ChinoState
 import com.mesaviva.app.games.DamasChecker
 import com.mesaviva.app.games.DamasColor
 import com.mesaviva.app.games.DamasGame
@@ -50,7 +53,8 @@ enum class RoomGame(val id: String, val emoji: String, val titleEs: String, val 
     Snakes("serpientes", "🐍", "Serpientes", "Snakes"),
     Brisca("brisca", "🃏", "Brisca", "Brisca"),
     Truco("truco", "🎴", "Truco", "Truco"),
-    Ludo("ludo", "🎲", "Ludo", "Ludo");
+    Ludo("ludo", "🎲", "Ludo", "Ludo"),
+    Chino("chino", "⭐", "Damas Chinas", "Chinese Checkers");
 
     fun title(language: String): String = if (language == "en") titleEn else titleEs
 
@@ -142,10 +146,22 @@ class NativeRoomController(
     var ludoState by mutableStateOf<LudoState?>(null)
         private set
 
+    var chinoState by mutableStateOf<ChinoState?>(null)
+        private set
+
+    var chinoNames by mutableStateOf<List<String>>(emptyList())
+        private set
+
+    var chinoBots by mutableStateOf<List<Boolean>>(emptyList())
+        private set
+
     var briscaPlayers by mutableStateOf(2)
         private set
 
     var ludoPlayers by mutableStateOf(4)
+        private set
+
+    var chinoPlayers by mutableStateOf(2)
         private set
 
     var dominoPlayers by mutableStateOf(4)
@@ -176,6 +192,7 @@ class NativeRoomController(
     private var brisca = BriscaGame(2, 100, true)
     private var truco = TrucoGame(30, true)
     private var ludo = LudoGame(4, true)
+    private var chino = ChinoGame()
     private val timeFormat = DateTimeFormatter.ofPattern("HH:mm")
 
     private var relay: LanRelayServer? = null
@@ -198,6 +215,7 @@ class NativeRoomController(
         RoomGame.Brisca -> briscaState?.seats?.any { it.isBot } == true
         RoomGame.Truco -> trucoState?.seats?.any { it.isBot } == true
         RoomGame.Ludo -> ludoState?.players?.any { it.isBot } == true
+        RoomGame.Chino -> chinoBots.any { it }
         else -> botSeat
     }
     val canStart: Boolean
@@ -207,6 +225,7 @@ class NativeRoomController(
             RoomGame.Brisca -> guests.any { it.online && it.seat in 1 until briscaPlayers }
             RoomGame.Truco -> guests.any { it.online && it.seat == 1 }
             RoomGame.Ludo -> guests.any { it.online && it.seat in 1 until ludoPlayers }
+            RoomGame.Chino -> guests.any { it.online && it.seat in 1 until chinoPlayers }
             else -> guests.any { it.online && it.seat == 1 }
         }
 
@@ -358,6 +377,10 @@ class NativeRoomController(
                             syncLudoSeats()
                             broadcastState()
                         }
+                        RoomGame.Chino -> {
+                            syncChinoSeats()
+                            broadcastState()
+                        }
                         else -> {
                             if (seat == 1) botSeat = false
                             sendStateTo(id)
@@ -391,11 +414,15 @@ class NativeRoomController(
                     syncLudoSeats()
                     broadcastState()
                 }
+                if (inGame && activeGame == RoomGame.Chino) {
+                    syncChinoSeats()
+                    broadcastState()
+                }
                 appendSystem(state.t("room.guestRejoined"))
                 NativeAudio.play(context, NativeAudio.Sfx.Chat, state.sfx)
                 if (inGame) {
                     sendPayloadTo(id, JSONObject().put("k", "seat").put("seat", guest?.seat ?: 1))
-                    if (activeGame !in setOf(RoomGame.Snakes, RoomGame.Domino, RoomGame.Brisca, RoomGame.Truco, RoomGame.Ludo)) sendStateTo(id)
+                    if (activeGame !in setOf(RoomGame.Snakes, RoomGame.Domino, RoomGame.Brisca, RoomGame.Truco, RoomGame.Ludo, RoomGame.Chino)) sendStateTo(id)
                 }
             }
             "guestLeft" -> {
@@ -426,6 +453,10 @@ class NativeRoomController(
                         appendSystem(state.t("room.guestLeftBot", mapOf("name" to (guest?.name ?: state.t("room.guestFallback")))))
                     } else if (activeGame == RoomGame.Ludo) {
                         syncLudoSeats()
+                        broadcastState()
+                        appendSystem(state.t("room.guestLeftBot", mapOf("name" to (guest?.name ?: state.t("room.guestFallback")))))
+                    } else if (activeGame == RoomGame.Chino) {
+                        syncChinoSeats()
                         broadcastState()
                         appendSystem(state.t("room.guestLeftBot", mapOf("name" to (guest?.name ?: state.t("room.guestFallback")))))
                     } else if (guest?.seat == 1) {
@@ -484,6 +515,7 @@ class NativeRoomController(
             "trucoNextHand" -> hostGuestTrucoNextHand(from)
             "ludoRoll" -> hostGuestLudoRoll(from)
             "ludoMove" -> hostGuestLudoMove(from, payload)
+            "chinoMove" -> hostGuestChinoMove(from, payload)
             "rematch" -> startMatch()
         }
     }
@@ -573,6 +605,23 @@ class NativeRoomController(
                         player.copy(name = names[index], isBot = bots[index])
                     },
                 )
+            }
+            RoomGame.Chino -> {
+                val count = chinoPlayers.coerceIn(2, 6)
+                chino = ChinoGame(System.nanoTime())
+                val names = MutableList(count) { index ->
+                    if (index == 0) hostName.ifBlank { state.t("room.hostFallback") } else botName(index)
+                }
+                val bots = MutableList(count) { it != 0 }
+                for (guest in guests) {
+                    if (guest.seat in 1 until count) {
+                        names[guest.seat] = guest.name
+                        bots[guest.seat] = !guest.online
+                    }
+                }
+                chinoNames = names
+                chinoBots = bots
+                chinoState = chino.newMatch(count)
             }
             RoomGame.Snakes -> {
                 snakesRandom = kotlin.random.Random(System.nanoTime())
@@ -813,6 +862,81 @@ class NativeRoomController(
         )
     }
 
+    fun hostChinoMove(from: Int, to: Int) {
+        if (!isHost || activeGame != RoomGame.Chino) return
+        val board = chinoState ?: return
+        if (board.turn != 0 || chinoBots.getOrElse(0) { false }) {
+            hint = state.t("room.notYourTurn")
+            return
+        }
+        applyChino(chino.move(board, from, to))
+    }
+
+    fun hostBotChinoMove() {
+        if (!isHost || activeGame != RoomGame.Chino) return
+        val board = chinoState ?: return
+        if (board.phase == ChinoPhase.MatchEnd) return
+        if (chinoBots.getOrElse(board.turn) { false }.not()) return
+        val move = chino.botMove(board) ?: return
+        applyChino(chino.move(board, move.from, move.to))
+    }
+
+    private fun applyChino(result: com.mesaviva.app.games.ChinoResult) {
+        if (result.error != null) {
+            hint = state.t(result.error)
+            return
+        }
+        chinoState = result.state
+        hint = ""
+        val jumped = (result.state.lastMove?.jumps ?: 0) > 0
+        NativeAudio.play(
+            context,
+            when {
+                result.state.phase == ChinoPhase.MatchEnd && result.state.winner == 0 -> NativeAudio.Sfx.Win
+                result.state.phase == ChinoPhase.MatchEnd -> NativeAudio.Sfx.Lose
+                jumped -> NativeAudio.Sfx.Capture
+                else -> NativeAudio.Sfx.Card
+            },
+            state.sfx,
+        )
+        state.vibrate(context, if (jumped) 40 else 20)
+        finishChino(result.state)
+        broadcastState()
+    }
+
+    private fun finishChino(board: ChinoState) {
+        if (board.phase != ChinoPhase.MatchEnd || awarded) return
+        awarded = true
+        val won = board.winner == 0
+        state.awardMatch(win = won, draw = board.draw)
+        NativeAudio.play(
+            context,
+            when {
+                board.draw -> NativeAudio.Sfx.Draw
+                won -> NativeAudio.Sfx.Win
+                else -> NativeAudio.Sfx.Lose
+            },
+            state.sfx,
+        )
+    }
+
+    private fun syncChinoSeats() {
+        val count = chinoState?.playerCount ?: return
+        chinoNames = (0 until count).map { index ->
+            when {
+                index == 0 -> hostName.ifBlank { state.t("room.hostFallback") }
+                else -> guests.firstOrNull { it.seat == index }?.name ?: chinoNames.getOrElse(index) { botName(index) }
+            }
+        }
+        chinoBots = (0 until count).map { index ->
+            if (index == 0) false else guests.firstOrNull { it.seat == index }?.online != true
+        }
+    }
+
+    fun chooseChinoPlayers(count: Int) {
+        if (isHost && !inGame) chinoPlayers = count.coerceIn(2, 6)
+    }
+
     private fun applyBrisca(result: com.mesaviva.app.games.BriscaResult) {
         if (result.error != null) {
             hint = state.t(result.error)
@@ -1050,6 +1174,13 @@ class NativeRoomController(
                 if (current.phase == LudoPhase.MatchEnd) return
                 ludoState = current.copy(phase = LudoPhase.MatchEnd, winnerIndex = 1)
                 finishLudo(ludoState!!)
+                broadcastState()
+            }
+            RoomGame.Chino -> {
+                val current = chinoState ?: return
+                if (current.phase == ChinoPhase.MatchEnd) return
+                chinoState = current.copy(phase = ChinoPhase.MatchEnd, winner = 1, reason = "chino.reason.resign")
+                finishChino(chinoState!!)
                 broadcastState()
             }
             RoomGame.Domino -> {
@@ -1420,6 +1551,17 @@ class NativeRoomController(
         applyLudo(ludo.move(board, tokenId))
     }
 
+    private fun hostGuestChinoMove(fromId: String?, payload: JSONObject) {
+        if (activeGame != RoomGame.Chino) return
+        val seat = guests.firstOrNull { it.id == fromId }?.seat ?: return
+        val board = chinoState ?: return
+        if (board.phase != ChinoPhase.Play || board.turn != seat || chinoBots.getOrElse(seat) { true }) return
+        val from = payload.optInt("from", -1)
+        val to = payload.optInt("to", -1)
+        if (from !in board.pieces.indices || to !in board.pieces.indices) return
+        applyChino(chino.move(board, from, to))
+    }
+
     private fun hostGuestResign(fromId: String?) {
         val guest = guests.firstOrNull { it.id == fromId } ?: return
         when (activeGame) {
@@ -1495,6 +1637,14 @@ class NativeRoomController(
                 if (current.phase == LudoPhase.MatchEnd) return
                 ludoState = current.copy(phase = LudoPhase.MatchEnd, winnerIndex = 0)
                 finishLudo(ludoState!!)
+                broadcastState()
+            }
+            RoomGame.Chino -> {
+                val current = chinoState ?: return
+                if (guest.seat !in 0 until current.playerCount) return
+                if (current.phase == ChinoPhase.MatchEnd) return
+                chinoState = current.copy(phase = ChinoPhase.MatchEnd, winner = 0, reason = "chino.reason.resign")
+                finishChino(chinoState!!)
                 broadcastState()
             }
             null -> Unit
@@ -1583,7 +1733,7 @@ class NativeRoomController(
 
     private fun nextSeat(): Int {
         val used = guests.map { it.seat }.toSet()
-        return (1..3).firstOrNull { it !in used } ?: 0
+        return (1..5).firstOrNull { it !in used } ?: 0
     }
 
     private fun finishDamas(board: DamasState, hostWon: Boolean) {
@@ -1671,6 +1821,7 @@ class NativeRoomController(
         RoomGame.Brisca -> briscaState?.let { RoomCodec.briscaToJson(it, viewerSeat) }
         RoomGame.Truco -> trucoState?.let { RoomCodec.trucoToJson(it, viewerSeat) }
         RoomGame.Ludo -> ludoState?.let { RoomCodec.ludoToJson(it) }
+        RoomGame.Chino -> chinoState?.let { RoomCodec.chinoToJson(it, chinoNames, chinoBots) }
         null -> null
     }
 
@@ -1824,15 +1975,15 @@ class NativeRoomController(
         when (payload.optString("k")) {
             "welcome" -> {
                 hostName = payload.optString("host", state.t("room.hostFallback"))
-                mySeat = payload.optInt("seat", mySeat).coerceIn(0, 3)
+                mySeat = payload.optInt("seat", mySeat).coerceIn(0, 5)
                 appendSystem(state.t("room.welcomeHost", mapOf("name" to hostName)))
             }
             "seat" -> {
-                mySeat = payload.optInt("seat", mySeat).coerceIn(0, 3)
+                mySeat = payload.optInt("seat", mySeat).coerceIn(0, 5)
             }
             "start" -> {
                 activeGame = RoomGame.fromId(payload.optString("game"))
-                mySeat = payload.optInt("seat", mySeat).coerceIn(0, 3)
+                mySeat = payload.optInt("seat", mySeat).coerceIn(0, 5)
                 damasState = null
                 mancalaState = null
                 snakesState = null
@@ -1840,6 +1991,9 @@ class NativeRoomController(
                 briscaState = null
                 trucoState = null
                 ludoState = null
+                chinoState = null
+                chinoNames = emptyList()
+                chinoBots = emptyList()
                 dominoPending = false
                 awarded = false
                 appendSystem(state.t("room.youAreInMatch"))
@@ -2006,6 +2160,38 @@ class NativeRoomController(
                     NativeAudio.play(context, if (won) NativeAudio.Sfx.Win else NativeAudio.Sfx.Lose, state.sfx)
                 }
             }
+            RoomGame.Chino.id -> {
+                val parsed = RoomCodec.chinoFromJson(payload) ?: return
+                val playersJson = payload.optJSONArray("players")
+                chinoNames = (0 until parsed.playerCount).map { index ->
+                    playersJson?.optJSONObject(index)?.optString("name")?.takeIf { it.isNotBlank() }
+                        ?: "Jugador ${index + 1}"
+                }
+                chinoBots = (0 until parsed.playerCount).map { index ->
+                    playersJson?.optJSONObject(index)?.optBoolean("bot") ?: (index != 0)
+                }
+                val previous = chinoState
+                chinoState = parsed
+                activeGame = RoomGame.Chino
+                val jumped = (parsed.lastMove?.jumps ?: 0) > 0
+                if (parsed.lastMove != previous?.lastMove) {
+                    NativeAudio.play(context, if (jumped) NativeAudio.Sfx.Capture else NativeAudio.Sfx.Card, state.sfx)
+                }
+                if (parsed.phase == ChinoPhase.MatchEnd && !awarded) {
+                    awarded = true
+                    val won = parsed.winner == mySeat
+                    state.awardMatch(win = won, draw = parsed.draw)
+                    NativeAudio.play(
+                        context,
+                        when {
+                            parsed.draw -> NativeAudio.Sfx.Draw
+                            won -> NativeAudio.Sfx.Win
+                            else -> NativeAudio.Sfx.Lose
+                        },
+                        state.sfx,
+                    )
+                }
+            }
         }
     }
 
@@ -2053,6 +2239,7 @@ class NativeRoomController(
         if (activeGame == RoomGame.Brisca && mySeat !in (briscaState?.seats?.indices ?: emptyList())) return
         if (activeGame == RoomGame.Truco && mySeat !in (trucoState?.seats?.indices ?: emptyList())) return
         if (activeGame == RoomGame.Ludo && mySeat !in (ludoState?.players?.indices ?: emptyList())) return
+        if (activeGame == RoomGame.Chino && mySeat !in 0 until (chinoState?.playerCount ?: 0)) return
         sendPayload(JSONObject().put("k", "resign"))
     }
 
@@ -2155,6 +2342,16 @@ class NativeRoomController(
             return
         }
         sendPayload(JSONObject().put("k", "ludoMove").put("token", tokenId))
+    }
+
+    fun guestChinoMove(from: Int, to: Int) {
+        if (!isGuest || activeGame != RoomGame.Chino) return
+        val board = chinoState ?: return
+        if (board.phase != ChinoPhase.Play || board.turn != mySeat || chinoBots.getOrElse(mySeat) { true }) {
+            hint = state.t("room.notYourTurn")
+            return
+        }
+        sendPayload(JSONObject().put("k", "chinoMove").put("from", from).put("to", to))
     }
 
     fun sendChat(text: String) {
