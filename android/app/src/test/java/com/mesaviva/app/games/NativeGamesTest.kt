@@ -910,4 +910,34 @@ class NativeGamesTest {
         assertTrue(state.scores.any { it >= 15 })
         assertTrue(state.history.isNotEmpty())
     }
+
+    @Test
+    fun `soroban value follows the rods and check solves the target`() {
+        val game = SorobanGame(seed = 5)
+        var state = game.newGame(1)
+        assertEquals(0L, game.value(state))
+        state = game.botTarget(state)
+        assertEquals(state.target, game.value(state))
+        val result = game.check(state)
+        assertEquals(true, result.correct)
+        assertEquals(1, result.state.solved)
+        assertTrue(result.state.score > 0)
+        assertTrue(result.state.target > 0)
+    }
+
+    @Test
+    fun `soroban completes ten challenges`() {
+        val game = SorobanGame(targetCount = 10, seed = 8)
+        var state = game.newGame(1)
+        var guard = 0
+        while (state.phase == SorobanPhase.Playing && guard++ < 20) {
+            state = game.botTarget(state)
+            val result = game.check(state)
+            state = result.state
+        }
+        assertEquals(SorobanPhase.Complete, state.phase)
+        assertEquals(10, state.solved)
+        assertTrue(state.score > 0)
+        assertTrue(state.bestStreak >= 1)
+    }
 }

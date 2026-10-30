@@ -1,6 +1,17 @@
 ﻿# Roadmap
 
-## v2.2.0 · La estrella conectada (actual)
+## v2.3.0 · El ábaco (actual)
+
+- [x] Soroban jugable de 13 varillas con 10 retos.
+- [x] Puntuación, racha, historial, PDF y XP.
+- [x] 20 juegos jugables de 30.
+- [x] 138 pruebas verdes (30 web + 108 Kotlin).
+- [x] APK y AAB de release firmados.
+- [x] Evidencia visual en `docs/evidence/v2.3.0/`.
+- [ ] Shogi, Janggi, Mahjong y el resto del catálogo (v2.4.0).
+- [ ] Relay público, replays web y accesibilidad completa (v2.4.0).
+
+## v2.2.0 · La estrella conectada
 
 - [x] Damas Chinas de 2–6 jugadores en sala.
 - [x] Ocho juegos con sala nativa.
@@ -8,8 +19,8 @@
 - [x] 136 pruebas verdes (30 web + 106 Kotlin).
 - [x] APK y AAB de release firmados.
 - [x] Evidencia visual en `docs/evidence/v2.2.0/`.
-- [ ] Relay público con TLS (v2.3.0).
-- [ ] Replay web adicional, accesibilidad y catálogo restante (v2.3.0).
+- [x] Soroban jugable (v2.3.0).
+- [ ] Relay público con TLS (v2.4.0).
 
 ## v2.1.0 · Salas grandes
 

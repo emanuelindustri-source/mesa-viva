@@ -4,41 +4,41 @@
 
 ## Estado actual
 
-- **Versión publicada:** 2.2.0.
+- **Versión publicada:** 2.3.0.
 - **Catálogo:** 30 juegos.
-- **Juegos jugables:** 19, todos 100 % Jetpack Compose.
+- **Juegos jugables:** 20, todos 100 % Jetpack Compose.
 - **Juegos en WebView:** 0 (el WebView queda como respaldo de la PWA y de la sala remota).
 - **Salas nativas:** Damas y Mancala (2), Dominó (2–4), Serpientes (2–4), Brisca (2–4), Truco (2), Ludo (2–4) y Damas Chinas (2–6), por LAN o relay online configurable.
 - **Manos privadas:** Dominó, Brisca y Truco.
 - **Replays:** semilla, paso a paso, automático, enlace, archivo JSON, importación y visor web de Damas/Mancala.
-- **Crónica PDF:** 19 mesas, con tarjeta de estadísticas.
-- **Audio nativo:** música procedural por festividad y efectos en las 19 mesas.
+- **Crónica PDF:** 20 mesas, con tarjeta de estadísticas.
+- **Audio nativo:** música procedural por festividad y efectos en las 20 mesas.
 - **Repositorio:** <https://github.com/emanuelindustri-source/mesa-viva>
 - **Portada:** <https://emanuelindustri-source.github.io/mesa-viva/>
 - **Juego web:** <https://emanuelindustri-source.github.io/mesa-viva/play/>
 - **Replay web:** <https://emanuelindustri-source.github.io/mesa-viva/replay/>
-- **Release:** <https://github.com/emanuelindustri-source/mesa-viva/releases/tag/v2.2.0>
-- **VERSION:** `2.2.0`
-- **Android:** `versionCode=24`, `versionName=2.2.0`, compileSdk/targetSdk 36.
+- **Release:** <https://github.com/emanuelindustri-source/mesa-viva/releases/tag/v2.3.0>
+- **VERSION:** `2.3.0`
+- **Android:** `versionCode=25`, `versionName=2.3.0`, compileSdk/targetSdk 36.
 - **Gradle:** 8.14.4.
 
 ### Calidad
 
 - 30/30 pruebas de motores web.
-- 106/106 pruebas Kotlin (juegos, salas, replays, Reversi, Ur, Brisca, Truco, Ludo, Damas Chinas y códecs).
-- **136 pruebas en total.**
+- 108/108 pruebas Kotlin (juegos, salas, replays, Reversi, Ur, Brisca, Truco, Ludo, Damas Chinas, Soroban y códecs).
+- **138 pruebas en total.**
 - TypeScript sin errores.
 - Web compilada con Vite 6.4.5 y sincronizada dentro del APK.
 - APK debug, APK release firmado y AAB release firmado.
-- Damas Chinas, Ludo, Brisca y Truco en sala probados con anfitrión Android y un invitado WebSocket real.
-- 19 juegos nativos en el catálogo; 11 pendientes.
+- Soroban probado en emulador Android 14.
+- 20 juegos nativos en el catálogo; 10 pendientes.
 - Teléfono físico `22101316G`: detectado por `adb`, pero MIUI rechaza la instalación USB.
 
-### Checksums v2.2.0
+### Checksums v2.3.0
 
-- APK release firmado: `32598679B87F5A6E4237A40B6DA67ADC1EFCDA5FF934415E8343C9477C3E8981` · 10.783.897 bytes.
-- AAB release firmado: `9284A08769951E0D88D02277EDFE6566EF2FA23A3B1EB88D60A63C0125182116` · 10.406.360 bytes.
-- Artefactos locales en `artifacts/`: `mesa-viva-2.2.0-release.apk`, `mesa-viva-2.2.0-release.aab`. La release de GitHub añade `mesa-viva-2.2.0-debug.apk`.
+- APK release firmado: `AF918AB505DF11535251A9BC83CE8E7D8640B9EBACE6F34ABDF872F8D41AF32E` · 10.816.665 bytes.
+- AAB release firmado: `B182952448B3978E6FB829C0E26FEA78D6B55625154B51245C9B9B6AE7499999` · 10.432.852 bytes.
+- Artefactos locales en `artifacts/`: `mesa-viva-2.3.0-release.apk`, `mesa-viva-2.3.0-release.aab`. La release de GitHub añade `mesa-viva-2.3.0-debug.apk`.
 
 ## Compose
 
@@ -50,16 +50,16 @@
 - **Audio nativo** en las 19 mesas.
 - **XP real** al terminar.
 - **Accesibilidad:** cartas, fichas, casillas, puntos y tableros descritos.
-- **Pendiente:** los 11 juegos restantes.
+- **Pendiente:** los 10 juegos restantes.
 
-## Siguiente versión: 2.3.0
+## Siguiente versión: 2.4.0
 
-Ver [`v2.3.0.md`](./v2.3.0.md). Incluye:
+Ver [`v2.4.0.md`](./v2.4.0.md). Incluye:
 
-1. Relay público y enlaces universales.
-2. Replay web de Reversi, Ur, Póker, Caída y Furia.
-3. Accesibilidad completa, teléfono físico y Baseline Profile.
-4. Shogi, Janggi, Mahjong y el resto del catálogo.
+1. Shogi y Janggi.
+2. Mahjong americano, Riichi y Mahjong con naipes.
+3. Luzhanqi, Tren Mexicano, Chickenfoot, Aeroplane Chess y Ajedrez para tres.
+4. Relay público, replays web y accesibilidad completa.
 
 ## Dónde está cada cosa
 

@@ -66,7 +66,8 @@ Es un proyecto de varias versiones, no un commit.
 - [x] Brisca y Truco en salas con manos privadas y bots (v2.0.0).
 - [x] Ludo en sala de 2–4 con dados y capturas (v2.1.0).
 - [x] Damas Chinas en sala de 2–6 (v2.2.0).
-- [ ] Relay público; replays web adicionales; catálogo restante (v2.3.0).
+- [x] Soroban jugable de 13 varillas (v2.3.0).
+- [ ] Shogi, Janggi, Mahjong y el resto; relay público; replays web (v2.4.0).
 
 ### Fase 4 · Retirada del WebView
 
@@ -83,6 +84,7 @@ Es un proyecto de varias versiones, no un commit.
 - v2.0.0 lleva Brisca y Truco a las salas nativas con manos privadas, validación autoritativa y bots de reemplazo. El siguiente paso son Ludo/Damas Chinas en salas, el relay público y los replays web adicionales.
 - v2.1.0 suma Ludo de 2–4 a las salas nativas. Siete juegos tienen sala. El siguiente paso es Damas Chinas en sala, el relay público y los replays web adicionales.
 - v2.2.0 suma Damas Chinas de 2–6 a las salas nativas. Ocho juegos tienen sala. El siguiente paso es el relay público, los replays web adicionales y el catálogo restante.
+- v2.3.0 suma Soroban jugable y lleva el catálogo a 20 juegos. El siguiente paso son Shogi, Janggi, Mahjong, el relay público y los replays web adicionales.
 
 ## Arquitectura propuesta
 

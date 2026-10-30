@@ -121,7 +121,7 @@ fun CatalogScreen(
         }
         item {
             Text(
-                "Mesa Viva 2.2.0 · 19 de 30 juegos · Damas Chinas, Ludo, Brisca y Truco en salas · sin anuncios",
+                "Mesa Viva 2.3.0 · 20 de 30 juegos · Damas Chinas, Ludo, Brisca y Truco en salas · sin anuncios",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 8.dp),
@@ -216,6 +216,6 @@ private fun StatusBadge(state: ShellState, status: String) {
 private fun categoryLabel(state: ShellState, category: String): String = when (category) {
     "cartas" -> state.t("catalog.cards")
     "dados" -> state.t("catalog.dice")
-    "herramienta" -> state.t("catalog.research")
+    "herramienta" -> state.t("catalog.tool")
     else -> state.t("catalog.board")
 }

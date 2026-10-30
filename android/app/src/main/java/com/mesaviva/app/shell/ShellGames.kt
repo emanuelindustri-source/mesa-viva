@@ -42,7 +42,7 @@ val SHELL_GAMES: List<ShellGame> = listOf(
     ShellGame("riichi", "Riichi Mahjong", "🀄", "4", "tablero", "research", "Mahjong japonés."),
     ShellGame("mahjong-cards", "Mahjong con naipes", "🃏", "4", "cartas", "research", "Mahjong con baraja."),
     ShellGame("three-chess", "Ajedrez para tres", "♞", "3", "tablero", "research", "Tres ejércitos en un tablero."),
-    ShellGame("soroban", "Soroban", "🧮", "1", "herramienta", "soon", "Ábaco japonés."),
+    ShellGame("soroban", "Soroban", "🧮", "1", "herramienta", "playable", "Ábaco japonés de 13 varillas. Nativo en Compose.", native = true),
 )
 
 val PLAYABLE_GAMES = SHELL_GAMES.filter { it.status == "playable" }

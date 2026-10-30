@@ -1,5 +1,30 @@
 ﻿# Changelog
 
+## 2.3.0 · 2026-10-30
+
+El ábaco.
+
+### Añadido
+
+- **Soroban jugable**: ábaco japonés de 13 varillas, cuentas celestiales y terrestres.
+- Retos de 1 a 6 cifras, diez aciertos por partida, puntuación, racha y mejor racha.
+- Controles por varilla, comprobación, siguiente nivel y limpieza total.
+- Historial, PDF y XP al completar.
+- 2 pruebas nuevas de Soroban.
+- El catálogo llega a **20 juegos jugables de 30**.
+
+### Cambiado
+
+- Android: `versionCode=25`, `versionName=2.3.0`.
+- El inicio, catálogo y ajustes muestran 20 juegos y la versión 2.3.0.
+- La categoría `herramienta` se muestra como Herramienta.
+
+### Pendiente
+
+- Shogi, Janggi, Mahjong y los 8 juegos restantes.
+- Relay público, replays web y accesibilidad completa.
+- Teléfono físico.
+
 ## 2.2.0 · 2026-10-30
 
 La estrella conectada.
