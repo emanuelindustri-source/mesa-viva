@@ -62,7 +62,7 @@ import com.mesaviva.app.games.LudoState
 import com.mesaviva.app.games.LudoToken
 import kotlinx.coroutines.delay
 
-private val LUDO_COLORS = mapOf(
+internal val LUDO_COLORS = mapOf(
     LudoColor.Red to Color(0xFFD9534F),
     LudoColor.Green to Color(0xFF4FA36B),
     LudoColor.Yellow to Color(0xFFE0B23A),
@@ -412,7 +412,7 @@ private fun LudoSetupDialog(
     )
 }
 
-private fun ludoZone(col: Int, row: Int): Pair<Color, Boolean> {
+internal fun ludoZone(col: Int, row: Int): Pair<Color, Boolean> {
     if (col < 6 && row < 6) return Color(0xFF4FA36B).copy(alpha = 0.22f) to false
     if (col > 8 && row < 6) return Color(0xFFE0B23A).copy(alpha = 0.24f) to false
     if (col < 6 && row > 8) return Color(0xFFD9534F).copy(alpha = 0.22f) to false

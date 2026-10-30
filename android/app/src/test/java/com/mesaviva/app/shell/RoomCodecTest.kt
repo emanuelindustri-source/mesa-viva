@@ -6,6 +6,9 @@ import com.mesaviva.app.games.DamasColor
 import com.mesaviva.app.games.DamasGame
 import com.mesaviva.app.games.DamasPhase
 import com.mesaviva.app.games.DominoGame
+import com.mesaviva.app.games.LudoColor
+import com.mesaviva.app.games.LudoGame
+import com.mesaviva.app.games.LudoPhase
 import com.mesaviva.app.games.MancalaGame
 import com.mesaviva.app.games.MancalaSide
 import com.mesaviva.app.games.TrucoGame
@@ -294,5 +297,25 @@ class RoomCodecTest {
         assertEquals(2, decoded.pending?.stake)
         assertEquals(1, decoded.pending?.awaiting)
         assertEquals(state.history, decoded.history)
+    }
+
+    @Test
+    fun ludoCodecRoundTripKeepsPlayersTokensAndTurn() {
+        val game = LudoGame(playerCount = 4, allHumans = false, seed = 31)
+        var state = game.newMatch()
+        var guard = 0
+        while (state.phase != LudoPhase.Move && guard++ < 40) {
+            state = game.roll(state).state
+        }
+        assertEquals(LudoPhase.Move, state.phase)
+        val decoded = RoomCodec.ludoFromJson(RoomCodec.ludoToJson(state))
+        assertNotNull(decoded)
+        assertEquals(state.players.map { it.name }, decoded!!.players.map { it.name })
+        assertEquals(state.players.map { it.color }, decoded.players.map { it.color })
+        assertEquals(state.tokens.map { it.progress }, decoded.tokens.map { it.progress })
+        assertEquals(state.turn, decoded.turn)
+        assertEquals(state.dice, decoded.dice)
+        assertEquals(state.phase, decoded.phase)
+        assertTrue(decoded.tokens.any { it.color == LudoColor.Red })
     }
 }

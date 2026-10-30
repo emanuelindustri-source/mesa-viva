@@ -20,6 +20,12 @@ import com.mesaviva.app.games.DominoTile
 import com.mesaviva.app.games.MancalaPhase
 import com.mesaviva.app.games.MancalaSide
 import com.mesaviva.app.games.MancalaState
+import com.mesaviva.app.games.LudoColor
+import com.mesaviva.app.games.LudoMove
+import com.mesaviva.app.games.LudoPhase
+import com.mesaviva.app.games.LudoPlayer
+import com.mesaviva.app.games.LudoState
+import com.mesaviva.app.games.LudoToken
 import com.mesaviva.app.games.SpanishCard
 import com.mesaviva.app.games.SpanishSuit
 import com.mesaviva.app.games.TrucoChallenge
@@ -634,6 +640,105 @@ internal object RoomCodec {
             draw = json.optBoolean("draw"),
             reason = if (json.isNull("reason")) null else json.optString("reason"),
             history = history,
+        )
+    }
+
+    /* --------------------------------------------------------------- ludo */
+
+    fun ludoToJson(board: LudoState): JSONObject {
+        val players = JSONArray()
+        board.players.forEach { player ->
+            players.put(
+                JSONObject()
+                    .put("name", player.name)
+                    .put("bot", player.isBot)
+                    .put("color", player.color.name)
+                    .put("captures", player.captures),
+            )
+        }
+        val tokens = JSONArray()
+        board.tokens.forEach { token ->
+            tokens.put(
+                JSONObject()
+                    .put("id", token.id)
+                    .put("color", token.color.name)
+                    .put("slot", token.slot)
+                    .put("progress", token.progress),
+            )
+        }
+        val lastMove = board.lastMove?.let {
+            JSONObject().put("token", it.tokenId).put("from", it.from).put("to", it.to)
+        } ?: JSONObject.NULL
+        return JSONObject()
+            .put("k", "state")
+            .put("game", RoomGame.Ludo.id)
+            .put("players", players)
+            .put("tokens", tokens)
+            .put("turn", board.turn)
+            .put("phase", when (board.phase) {
+                LudoPhase.Roll -> "roll"
+                LudoPhase.Move -> "move"
+                LudoPhase.MatchEnd -> "matchend"
+            })
+            .put("dice", board.dice ?: JSONObject.NULL)
+            .put("lastRoll", board.lastRoll ?: JSONObject.NULL)
+            .put("sixStreak", board.sixStreak)
+            .put("lastMove", lastMove)
+            .put("winnerIndex", board.winnerIndex ?: JSONObject.NULL)
+    }
+
+    fun ludoFromJson(json: JSONObject): LudoState? {
+        val playersJson = json.optJSONArray("players") ?: return null
+        if (playersJson.length() !in 2..4) return null
+        val players = mutableListOf<LudoPlayer>()
+        for (index in 0 until playersJson.length()) {
+            val entry = playersJson.optJSONObject(index) ?: return null
+            val color = runCatching { LudoColor.valueOf(entry.optString("color")) }.getOrNull() ?: return null
+            players.add(
+                LudoPlayer(
+                    name = entry.optString("name", "Jugador ${index + 1}"),
+                    isBot = entry.optBoolean("bot"),
+                    color = color,
+                    captures = entry.optInt("captures", 0),
+                ),
+            )
+        }
+        val tokensJson = json.optJSONArray("tokens") ?: return null
+        val tokens = mutableListOf<LudoToken>()
+        for (index in 0 until tokensJson.length()) {
+            val entry = tokensJson.optJSONObject(index) ?: return null
+            val color = runCatching { LudoColor.valueOf(entry.optString("color")) }.getOrNull() ?: return null
+            val progress = entry.optInt("progress", -1)
+            if (progress < -1 || progress > 57) return null
+            tokens.add(
+                LudoToken(
+                    id = entry.optString("id").takeIf { it.isNotBlank() } ?: return null,
+                    color = color,
+                    slot = entry.optInt("slot").coerceIn(0, 3),
+                    progress = progress,
+                ),
+            )
+        }
+        if (tokens.size != players.size * 4) return null
+        val lastMoveJson = json.optJSONObject("lastMove")
+        val lastMove = lastMoveJson?.let {
+            val tokenId = it.optString("token").takeIf { value -> value.isNotBlank() } ?: return@let null
+            LudoMove(tokenId, it.optInt("from", -1), it.optInt("to", -1))
+        }
+        return LudoState(
+            players = players,
+            tokens = tokens,
+            turn = json.optInt("turn").coerceIn(0, players.lastIndex),
+            phase = when (json.optString("phase")) {
+                "move" -> LudoPhase.Move
+                "matchend" -> LudoPhase.MatchEnd
+                else -> LudoPhase.Roll
+            },
+            dice = if (json.isNull("dice")) null else json.optInt("dice").takeIf { it in 1..6 },
+            lastRoll = if (json.isNull("lastRoll")) null else json.optInt("lastRoll").takeIf { it in 1..6 },
+            sixStreak = json.optInt("sixStreak", 0),
+            lastMove = lastMove,
+            winnerIndex = if (json.isNull("winnerIndex")) null else json.optInt("winnerIndex").takeIf { it in players.indices },
         )
     }
 }

@@ -1,5 +1,30 @@
 ﻿# Changelog
 
+## 2.1.0 · 2026-10-29
+
+Salas grandes.
+
+### Añadido
+
+- **Ludo en sala** de 2–4 jugadores con tablero 15×15, dado, capturas, turnos extra y meta exacta.
+- Validación autoritativa de tirada y movimiento en el anfitrión.
+- Bot de reemplazo para asientos vacíos o invitados desconectados.
+- 7 juegos con sala nativa: Damas, Mancala, Dominó, Serpientes, Brisca, Truco y Ludo.
+- 1 prueba nueva del códec de Ludo.
+- Prueba real de sala con anfitrión Android e invitado WebSocket.
+
+### Cambiado
+
+- Android: `versionCode=23`, `versionName=2.1.0`.
+- El lobby nativo incluye Ludo con selector de 2, 3 o 4 jugadores.
+- El inicio y el catálogo muestran la 2.1.0.
+
+### Pendiente
+
+- Damas Chinas en sala.
+- Relay público con TLS, replays web adicionales y accesibilidad completa.
+- Los 11 juegos restantes y el teléfono físico.
+
 ## 2.0.0 · 2026-10-29
 
 La mesa conectada.

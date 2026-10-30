@@ -1,6 +1,17 @@
 ﻿# Roadmap
 
-## v2.0.0 · La mesa conectada (actual)
+## v2.1.0 · Salas grandes (actual)
+
+- [x] Ludo de 2–4 en sala con dados, capturas y turnos extra.
+- [x] Siete juegos con sala nativa.
+- [x] Bot de reemplazo y validación autoritativa.
+- [x] 135 pruebas verdes (30 web + 105 Kotlin).
+- [x] APK y AAB de release firmados.
+- [x] Evidencia visual en `docs/evidence/v2.1.0/`.
+- [ ] Damas Chinas en sala (v2.2.0).
+- [ ] Relay público con TLS, replays web adicionales y accesibilidad completa (v2.2.0).
+
+## v2.0.0 · La mesa conectada
 
 - [x] Brisca en sala de 2–4 con manos privadas y parejas.
 - [x] Truco en sala de 2 con envido, real envido, truco, retruco y vale cuatro.
@@ -10,8 +21,8 @@
 - [x] 134 pruebas verdes (30 web + 104 Kotlin).
 - [x] APK y AAB de release firmados.
 - [x] Evidencia visual en `docs/evidence/v2.0.0/`.
-- [ ] Ludo y Damas Chinas en salas (v2.1.0).
-- [ ] Relay público con TLS, replays web adicionales y accesibilidad completa (v2.1.0).
+- [x] Ludo en sala (v2.1.0).
+- [ ] Damas Chinas en sala (v2.2.0).
 
 ## v1.9.0 · La baraja completa
 

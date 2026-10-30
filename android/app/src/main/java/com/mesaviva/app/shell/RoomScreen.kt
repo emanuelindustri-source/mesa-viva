@@ -1,6 +1,7 @@
 package com.mesaviva.app.shell
 
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -77,6 +79,9 @@ import com.mesaviva.app.games.MancalaGame
 import com.mesaviva.app.games.MancalaPhase
 import com.mesaviva.app.games.MancalaSide
 import com.mesaviva.app.games.MancalaState
+import com.mesaviva.app.games.LudoGame
+import com.mesaviva.app.games.LudoPhase
+import com.mesaviva.app.games.LudoState
 import com.mesaviva.app.games.SpanishCard
 import com.mesaviva.app.games.TrucoGame
 import com.mesaviva.app.games.TrucoPhase
@@ -249,7 +254,7 @@ private fun NativeRoomLobby(
                     Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         Text(state.t("room.createNative"), style = MaterialTheme.typography.titleMedium)
                         Text(
-                            if (game == RoomGame.Snakes || game == RoomGame.Domino || game == RoomGame.Brisca) {
+                            if (game == RoomGame.Snakes || game == RoomGame.Domino || game == RoomGame.Brisca || game == RoomGame.Ludo) {
                                 state.t("room.snakesPlayers")
                             } else {
                                 state.t("room.twoPlayers")
@@ -438,6 +443,18 @@ private fun HostLobby(
                                     selected = session.briscaPlayers == count,
                                     onClick = { session.chooseBriscaPlayers(count) },
                                     label = { Text(if (count == 4) "4 · ${state.t("brisca.pairs")}" else "2") },
+                                )
+                            }
+                        }
+                    }
+                    if (session.selectedGame == RoomGame.Ludo) {
+                        Text(state.t("room.ludoPlayers"), style = MaterialTheme.typography.labelMedium)
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            listOf(2, 3, 4).forEach { count ->
+                                FilterChip(
+                                    selected = session.ludoPlayers == count,
+                                    onClick = { session.chooseLudoPlayers(count) },
+                                    label = { Text(count.toString()) },
                                 )
                             }
                         }
@@ -643,11 +660,13 @@ private fun NativeRoomGame(
     val domino = session.dominoState
     val brisca = session.briscaState
     val truco = session.trucoState
+    val ludo = session.ludoState
     val finished = (game == RoomGame.Damas && damas?.phase == DamasPhase.MatchEnd) ||
         (game == RoomGame.Mancala && mancala?.phase == MancalaPhase.MatchEnd) ||
         (game == RoomGame.Domino && domino?.phase == DominoPhase.MatchEnd) ||
         (game == RoomGame.Brisca && brisca?.phase == BriscaPhase.MatchEnd) ||
         (game == RoomGame.Truco && truco?.phase == TrucoPhase.MatchEnd) ||
+        (game == RoomGame.Ludo && ludo?.phase == LudoPhase.MatchEnd) ||
         (game == RoomGame.Snakes && snakes?.finished == true)
 
     LaunchedEffect(finished) {
@@ -758,6 +777,12 @@ private fun NativeRoomGame(
                     else -> state.t("room.theirTurn", mapOf("name" to (truco.seats.getOrNull(truco.turn)?.name ?: opponentName)))
                 }
             }
+            game == RoomGame.Ludo && ludo != null -> {
+                val player = ludo.players.getOrNull(ludo.turn)
+                if (player?.isBot == true) state.t("room.botPlaying", mapOf("name" to player.name))
+                else if (ludo.turn == session.mySeat) state.t("room.yourTurn")
+                else state.t("room.theirTurn", mapOf("name" to (player?.name ?: opponentName)))
+            }
             else -> state.t("room.syncState")
         }
         NativeTurnBanner(text = banner, alert = false)
@@ -838,6 +863,15 @@ private fun NativeRoomGame(
                     RoomTrucoBoard(state, session, truco)
                 }
             }
+            RoomGame.Ludo -> {
+                if (ludo == null) {
+                    Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+                        Text(state.t("room.syncState"), style = MaterialTheme.typography.bodyMedium)
+                    }
+                } else {
+                    RoomLudoBoard(state, session, ludo)
+                }
+            }
             null -> Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
                 Text(state.t("room.syncState"))
             }
@@ -855,6 +889,7 @@ private fun NativeRoomGame(
                 RoomGame.Domino -> session.mySeat in 0 until (session.dominoState?.players?.size ?: 0)
                 RoomGame.Brisca -> session.mySeat in 0 until (session.briscaState?.seats?.size ?: 0)
                 RoomGame.Truco -> session.mySeat in 0..1
+                RoomGame.Ludo -> session.mySeat in 0 until (session.ludoState?.players?.size ?: 0)
                 null -> false
                 else -> session.isHost || session.mySeat == 1
             }
@@ -949,6 +984,20 @@ private fun NativeRoomGame(
         }
     }
 
+    LaunchedEffect(
+        session.ludoState?.turn,
+        session.ludoState?.phase,
+        session.ludoState?.dice,
+        session.ludoState?.lastMove,
+    ) {
+        val board = session.ludoState ?: return@LaunchedEffect
+        if (!session.isHost || board.phase == LudoPhase.MatchEnd) return@LaunchedEffect
+        val player = board.players.getOrNull(board.turn) ?: return@LaunchedEffect
+        if (!player.isBot) return@LaunchedEffect
+        delay(700)
+        session.hostBotLudoAction()
+    }
+
     if (chatOpen) {
         AlertDialog(
             onDismissRequest = { chatOpen = false },
@@ -999,7 +1048,8 @@ private fun NativeRoomGame(
             (game == RoomGame.Mancala && mancala?.whiteStore == mancala?.blackStore) ||
             (game == RoomGame.Domino && domino?.winnerIndices?.isEmpty() == true) ||
             (game == RoomGame.Brisca && brisca?.draw == true) ||
-            (game == RoomGame.Truco && truco?.draw == true)
+            (game == RoomGame.Truco && truco?.draw == true) ||
+            (game == RoomGame.Ludo && ludo?.winnerIndex == null)
         val won = when (game) {
             RoomGame.Damas -> myColor != null && damas?.winner == myColor
             RoomGame.Mancala -> mySide != null && mancala?.winner == mySide
@@ -1013,6 +1063,7 @@ private fun NativeRoomGame(
                 } == true
             }
             RoomGame.Truco -> truco?.winner == session.mySeat
+            RoomGame.Ludo -> ludo?.winnerIndex == session.mySeat
             null -> false
         }
         val spectator = game != RoomGame.Snakes && !session.isHost && session.mySeat != 1
@@ -1020,6 +1071,7 @@ private fun NativeRoomGame(
             RoomGame.Snakes -> snakes?.names?.getOrNull(snakes.winner ?: -1) ?: opponentName
             RoomGame.Brisca -> brisca?.winner?.let { brisca.seats.getOrNull(it)?.name } ?: opponentName
             RoomGame.Truco -> truco?.winner?.let { truco.seats.getOrNull(it)?.name } ?: opponentName
+            RoomGame.Ludo -> ludo?.winnerIndex?.let { ludo.players.getOrNull(it)?.name } ?: opponentName
             else -> opponentName
         }
         AlertDialog(
@@ -2249,5 +2301,137 @@ private fun RoomTrucoBoard(
             pdfTitle = state.t("truco.title"),
             pdfSubtitle = state.t("truco.subtitle"),
         ) { historyOpen = false }
+    }
+}
+
+@Composable
+private fun RoomLudoBoard(
+    state: ShellState,
+    session: NativeRoomController,
+    board: LudoState,
+) {
+    val ludo = remember(board.players.size) { LudoGame(board.players.size, allHumans = true) }
+    val mySeat = session.mySeat.coerceIn(0, board.players.lastIndex)
+    val myPlayer = board.players.getOrNull(mySeat)
+    val myTurn = board.phase != LudoPhase.MatchEnd && board.turn == mySeat && myPlayer?.isBot == false
+    val legal = if (board.phase == LudoPhase.Move && myTurn) {
+        ludo.legalMoves(board).map { it.tokenId }.toSet()
+    } else {
+        emptySet()
+    }
+
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+        BoxWithConstraints(
+            Modifier
+                .fillMaxWidth()
+                .aspectRatio(1f)
+                .clip(RoundedCornerShape(12.dp))
+                .border(2.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(12.dp)),
+        ) {
+            val cell = maxWidth / 15
+            Column(Modifier.fillMaxSize()) {
+                for (row in 0 until 15) {
+                    Row(Modifier.weight(1f).fillMaxWidth()) {
+                        for (col in 0 until 15) {
+                            val zone = ludoZone(col, row)
+                            Box(
+                                Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight()
+                                    .background(zone.first)
+                                    .border(0.4.dp, Color.Black.copy(alpha = 0.08f)),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                if (zone.second) {
+                                    Text("★", fontSize = (cell.value * 0.35f).sp, color = Color(0x66FFFFFF))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            val byCell = board.tokens.groupBy { LudoGame.tokenCoord(it) }
+            for ((coord, tokens) in byCell) {
+                tokens.forEachIndexed { index, token ->
+                    val tokenSize = cell * 0.62f
+                    val baseX = cell * coord.first + cell * 0.19f + (index * 2).dp
+                    val baseY = cell * coord.second + cell * 0.19f + (index * 2).dp
+                    val x by animateDpAsState(baseX, label = "room-ludo-x-${token.id}")
+                    val y by animateDpAsState(baseY, label = "room-ludo-y-${token.id}")
+                    Box(
+                        Modifier
+                            .offset(x = x, y = y)
+                            .size(tokenSize)
+                            .clip(CircleShape)
+                            .background(LUDO_COLORS[token.color] ?: Color.Gray)
+                            .border(1.5.dp, Color.White.copy(alpha = 0.9f), CircleShape)
+                            .semantics {
+                                contentDescription = "Ficha ${token.slot + 1}, ${token.color.name}, casilla ${token.progress}"
+                            }
+                            .then(
+                                if (token.id in legal) {
+                                    Modifier.clickable {
+                                        if (session.isHost) session.hostLudoMove(token.id) else session.guestLudoMove(token.id)
+                                    }
+                                } else {
+                                    Modifier
+                                },
+                            ),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            "${token.slot + 1}",
+                            color = Color.White,
+                            fontSize = 8.sp,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                }
+            }
+        }
+
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            board.players.forEachIndexed { index, player ->
+                Surface(
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(8.dp),
+                    color = LUDO_COLORS[player.color]?.copy(alpha = 0.14f) ?: MaterialTheme.colorScheme.surfaceVariant,
+                ) {
+                    Column(Modifier.padding(4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            if (index == mySeat) state.t("common.you") else player.name,
+                            style = MaterialTheme.typography.labelSmall,
+                            maxLines = 1,
+                            fontWeight = if (index == board.turn) FontWeight.Bold else FontWeight.Normal,
+                        )
+                        Text(
+                            "${ludo.finishedCount(board, index)}/4 · ${player.captures}⚔",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = LUDO_COLORS[player.color] ?: MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
+                }
+            }
+        }
+
+        Button(
+            onClick = { if (session.isHost) session.hostLudoRoll() else session.guestLudoRoll() },
+            enabled = myTurn && board.phase == LudoPhase.Roll,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text("🎲 ${state.t("ludo.roll")}${board.lastRoll?.let { " · $it" } ?: ""}")
+        }
+
+        Text(
+            when {
+                board.phase == LudoPhase.MatchEnd -> state.t("ludo.winner", mapOf("p" to (board.players.getOrNull(board.winnerIndex ?: 0)?.name ?: "")))
+                board.turn != mySeat -> state.t("room.theirTurn", mapOf("name" to (board.players.getOrNull(board.turn)?.name ?: "")))
+                board.phase == LudoPhase.Roll -> state.t("ludo.yourRoll")
+                else -> state.t("ludo.movePrompt")
+            },
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
