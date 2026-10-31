@@ -37,7 +37,7 @@ val SHELL_GAMES: List<ShellGame> = listOf(
     ShellGame("luzhanqi", "Luzhanqi", "🎖️", "2–4", "tablero", "research", "Guerra de piezas con niebla."),
     ShellGame("mexican-train", "Tren Mexicano", "🚂", "2–8", "tablero", "soon", "Dominó con trenes y pozo."),
     ShellGame("chickenfoot", "Chickenfoot", "🐔", "2–8", "tablero", "soon", "Dominó en forma de pata."),
-    ShellGame("aeroplane", "Aeroplane Chess", "✈️", "2–4", "tablero", "soon", "Carrera aérea de dados."),
+    ShellGame("aeroplane", "Aeroplane Chess", "✈️", "2–4", "tablero", "playable", "Carrera aérea con saltos y capturas. Nativo en Compose.", native = true),
     ShellGame("mahjong", "Mahjong", "🀄", "4", "tablero", "research", "Mahjong americano."),
     ShellGame("riichi", "Riichi Mahjong", "🀄", "4", "tablero", "research", "Mahjong japonés."),
     ShellGame("mahjong-cards", "Mahjong con naipes", "🃏", "4", "cartas", "research", "Mahjong con baraja."),

@@ -1006,4 +1006,24 @@ class NativeGamesTest {
         assertEquals(JanggiKind.Cannon, result.state.board[JanggiGame.indexOf(0, 2)]?.kind)
         assertTrue(result.state.history.any { it.contains("x") })
     }
+
+    @Test
+    fun `aeroplane chess jumps four extra squares`() {
+        val game = LudoGame(playerCount = 2, allHumans = false, seed = 12, variant = "aeroplane")
+        val base = game.newMatch()
+        val player = base.players[0]
+        val token = base.tokens.first { it.color == player.color }
+        val tokens = base.tokens.map { if (it.id == token.id) it.copy(progress = 0) else it }
+        val state = base.copy(
+            tokens = tokens,
+            turn = 0,
+            dice = 4,
+            phase = LudoPhase.Move,
+            sixStreak = 0,
+        )
+        val moves = game.legalMoves(state)
+        val move = moves.firstOrNull { it.tokenId == token.id }
+        assertNotNull(move)
+        assertEquals(8, move!!.to)
+    }
 }

@@ -37,6 +37,7 @@ enum class ShellScreen {
     Soroban,
     Shogi,
     Janggi,
+    Aeroplane,
     Room,
 }
 

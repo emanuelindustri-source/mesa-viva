@@ -1,5 +1,29 @@
 ﻿# Changelog
 
+## 2.6.0 · 2026-10-30
+
+Cielo de colores.
+
+### Añadido
+
+- **Aeroplane Chess nativo** de 2–4 jugadores con cuatro aviones por color.
+- Saltos de cuatro casillas, capturas, turnos extra y meta exacta.
+- Bots, modo pasar el teléfono, historial, PDF y XP.
+- 1 prueba nueva del salto de Aeroplane.
+- El catálogo llega a **23 juegos jugables de 30**.
+
+### Cambiado
+
+- Android: `versionCode=28`, `versionName=2.6.0`.
+- El inicio, catálogo y ajustes muestran 23 juegos y la versión 2.6.0.
+- Botonera de Ludo/Aeroplane con cuatro botones de igual ancho.
+
+### Pendiente
+
+- Mahjong, Luzhanqi y los 5 juegos restantes.
+- Relay público, replays web y accesibilidad completa.
+- Teléfono físico.
+
 ## 2.5.0 · 2026-10-30
 
 Palacio y río.

@@ -69,7 +69,8 @@ Es un proyecto de varias versiones, no un commit.
 - [x] Soroban jugable de 13 varillas (v2.3.0).
 - [x] Shogi 9×9 con promociones, capturas y drops (v2.4.0).
 - [x] Janggi 9×10 con palacio, río y cañón (v2.5.0).
-- [ ] Mahjong, Luzhanqi y el resto; relay público; replays web (v2.6.0).
+- [x] Aeroplane Chess de 2–4 con saltos (v2.6.0).
+- [ ] Mahjong, Luzhanqi y el resto; relay público; replays web (v2.7.0).
 
 ### Fase 4 · Retirada del WebView
 
@@ -89,6 +90,7 @@ Es un proyecto de varias versiones, no un commit.
 - v2.3.0 suma Soroban jugable y lleva el catálogo a 20 juegos. El siguiente paso son Shogi, Janggi, Mahjong, el relay público y los replays web adicionales.
 - v2.4.0 suma Shogi 9×9 con promociones, capturas, drops y jaque, y lleva el catálogo a 21 juegos. El siguiente paso son Janggi, Mahjong, el relay público y los replays web adicionales.
 - v2.5.0 suma Janggi 9×10 con palacio, río y cañón, y lleva el catálogo a 22 juegos. El siguiente paso son Mahjong, Luzhanqi, el relay público y los replays web adicionales.
+- v2.6.0 suma Aeroplane Chess de 2–4 con saltos y capturas, y lleva el catálogo a 23 juegos. El siguiente paso son Mahjong, Luzhanqi, el relay público y los replays web adicionales.
 
 ## Arquitectura propuesta
 

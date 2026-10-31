@@ -1,6 +1,17 @@
 ﻿# Roadmap
 
-## v2.5.0 · Palacio y río (actual)
+## v2.6.0 · Cielo de colores (actual)
+
+- [x] Aeroplane Chess de 2–4 con saltos, capturas y turnos extra.
+- [x] Bots, modo pasar el teléfono, historial, PDF y XP.
+- [x] 23 juegos jugables de 30.
+- [x] 144 pruebas verdes (30 web + 114 Kotlin).
+- [x] APK y AAB de release firmados.
+- [x] Evidencia visual en `docs/evidence/v2.6.0/`.
+- [ ] Mahjong, Luzhanqi y los 5 juegos restantes (v2.7.0).
+- [ ] Relay público, replays web y accesibilidad completa (v2.7.0).
+
+## v2.5.0 · Palacio y río
 
 - [x] Janggi 9×10 con palacio, río, cañón y generales enfrentados.
 - [x] Bots easy, normal y hard; modo pasar el teléfono.
@@ -9,8 +20,8 @@
 - [x] 143 pruebas verdes (30 web + 113 Kotlin).
 - [x] APK y AAB de release firmados.
 - [x] Evidencia visual en `docs/evidence/v2.5.0/`.
-- [ ] Mahjong, Luzhanqi y los 6 juegos restantes (v2.6.0).
-- [ ] Relay público, replays web y accesibilidad completa (v2.6.0).
+- [x] Aeroplane Chess jugable (v2.6.0).
+- [ ] Mahjong y Luzhanqi (v2.7.0).
 
 ## v2.4.0 · Juegos del mundo
 

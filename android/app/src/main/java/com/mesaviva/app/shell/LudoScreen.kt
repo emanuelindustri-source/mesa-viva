@@ -73,9 +73,19 @@ private data class LudoSetup(val players: Int, val allHumans: Boolean)
 
 @Composable
 fun LudoScreen(state: ShellState, onBack: () -> Unit) {
+    LudoTable(state, onBack, variant = "ludo")
+}
+
+@Composable
+fun AeroplaneScreen(state: ShellState, onBack: () -> Unit) {
+    LudoTable(state, onBack, variant = "aeroplane")
+}
+
+@Composable
+private fun LudoTable(state: ShellState, onBack: () -> Unit, variant: String) {
     val context = LocalContext.current
     var setup by remember { mutableStateOf(LudoSetup(4, false)) }
-    var game by remember { mutableStateOf(LudoGame(setup.players, setup.allHumans)) }
+    var game by remember { mutableStateOf(LudoGame(setup.players, setup.allHumans, variant = variant)) }
     var board by remember { mutableStateOf(game.newMatch()) }
     var setupOpen by remember { mutableStateOf(true) }
     var winnerOpen by remember { mutableStateOf(false) }
@@ -88,7 +98,7 @@ fun LudoScreen(state: ShellState, onBack: () -> Unit) {
 
     fun start(config: LudoSetup) {
         setup = config
-        game = LudoGame(config.players, config.allHumans)
+        game = LudoGame(config.players, config.allHumans, variant = variant)
         board = game.newMatch()
         log = emptyList()
         setupOpen = false
@@ -164,9 +174,12 @@ fun LudoScreen(state: ShellState, onBack: () -> Unit) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = state.t("common.back"))
             }
             Column(Modifier.weight(1f)) {
-                Text(state.t("ludo.title"), style = MaterialTheme.typography.titleLarge)
                 Text(
-                    state.t("ludo.subtitle"),
+                    state.t(if (variant == "aeroplane") "aeroplane.title" else "ludo.title"),
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                Text(
+                    state.t(if (variant == "aeroplane") "aeroplane.subtitle" else "ludo.subtitle"),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -307,12 +320,19 @@ fun LudoScreen(state: ShellState, onBack: () -> Unit) {
                 enabled = board.phase == LudoPhase.Roll && board.players.getOrNull(board.turn)?.isBot == false,
                 modifier = Modifier.weight(1f),
             ) {
-                Text("🎲 ${state.t("ludo.roll")}")
+                Text("🎲 ${state.t("ludo.roll")}", style = MaterialTheme.typography.labelSmall)
             }
-            OutlinedButton(onClick = { setupOpen = true }) { Text(state.t("ludo.newMatch")) }
-            OutlinedButton(onClick = { historyOpen = true }) { Text(state.t("common.history")) }
-            Button(onClick = { winnerOpen = false; board = game.resign(board).state; winnerOpen = true }) {
-                Text(state.t("ludo.resign"))
+            OutlinedButton(onClick = { setupOpen = true }, modifier = Modifier.weight(1f)) {
+                Text(state.t("ludo.newMatch"), style = MaterialTheme.typography.labelSmall)
+            }
+            OutlinedButton(onClick = { historyOpen = true }, modifier = Modifier.weight(1f)) {
+                Text(state.t("common.history"), style = MaterialTheme.typography.labelSmall)
+            }
+            Button(
+                onClick = { winnerOpen = false; board = game.resign(board).state; winnerOpen = true },
+                modifier = Modifier.weight(1f),
+            ) {
+                Text(state.t("ludo.resign"), style = MaterialTheme.typography.labelSmall)
             }
         }
 
@@ -340,7 +360,7 @@ fun LudoScreen(state: ShellState, onBack: () -> Unit) {
     }
 
     if (setupOpen) {
-        LudoSetupDialog(state, setup, onDismiss = { if (board.tokens.any { it.progress > -1 }) setupOpen = false }, onStart = { start(it) })
+        LudoSetupDialog(state, setup, variant, onDismiss = { if (board.tokens.any { it.progress > -1 }) setupOpen = false }, onStart = { start(it) })
     }
 
     if (winnerOpen && board.phase == LudoPhase.MatchEnd) {
@@ -374,6 +394,7 @@ fun LudoScreen(state: ShellState, onBack: () -> Unit) {
 private fun LudoSetupDialog(
     state: ShellState,
     initial: LudoSetup,
+    variant: String,
     onDismiss: () -> Unit,
     onStart: (LudoSetup) -> Unit,
 ) {
@@ -381,7 +402,7 @@ private fun LudoSetupDialog(
     var allHumans by remember { mutableStateOf(initial.allHumans) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(state.t("ludo.setup")) },
+        title = { Text(state.t(if (variant == "aeroplane") "aeroplane.setup" else "ludo.setup")) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(state.t("ludo.players"), style = MaterialTheme.typography.labelMedium)
@@ -399,14 +420,16 @@ private fun LudoSetupDialog(
                     Switch(checked = allHumans, onCheckedChange = { allHumans = it })
                 }
                 Text(
-                    state.t("ludo.rules"),
+                    state.t(if (variant == "aeroplane") "aeroplane.rules" else "ludo.rules"),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         },
         confirmButton = {
-            Button(onClick = { onStart(LudoSetup(players, allHumans)) }) { Text(state.t("ludo.start")) }
+            Button(onClick = { onStart(LudoSetup(players, allHumans)) }) {
+                Text(state.t(if (variant == "aeroplane") "aeroplane.start" else "ludo.start"))
+            }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(state.t("common.close")) } },
     )

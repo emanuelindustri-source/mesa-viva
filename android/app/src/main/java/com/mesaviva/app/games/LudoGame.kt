@@ -47,9 +47,11 @@ class LudoGame(
     playerCount: Int,
     private val allHumans: Boolean = false,
     seed: Long = Random.nextLong(),
+    private val variant: String = "ludo",
 ) {
     private val random = Random(seed)
     private val count = playerCount.coerceIn(2, 4)
+    private val isAeroplane = variant == "aeroplane"
 
     companion object {
         const val FINISH = 57
@@ -91,6 +93,9 @@ class LudoGame(
         )
 
         val SAFE = setOf(0, 8, 13, 21, 26, 34, 39, 47)
+
+        /** Casillas de salto de Aeroplane Chess (cada cuatro pasos). */
+        val AEROPLANE_JUMPS = setOf(4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48)
 
         fun colorsForPlayers(count: Int): List<LudoColor> = when {
             count <= 2 -> listOf(LudoColor.Red, LudoColor.Yellow)
@@ -142,9 +147,14 @@ class LudoGame(
                 continue
             }
             val to = token.progress + die
-            if (to <= FINISH) moves.add(LudoMove(token.id, token.progress, to))
+            if (to <= FINISH) moves.add(LudoMove(token.id, token.progress, jumpTarget(color, to)))
         }
         return moves
+    }
+
+    private fun jumpTarget(color: LudoColor, progress: Int): Int {
+        if (!isAeroplane || progress > 51) return progress
+        return if (absolute(color, progress) in AEROPLANE_JUMPS) (progress + 4).coerceAtMost(FINISH) else progress
     }
 
     fun finishedCount(state: LudoState, seatIndex: Int): Int {
@@ -225,7 +235,8 @@ class LudoGame(
         if (won) {
             return LudoResult(next.copy(phase = LudoPhase.MatchEnd, winnerIndex = state.turn))
         }
-        val extra = die == 6 || captured.isNotEmpty() || move.to >= FINISH
+        val extra = die == 6 || captured.isNotEmpty() || move.to >= FINISH ||
+            (isAeroplane && move.to > move.from + die)
         return LudoResult(next.copy(turn = if (extra) state.turn else nextSeat(state)))
     }
 
