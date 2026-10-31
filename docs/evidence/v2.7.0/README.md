@@ -8,7 +8,7 @@
 
 | Archivo | Contenido |
 |---|---|
-| `home.png` | Inicio 2.7.0 con 30 juegos jugables y 30 % Compose. |
+| `home.png` | Inicio 2.7.0 con 30 juegos jugables y 100 % Compose. |
 | `catalog.png` | Catálogo con 30 juegos, 30 nativos y filtros. |
 | `mahjong.png` | Mesa de Mahjong americano: mano, rivales, muro y descartes. |
 | `mahjong-setup.png` | Configuración de la mesa de Mahjong americano. |
