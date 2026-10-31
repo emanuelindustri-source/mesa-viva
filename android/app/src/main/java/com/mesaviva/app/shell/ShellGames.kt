@@ -11,7 +11,7 @@ data class ShellGame(
     val native: Boolean = false,
 )
 
-/** Catálogo de la cáscara. Los quince juegos abren su mesa nativa en Compose. */
+/** Catálogo de la cáscara. Los treinta juegos abren su mesa nativa en Compose. */
 val SHELL_GAMES: List<ShellGame> = listOf(
     ShellGame("poker", "Póker de la casa", "♠️", "2–6", "cartas", "playable", "Texas Hold'em con fichas de práctica. Nativo en Compose.", native = true),
     ShellGame("caida", "Caída", "🃏", "2–4", "cartas", "playable", "Cantos, caídas y mesa limpia. Nativo en Compose.", native = true),
@@ -34,15 +34,50 @@ val SHELL_GAMES: List<ShellGame> = listOf(
     ShellGame("truco", "Truco", "🎴", "2", "cartas", "playable", "Envido, truco y retruco. Nativo en Compose.", native = true),
     ShellGame("shogi", "Shogi", "将", "2", "tablero", "playable", "Ajedrez japonés con promociones, capturas y drops. Nativo en Compose.", native = true),
     ShellGame("janggi", "Janggi", "象", "2", "tablero", "playable", "Ajedrez coreano con palacio, río y cañón. Nativo en Compose.", native = true),
-    ShellGame("luzhanqi", "Luzhanqi", "🎖️", "2–4", "tablero", "research", "Guerra de piezas con niebla."),
-    ShellGame("mexican-train", "Tren Mexicano", "🚂", "2–8", "tablero", "soon", "Dominó con trenes y pozo."),
-    ShellGame("chickenfoot", "Chickenfoot", "🐔", "2–8", "tablero", "soon", "Dominó en forma de pata."),
+    ShellGame("luzhanqi", "Luzhanqi", "🎖️", "2–4", "tablero", "playable", "Guerra de piezas con niebla, trenes y minas. Nativo en Compose.", native = true),
+    ShellGame("mexican-train", "Tren Mexicano", "🚂", "2–8", "tablero", "playable", "Dominó doble 12 con trenes y tres rondas. Nativo en Compose.", native = true),
+    ShellGame("chickenfoot", "Chickenfoot", "🐔", "2–8", "tablero", "playable", "Dominó en forma de pata con doble 9. Nativo en Compose.", native = true),
     ShellGame("aeroplane", "Aeroplane Chess", "✈️", "2–4", "tablero", "playable", "Carrera aérea con saltos y capturas. Nativo en Compose.", native = true),
-    ShellGame("mahjong", "Mahjong", "🀄", "4", "tablero", "research", "Mahjong americano."),
-    ShellGame("riichi", "Riichi Mahjong", "🀄", "4", "tablero", "research", "Mahjong japonés."),
-    ShellGame("mahjong-cards", "Mahjong con naipes", "🃏", "4", "cartas", "research", "Mahjong con baraja."),
-    ShellGame("three-chess", "Ajedrez para tres", "♞", "3", "tablero", "research", "Tres ejércitos en un tablero."),
+    ShellGame("mahjong", "Mahjong", "🀄", "4", "tablero", "playable", "Mahjong americano con flores y comodines. Nativo en Compose.", native = true),
+    ShellGame("riichi", "Riichi Mahjong", "🀄", "4", "tablero", "playable", "Mahjong japonés con riichi, chi y yaku. Nativo en Compose.", native = true),
+    ShellGame("mahjong-cards", "Mahjong con naipes", "🃏", "4", "cartas", "playable", "Mahjong americano en edición de naipes. Nativo en Compose.", native = true),
+    ShellGame("three-chess", "Ajedrez para tres", "♞", "3", "tablero", "playable", "Tres ejércitos en un tablero de 12×12. Nativo en Compose.", native = true),
     ShellGame("soroban", "Soroban", "🧮", "1", "herramienta", "playable", "Ábaco japonés de 13 varillas. Nativo en Compose.", native = true),
 )
 
 val PLAYABLE_GAMES = SHELL_GAMES.filter { it.status == "playable" }
+
+/** Ruta estable para abrir una mesa desde el catálogo, un QR o una prueba. */
+fun screenForGame(id: String): ShellScreen? = when (id) {
+    "serpientes" -> ShellScreen.Snakes
+    "domino" -> ShellScreen.Domino
+    "ajedrez" -> ShellScreen.Chess
+    "ludo" -> ShellScreen.Ludo
+    "mancala" -> ShellScreen.Mancala
+    "backgammon" -> ShellScreen.Backgammon
+    "damas" -> ShellScreen.Damas
+    "go" -> ShellScreen.Go
+    "jungle" -> ShellScreen.Jungle
+    "xiangqi" -> ShellScreen.Xiangqi
+    "chino" -> ShellScreen.Chino
+    "dados" -> ShellScreen.Dados
+    "caida" -> ShellScreen.Caida
+    "furia" -> ShellScreen.Furia
+    "poker" -> ShellScreen.Poker
+    "reversi" -> ShellScreen.Reversi
+    "ur" -> ShellScreen.Ur
+    "brisca" -> ShellScreen.Brisca
+    "truco" -> ShellScreen.Truco
+    "soroban" -> ShellScreen.Soroban
+    "shogi" -> ShellScreen.Shogi
+    "janggi" -> ShellScreen.Janggi
+    "aeroplane" -> ShellScreen.Aeroplane
+    "mahjong" -> ShellScreen.Mahjong
+    "riichi" -> ShellScreen.Riichi
+    "mahjong-cards" -> ShellScreen.MahjongCards
+    "luzhanqi" -> ShellScreen.Luzhanqi
+    "mexican-train" -> ShellScreen.MexicanTrain
+    "chickenfoot" -> ShellScreen.Chickenfoot
+    "three-chess" -> ShellScreen.ThreeChess
+    else -> null
+}

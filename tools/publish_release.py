@@ -1,8 +1,16 @@
-"""Publica una release de Mesa Viva y sube el APK.
+"""Publica una release de Mesa Viva y sube sus artefactos.
 
 Uso:
   $env:GITHUB_TOKEN = "..."
-  python tools/publish_release.py --tag v0.1.0 --apk artifacts/mesa-viva-0.1.0-debug.apk
+  python tools/publish_release.py `
+    --tag v2.7.0 `
+    --apk artifacts/mesa-viva-2.7.0-release.apk `
+    --aab artifacts/mesa-viva-2.7.0-release.aab `
+    --debug artifacts/mesa-viva-2.7.0-debug.apk `
+    --notes artifacts/release-body-v270.md
+
+El token necesita permiso `contents: write` sobre el repositorio. No se guarda
+en el proyecto: se lee de la variable de entorno GITHUB_TOKEN.
 """
 
 from __future__ import annotations
@@ -29,26 +37,42 @@ def request(method: str, url: str, token: str, data: bytes | None = None, conten
         "Content-Type": content_type,
     }
     req = urllib.request.Request(url, data=data, headers=headers, method=method)
-    with urllib.request.urlopen(req, timeout=90) as response:
+    with urllib.request.urlopen(req, timeout=180) as response:
         body = response.read()
         return json.loads(body.decode("utf-8")) if body else None
 
 
+def sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest().upper()
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--tag", default="v0.1.0")
-    parser.add_argument("--apk", default="artifacts/mesa-viva-0.1.0-debug.apk")
+    parser.add_argument("--tag", required=True)
+    parser.add_argument("--apk", required=True)
+    parser.add_argument("--aab", default="")
+    parser.add_argument("--debug", default="")
+    parser.add_argument("--notes", default="")
     args = parser.parse_args()
+
     token = os.environ.get("GITHUB_TOKEN", "").strip()
     if not token:
         print("Falta GITHUB_TOKEN", file=sys.stderr)
         return 2
-    apk = Path(args.apk)
-    if not apk.exists():
-        print(f"No existe {apk}", file=sys.stderr)
-        return 2
-    digest = hashlib.sha256(apk.read_bytes()).hexdigest().upper()
-    asset_name = f"mesa-viva-{args.tag.lstrip('v')}-debug.apk"
+
+    files = [Path(value) for value in (args.apk, args.aab, args.debug) if value]
+    for path in files:
+        if not path.exists():
+            print(f"No existe {path}", file=sys.stderr)
+            return 2
+
+    body = ""
+    if args.notes:
+        notes = Path(args.notes)
+        if notes.exists():
+            body = notes.read_text(encoding="utf-8")
+    if not body:
+        body = f"## Mesa Viva {args.tag}\n\nRelease de Mesa Viva. Consulta `versions/{args.tag.lstrip('v')}.md` para la evidencia completa.\n"
 
     release = None
     try:
@@ -59,36 +83,10 @@ def main() -> int:
             raise
 
     if release is None:
-        body = f"""## Mesa Viva {args.tag}
-
-La primera mesa completa: 8 juegos, salas en línea, 11 idiomas, temas de festividad y APK Android.
-
-### Incluye
-- Caída venezolana, Furia de Colores, Dominó, Dados Mentirosos, Ajedrez, Damas, Serpientes y Escaleras, Mancala.
-- Bots con 3 niveles, modo pasar el teléfono y salas con código/QR, chat y rondas.
-- Perfil de 10 niveles, XP, rachas y recompensas.
-- Temas de Halloween criollo, Navidad, Reyes, Carnaval, San Valentín, San Patricio, Semana Santa, Cruz de Mayo, Corpus e independencia por país.
-- Crónica de partida con últimos 5 movimientos, historial completo y PDF.
-- Música generativa, partículas, vibración y sensores.
-- Web/PWA instalable y APK Android nativo.
-
-### APK
-- `{asset_name}` · instalable por sideload (firma de depuración).
-- SHA-256: `{digest}`.
-- Para salas en línea: despliega el relay de `server/room-server.mjs` (ver `docs/DEPLOY.md`) y configura su URL en **Ajustes → Servidor de salas**.
-- Los modos locales funcionan sin internet.
-
-### Limitaciones conocidas
-- La sala LAN sin servidor por doble QR queda para v0.2; los modos offline locales ya funcionan.
-- El catálogo muestra 30 juegos; 8 son jugables en esta versión.
-- Las reglas tradicionales usan una variante documentada por Mesa Viva.
-
-Hecho con cariño para Venezuela y el mundo.
-"""
         payload = {
             "tag_name": args.tag,
             "target_commitish": "main",
-            "name": f"Mesa Viva {args.tag} · La primera mesa",
+            "name": f"Mesa Viva {args.tag} · La mesa completa",
             "body": body,
             "draft": False,
             "prerelease": False,
@@ -104,21 +102,32 @@ Hecho con cariño para Venezuela y el mundo.
             print("release recuperada", release["html_url"])
 
     assets = request("GET", f"{API}/releases/{release['id']}/assets", token) or []
-    existing = next((a for a in assets if a.get("name") == asset_name), None)
-    if existing:
-        print("asset existente", existing["browser_download_url"])
-        return 0
+    existing = {asset.get("name") for asset in assets}
+    uploaded = []
+    for path in files:
+        name = path.name
+        if name in existing:
+            print("asset existente", name)
+            continue
+        upload_url = release["upload_url"].split("{")[0] + f"?name={name}"
+        data = path.read_bytes()
+        content_type = "application/vnd.android.package-archive" if path.suffix == ".apk" else "application/octet-stream"
+        uploaded.append(request("POST", upload_url, token, data, content_type))
+        print("subido", name)
 
-    upload_url = release["upload_url"].split("{")[0] + f"?name={asset_name}"
-    data = apk.read_bytes()
-    upload = request("POST", upload_url, token, data, "application/vnd.android.package-archive")
-    print(json.dumps({
+    summary = {
         "release": release["html_url"],
         "tag": release["tag_name"],
-        "asset": upload["browser_download_url"],
-        "size": upload["size"],
-        "sha256": digest,
-    }, ensure_ascii=False, indent=2))
+        "assets": [
+            {
+                "name": path.name,
+                "size": path.stat().st_size,
+                "sha256": sha256(path),
+            }
+            for path in files
+        ],
+    }
+    print(json.dumps(summary, ensure_ascii=False, indent=2))
     return 0
 
 

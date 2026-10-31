@@ -96,6 +96,13 @@ fun MesaVivaApp(
         ShellScreen.Shogi,
         ShellScreen.Janggi,
         ShellScreen.Aeroplane,
+        ShellScreen.Mahjong,
+        ShellScreen.Riichi,
+        ShellScreen.MahjongCards,
+        ShellScreen.Luzhanqi,
+        ShellScreen.MexicanTrain,
+        ShellScreen.Chickenfoot,
+        ShellScreen.ThreeChess,
     )
     Scaffold(
         containerColor = Color.Transparent,
@@ -126,32 +133,7 @@ fun MesaVivaApp(
                 .padding(padding),
         ) {
             val openNative: (String) -> Unit = { id ->
-                state.screen = when (id) {
-                    "serpientes" -> ShellScreen.Snakes
-                    "domino" -> ShellScreen.Domino
-                    "ajedrez" -> ShellScreen.Chess
-                    "ludo" -> ShellScreen.Ludo
-                    "mancala" -> ShellScreen.Mancala
-                    "backgammon" -> ShellScreen.Backgammon
-                    "damas" -> ShellScreen.Damas
-                    "go" -> ShellScreen.Go
-                    "jungle" -> ShellScreen.Jungle
-                    "xiangqi" -> ShellScreen.Xiangqi
-                    "chino" -> ShellScreen.Chino
-                    "dados" -> ShellScreen.Dados
-                    "caida" -> ShellScreen.Caida
-                    "furia" -> ShellScreen.Furia
-                    "poker" -> ShellScreen.Poker
-                    "reversi" -> ShellScreen.Reversi
-                    "ur" -> ShellScreen.Ur
-                    "brisca" -> ShellScreen.Brisca
-                    "truco" -> ShellScreen.Truco
-                    "soroban" -> ShellScreen.Soroban
-                    "shogi" -> ShellScreen.Shogi
-                    "janggi" -> ShellScreen.Janggi
-                    "aeroplane" -> ShellScreen.Aeroplane
-                    else -> ShellScreen.Catalog
-                }
+                state.screen = screenForGame(id) ?: ShellScreen.Catalog
             }
             Crossfade(targetState = state.screen, label = "shell-screen") { screen ->
                 when (screen) {
@@ -183,6 +165,13 @@ fun MesaVivaApp(
                     ShellScreen.Shogi -> ShogiScreen(state) { state.screen = ShellScreen.Home }
                     ShellScreen.Janggi -> JanggiScreen(state) { state.screen = ShellScreen.Home }
                     ShellScreen.Aeroplane -> AeroplaneScreen(state) { state.screen = ShellScreen.Home }
+                    ShellScreen.Mahjong -> MahjongScreen(state, com.mesaviva.app.games.MahjongVariant.American) { state.screen = ShellScreen.Home }
+                    ShellScreen.Riichi -> MahjongScreen(state, com.mesaviva.app.games.MahjongVariant.Riichi) { state.screen = ShellScreen.Home }
+                    ShellScreen.MahjongCards -> MahjongScreen(state, com.mesaviva.app.games.MahjongVariant.Cards) { state.screen = ShellScreen.Home }
+                    ShellScreen.Luzhanqi -> LuzhanqiScreen(state) { state.screen = ShellScreen.Home }
+                    ShellScreen.MexicanTrain -> MexicanTrainScreen(state) { state.screen = ShellScreen.Home }
+                    ShellScreen.Chickenfoot -> ChickenfootScreen(state) { state.screen = ShellScreen.Home }
+                    ShellScreen.ThreeChess -> ThreeChessScreen(state) { state.screen = ShellScreen.Home }
                 }
             }
         }
@@ -389,7 +378,7 @@ private fun HeroCard(state: ShellState, onOpenWeb: (String) -> Unit, onNative: (
                 }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                MiniBadge("23", state.t("home.games"))
+                MiniBadge("30", state.t("home.games"))
                 MiniBadge("11", state.t("home.languages"))
             }
         }

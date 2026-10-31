@@ -38,6 +38,13 @@ enum class ShellScreen {
     Shogi,
     Janggi,
     Aeroplane,
+    Mahjong,
+    Riichi,
+    MahjongCards,
+    Luzhanqi,
+    MexicanTrain,
+    Chickenfoot,
+    ThreeChess,
     Room,
 }
 

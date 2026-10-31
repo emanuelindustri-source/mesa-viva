@@ -18,6 +18,7 @@ import com.mesaviva.app.shell.NativeAudio
 import com.mesaviva.app.shell.ReplayCodec
 import com.mesaviva.app.shell.ShellScreen
 import com.mesaviva.app.shell.ShellState
+import com.mesaviva.app.shell.screenForGame
 
 /**
  * Cáscara nativa en Jetpack Compose.
@@ -30,10 +31,12 @@ class MainActivity : ComponentActivity() {
 
     private var shell: ShellState? = null
     private var deepLink by mutableStateOf<String?>(null)
+    private var requestedScreen by mutableStateOf<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         deepLink = intent?.dataString?.takeIf { it.startsWith("mesaviva://") }
+        requestedScreen = intent?.getStringExtra("screen")
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.statusBarColor = Color.TRANSPARENT
         window.navigationBarColor = Color.TRANSPARENT
@@ -46,6 +49,11 @@ class MainActivity : ComponentActivity() {
         setContent {
             val state = remember { ShellState(this) }
             shell = state
+            LaunchedEffect(requestedScreen) {
+                val id = requestedScreen ?: return@LaunchedEffect
+                requestedScreen = null
+                screenForGame(id)?.let { state.screen = it }
+            }
             LaunchedEffect(deepLink) {
                 val link = deepLink ?: return@LaunchedEffect
                 deepLink = null
@@ -86,6 +94,7 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         intent.dataString?.takeIf { it.startsWith("mesaviva://") }?.let { deepLink = it }
+        intent.getStringExtra("screen")?.let { requestedScreen = it }
     }
 
     override fun onResume() {

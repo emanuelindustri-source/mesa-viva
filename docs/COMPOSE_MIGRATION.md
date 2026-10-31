@@ -70,14 +70,14 @@ Es un proyecto de varias versiones, no un commit.
 - [x] Shogi 9×9 con promociones, capturas y drops (v2.4.0).
 - [x] Janggi 9×10 con palacio, río y cañón (v2.5.0).
 - [x] Aeroplane Chess de 2–4 con saltos (v2.6.0).
-- [ ] Mahjong, Luzhanqi y el resto; relay público; replays web (v2.7.0).
+- [x] Mahjong (3 variantes), Luzhanqi, Tren Mexicano, Chickenfoot y Ajedrez para tres; 30 juegos Compose (v2.7.0).
 
 ### Fase 4 · Retirada del WebView
 
 - Eliminar assets web del APK cuando haya paridad.
 - Mantener la PWA web como producto independiente.
 - Reducir tamaño y mejorar arranque.
-- Estado: 15 de 15 juegos jugables fuera del WebView; el WebView queda como respaldo de la PWA y la sala remota.
+- Estado: 30 de 30 juegos jugables fuera del WebView; el WebView queda como respaldo de la PWA y la sala remota.
 - v1.4.0 añade crónica PDF nativa en las quince mesas y accesibilidad básica de cartas y turnos.
 - v1.5.0 añade salas LAN nativas para Damas y Mancala, replays con semilla, audio procedural y PDF con estadísticas.
 - v1.6.0 añade Serpientes de 2–4 jugadores, relay online configurable, replays exportables e importables y audio en las quince mesas.
@@ -91,6 +91,7 @@ Es un proyecto de varias versiones, no un commit.
 - v2.4.0 suma Shogi 9×9 con promociones, capturas, drops y jaque, y lleva el catálogo a 21 juegos. El siguiente paso son Janggi, Mahjong, el relay público y los replays web adicionales.
 - v2.5.0 suma Janggi 9×10 con palacio, río y cañón, y lleva el catálogo a 22 juegos. El siguiente paso son Mahjong, Luzhanqi, el relay público y los replays web adicionales.
 - v2.6.0 suma Aeroplane Chess de 2–4 con saltos y capturas, y lleva el catálogo a 23 juegos. El siguiente paso son Mahjong, Luzhanqi, el relay público y los replays web adicionales.
+- v2.7.0 cierra el catálogo con Mahjong americano, Riichi, Mahjong con naipes, Luzhanqi, Tren Mexicano, Chickenfoot y Ajedrez para tres. Los 30 juegos son Compose; quedan la paridad web, el relay público con TLS y la accesibilidad completa.
 
 ## Arquitectura propuesta
 

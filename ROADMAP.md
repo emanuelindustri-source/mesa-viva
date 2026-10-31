@@ -1,6 +1,20 @@
 ﻿# Roadmap
 
-## v2.6.0 · Cielo de colores (actual)
+## v2.7.0 · La mesa completa (actual)
+
+- [x] Mahjong americano, Riichi y Mahjong con naipes nativos en Compose.
+- [x] Luzhanqi con piezas ocultas, vías, campamentos, minas y bombas.
+- [x] Tren Mexicano con dominó doble 12 y Chickenfoot con doble 9.
+- [x] Ajedrez para tres con tres ejércitos, promociones y eliminación.
+- [x] 30 juegos jugables de 30, todos 100 % Jetpack Compose.
+- [x] 146 pruebas Kotlin + 30 web = **176 pruebas**.
+- [x] APK debug, APK release firmado y AAB release firmado.
+- [ ] Capturas visuales de las mesas nuevas (recaptura pendiente por inestabilidad del emulador).
+- [ ] Paridad web de los 7 juegos nuevos (v2.8.0).
+- [ ] Relay público con TLS, replays web de todos los juegos y accesibilidad completa (v2.8.0).
+- [ ] Baseline Profile y prueba en teléfono físico (v2.8.0).
+
+## v2.6.0 · Cielo de colores (anterior)
 
 - [x] Aeroplane Chess de 2–4 con saltos, capturas y turnos extra.
 - [x] Bots, modo pasar el teléfono, historial, PDF y XP.

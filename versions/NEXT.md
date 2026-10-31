@@ -1,65 +1,69 @@
-﻿# Relevo del proyecto · Mesa Viva
+# Relevo del proyecto · Mesa Viva
 
 > **No borrar.** Este archivo existe para que cualquier chat, persona o IA sepa dónde quedó el proyecto. Se actualiza al cerrar cada versión, pero no se elimina.
 
 ## Estado actual
 
-- **Versión publicada:** 2.6.0.
+- **Versión publicada:** 2.7.0.
 - **Catálogo:** 30 juegos.
-- **Juegos jugables:** 23, todos 100 % Jetpack Compose.
+- **Juegos jugables:** 30, todos 100 % Jetpack Compose.
 - **Juegos en WebView:** 0 (el WebView queda como respaldo de la PWA y de la sala remota).
 - **Salas nativas:** Damas y Mancala (2), Dominó (2–4), Serpientes (2–4), Brisca (2–4), Truco (2), Ludo (2–4) y Damas Chinas (2–6), por LAN o relay online configurable.
 - **Manos privadas:** Dominó, Brisca y Truco.
 - **Replays:** semilla, paso a paso, automático, enlace, archivo JSON, importación y visor web de Damas/Mancala.
-- **Crónica PDF:** 23 mesas, con tarjeta de estadísticas.
-- **Audio nativo:** música procedural por festividad y efectos en las 23 mesas.
+- **Crónica PDF:** 30 mesas, con tarjeta de estadísticas.
+- **Audio nativo:** música procedural por festividad y efectos en las 30 mesas.
 - **Repositorio:** <https://github.com/emanuelindustri-source/mesa-viva>
 - **Portada:** <https://emanuelindustri-source.github.io/mesa-viva/>
 - **Juego web:** <https://emanuelindustri-source.github.io/mesa-viva/play/>
 - **Replay web:** <https://emanuelindustri-source.github.io/mesa-viva/replay/>
-- **Release:** <https://github.com/emanuelindustri-source/mesa-viva/releases/tag/v2.6.0>
-- **VERSION:** `2.6.0`
-- **Android:** `versionCode=28`, `versionName=2.6.0`, compileSdk/targetSdk 36.
+- **Release:** <https://github.com/emanuelindustri-source/mesa-viva/releases/tag/v2.7.0>
+- **VERSION:** `2.7.0`
+- **Android:** `versionCode=29`, `versionName=2.7.0`, compileSdk/targetSdk 36.
 - **Gradle:** 8.14.4.
 
 ### Calidad
 
 - 30/30 pruebas de motores web.
-- 114/114 pruebas Kotlin (juegos, salas, replays, Reversi, Ur, Brisca, Truco, Ludo, Damas Chinas, Soroban, Shogi, Janggi, Aeroplane y códecs).
-- **144 pruebas en total.**
+- 146/146 pruebas Kotlin (juegos, salas, replays, Mahjong, Luzhanqi, trenes, ajedrez para tres, Reversi, Ur, Brisca, Truco, Ludo, Damas Chinas, Soroban, Shogi, Janggi, Aeroplane y códecs).
+- **176 pruebas en total.**
 - TypeScript sin errores.
 - Web compilada con Vite 6.4.5 y sincronizada dentro del APK.
 - APK debug, APK release firmado y AAB release firmado.
-- Aeroplane Chess probado en emulador Android 14.
-- 23 juegos nativos en el catálogo; 7 pendientes.
+- Mesas nuevas verificadas en emulador Android 14.
+- 30 juegos nativos en el catálogo; 0 pendientes.
+- La web conserva 15 juegos; la paridad web queda para v2.8.0.
 - Teléfono físico `22101316G`: detectado por `adb`, pero MIUI rechaza la instalación USB.
 
-### Checksums v2.6.0
+### Checksums v2.7.0
 
-- APK release firmado: `5AF13BAB1B0E4EBC6DCAB88221865A5B21A4723D3F31D76E030A5D89EA5D5C5A` · 10.882.201 bytes.
-- AAB release firmado: `C6F99A1BF9F948221483D5B86F121C3C0E8ADA39ECA7856BF2F9884267A69AED` · 10.498.252 bytes.
-- Artefactos locales en `artifacts/`: `mesa-viva-2.6.0-release.apk`, `mesa-viva-2.6.0-release.aab`. La release de GitHub añade `mesa-viva-2.6.0-debug.apk`.
+- APK release firmado: `8414012DE3103E33454C779A44258F354478FD5BF542833018ED5B417B2678A7` · 11.046.041 bytes.
+- AAB release firmado: `8FD7EB1722C0682091FF30FE3B2F4FE9950C4CF4BD0706087E97EB8FC3CFD741` · 10.675.504 bytes.
+- APK debug: `F8C5C33FABD054D4073019AB131B1D3EAF8BC2B2969211AAD909433E5479C567` · 16.671.605 bytes.
+- Artefactos locales en `artifacts/`: `mesa-viva-2.7.0-release.apk`, `mesa-viva-2.7.0-release.aab` y `mesa-viva-2.7.0-debug.apk`.
 
 ## Compose
 
 - **Cáscara nativa completa:** inicio, catálogo, niveles, ajustes, sala y navegación.
-- **19 juegos 100 % Compose:** Póker, Caída, Furia, Dominó, Dados, Ajedrez, Damas, Serpientes, Mancala, Go, Jungle, Ludo, Backgammon, Xiangqi, Damas Chinas, Reversi, Ur, **Brisca** y **Truco**.
+- **30 juegos 100 % Compose:** Póker, Caída, Furia, Dominó, Dados, Ajedrez, Damas, Serpientes, Mancala, Go, Jungle, Ludo, Backgammon, Xiangqi, Damas Chinas, Reversi, Ur, Brisca, Truco, Soroban, Shogi, Janggi, Aeroplane Chess, Mahjong americano, Riichi, Mahjong con naipes, Luzhanqi, Tren Mexicano, Chickenfoot y Ajedrez para tres.
 - **Salas nativas:** Damas, Mancala, Dominó, Serpientes, Brisca, Truco, Ludo y Damas Chinas.
 - **Replay automático** y **visor web** de Damas/Mancala.
 - **Crónica PDF** en cada mesa.
-- **Audio nativo** en las 19 mesas.
+- **Audio nativo** en las 30 mesas.
 - **XP real** al terminar.
 - **Accesibilidad:** cartas, fichas, casillas, puntos y tableros descritos.
-- **Pendiente:** los 7 juegos restantes.
+- **Pendiente:** paridad web, accesibilidad completa, Baseline Profile, relay público y teléfono físico.
 
-## Siguiente versión: 2.7.0
+## Siguiente versión: 2.8.0
 
-Ver [`v2.7.0.md`](./v2.7.0.md). Incluye:
+Ver [`v2.8.0.md`](./v2.8.0.md). Incluye:
 
-1. Mahjong americano, Riichi y Mahjong con naipes.
-2. Luzhanqi con piezas ocultas.
-3. Tren Mexicano, Chickenfoot y Ajedrez para tres.
-4. Relay público, replays web y accesibilidad completa.
+1. Paridad web de los 7 juegos nuevos y catálogo web de 30.
+2. Relay público con TLS, métricas y moderación.
+3. Replays web de todos los juegos.
+4. Accesibilidad completa, Baseline Profile y pruebas instrumentadas.
+5. 11 idiomas y festividades completas en la cáscara nativa.
+6. Teléfono físico y checklist de tienda.
 
 ## Dónde está cada cosa
 
@@ -71,16 +75,20 @@ Ver [`v2.7.0.md`](./v2.7.0.md). Incluye:
 | `src/net/room.ts` | Salas web, host/invitado y reconexión |
 | `server/room-server.mjs` | Relay Node |
 | `landing/replay/index.html` | Visor web de replays |
-| `android/.../games/` | Motores Kotlin de los 19 juegos |
-| `android/.../games/BriscaGame.kt` | Reglas de Brisca |
-| `android/.../games/TrucoGame.kt` | Reglas de Truco |
-| `android/.../shell/BriscaScreen.kt` | Mesa de Brisca |
-| `android/.../shell/TrucoScreen.kt` | Mesa de Truco |
+| `android/.../games/` | Motores Kotlin de los 30 juegos |
+| `android/.../games/MahjongGame.kt` | Mahjong americano, Riichi y naipes |
+| `android/.../games/LuzhanqiGame.kt` | Luzhanqi con niebla, vías y campamentos |
+| `android/.../games/TrainGames.kt` | Tren Mexicano y Chickenfoot |
+| `android/.../games/ThreeChessGame.kt` | Ajedrez para tres |
+| `android/.../shell/MahjongScreen.kt` | Mesa de Mahjong |
+| `android/.../shell/LuzhanqiScreen.kt` | Mesa de Luzhanqi |
+| `android/.../shell/MexicanTrainScreen.kt` | Mesa de Tren Mexicano |
+| `android/.../shell/ChickenfootScreen.kt` | Mesa de Chickenfoot |
+| `android/.../shell/ThreeChessScreen.kt` | Mesa de Ajedrez para tres |
+| `android/.../shell/ShellGames.kt` | Catálogo y mapa de pantallas/deep links |
 | `android/.../shell/NativeRoom.kt` | Sesión host/invitado, asientos, protocolo y bots |
-| `android/.../shell/RoomCodec.kt` | Códec JSON con redacción de manos de Dominó |
-| `android/.../shell/SnakesRoom.kt` | Reglas puras de Serpientes para 2–4 |
-| `android/.../shell/ReplayExport.kt` | Enlaces nativos/web, archivo JSON e importación |
-| `android/.../shell/RoomScreen.kt` | Lobby, sala web y mesas LAN/online |
+| `android/.../shell/RoomCodec.kt` | Códec JSON con redacción de manos |
+| `android/.../shell/ReplayExport.kt` | Enlaces nativos/web, archivo e importación |
 | `android/.../shell/NativeAudio.kt` | Música y efectos procedurales |
 | `android/.../shell/NativeChronicle.kt` | Crónica PDF |
 | `landing/` | Portada, versiones, descargas y replay |
@@ -99,6 +107,7 @@ npm run build
 npm run build:pages         # portada + juego + replay en dist-site/
 npm run android:sync
 cd android && gradlew.bat testDebugUnitTest
+cd android && gradlew.bat assembleDebug
 cd android && gradlew.bat assembleRelease
 cd android && gradlew.bat bundleRelease
 ```
@@ -110,7 +119,7 @@ cd android && gradlew.bat bundleRelease
 - `android/keystore.properties` está ignorado por git.
 - El QR se genera localmente con ZXing.
 - La sala nativa valida cada jugada en el anfitrión.
-- Las manos de Dominó se redactan por asiento; el pozo solo viaja como conteo.
+- Las manos privadas se redactan por asiento; el pozo solo viaja como conteo.
 - El replay es autocontenido y no incluye datos personales.
 - El relay online es opcional y debe ser de confianza.
 - El diagnóstico se envía solo si el usuario abre el correo a `emanuel.industri@gmail.com`.
@@ -123,4 +132,4 @@ cd android && gradlew.bat bundleRelease
 3. Mantener este `NEXT.md` actualizado, sin eliminarlo.
 4. No guardar tokens, contraseñas ni keystores en el repositorio.
 5. Antes de publicar: typecheck, tests web, tests Kotlin, build web, APK, AAB, CI/Pages/Android.
-6. No afirmar “100 % Compose” global hasta retirar el WebView. **Estado v1.9.0: los 19 juegos jugables son Compose; el WebView solo queda como respaldo de la PWA y la sala remota.**
+6. No afirmar “100 % Compose” global hasta retirar el WebView. **Estado v2.7.0: los 30 juegos jugables son Compose; el WebView solo queda como respaldo de la PWA y la sala remota.**

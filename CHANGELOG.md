@@ -1,4 +1,41 @@
-﻿# Changelog
+# Changelog
+
+## 2.7.0 · 2026-10-30
+
+La mesa completa.
+
+### Añadido
+
+- **Mahjong americano, Riichi y Mahjong con naipes** nativos en Compose, con cuatro manos, muro, flores, comodines, descartes, pon, chi, kan, ron, tsumo, riichi, furiten, yaku y puntuación por mano.
+- **Luzhanqi** nativo: tablero 5×12, 25 piezas por bando, piezas ocultas, vías, campamentos, ingenieros, minas, bombas y captura de bandera.
+- **Tren Mexicano** nativo: dominó doble 12, 2–8 jugadores, tres rondas, tren propio, tren público, trenes abiertos y bloqueos.
+- **Chickenfoot** nativo: dominó doble 9, 2–8 jugadores, tres rondas y la pata de tres ramas.
+- **Ajedrez para tres** nativo: tablero 12×12, tres ejércitos de 16 piezas, promociones, jaque, eliminación y bots.
+- Historial, PDF, audio, vibración y XP en las mesas nuevas.
+- Textos en español e inglés para las 7 mesas nuevas.
+
+### Cambiado
+
+- El catálogo pasa de **23 a 30 juegos jugables de 30**.
+- Android: `versionCode=29`, `versionName=2.7.0`.
+- El inicio, el catálogo, los ajustes y la portada anuncian la 2.7.0.
+- Mahjong cierra correctamente la partida al terminar la cuarta mano.
+- La mesa de Luzhanqi permite entrar en campamentos vacíos y protege a su ocupante.
+
+### Pruebas
+
+- **146 pruebas Kotlin** verdes y **30 web** verdes: **176 en total**.
+- TypeScript sin errores.
+- Web compilada con Vite 6.4.5.
+- APK debug, APK release firmado y AAB release firmado.
+- Verificación visual en emulador Android 14.
+
+### Pendiente
+
+- Paridad web de los 7 juegos nuevos (la web conserva 15).
+- Relay público con TLS, replays web de todos los juegos y accesibilidad completa.
+- Baseline Profile y prueba en teléfono físico.
+- Los 11 idiomas y las festividades completas en la cáscara nativa.
 
 ## 2.6.0 · 2026-10-30
 

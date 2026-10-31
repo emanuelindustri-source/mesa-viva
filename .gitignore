@@ -13,6 +13,7 @@ i18n-report.txt
 
 # Android
 android/.gradle/
+android/.kotlin/
 android/build/
 android/app/build/
 android/local.properties
@@ -46,4 +47,5 @@ desktop.ini
 *.log
 npm-debug.log*
 tools/tmp/
+tools/git/
 artifacts/

@@ -1,13 +1,18 @@
-﻿# Mesa Viva · La fiesta se juega en tu mesa
+# Mesa Viva · La fiesta se juega en tu mesa
 
-**Mesa Viva** es una aplicación de juegos de cartas y mesa con alma venezolana. Funciona sin conexión para jugar solo, contra bots o pasando el teléfono; y tiene salas en línea con código y QR para jugar con amigos. La web (15 juegos) y el APK Android (19 juegos nativos) comparten los motores de los juegos que existen en ambos.
+**Mesa Viva** es una aplicación de juegos de cartas y mesa con alma venezolana. Funciona sin conexión para jugar solo, contra bots o pasando el teléfono; y tiene salas en línea con código y QR para jugar con amigos. La web (15 juegos) y el APK Android (30 juegos nativos) comparten los motores de los juegos que existen en ambos.
 
-> Estado actual: **v2.6.0**. **30 juegos en el catálogo** y **23 jugables, todos 100 % Jetpack Compose**: Póker, Caída, Furia de Colores, Dominó, Dados Mentirosos, Ajedrez, Damas, Serpientes y Escaleras, Mancala, Go, Jungle, Ludo, Backgammon, Xiangqi, Damas Chinas, Reversi, Juego Real de Ur, **Brisca**, **Truco**, **Soroban**, **Shogi**, **Janggi** y **Aeroplane Chess**. La cáscara nativa suma **Dominó de 2–4 con manos privadas**, **Brisca y Truco en salas**, **Ludo de 2–4 en sala**, **Damas Chinas de 2–6 en sala**, **salas de hasta 6**, **relay online configurable**, **replays automáticos y visor web**, **audio en las 23 mesas** y **crónica PDF con estadísticas**. Android 16 (API 36), APK/AAB firmados y PWA offline.
+> Estado actual: **v2.7.0**. **30 juegos en el catálogo** y **30 jugables, todos 100 % Jetpack Compose**: Póker, Caída, Furia de Colores, Dominó, Dados Mentirosos, Ajedrez, Damas, Serpientes y Escaleras, Mancala, Go, Jungle, Ludo, Backgammon, Xiangqi, Damas Chinas, Reversi, Juego Real de Ur, **Brisca**, **Truco**, **Soroban**, **Shogi**, **Janggi**, **Aeroplane Chess**, **Mahjong americano**, **Riichi**, **Mahjong con naipes**, **Luzhanqi**, **Tren Mexicano**, **Chickenfoot** y **Ajedrez para tres**. La cáscara nativa suma **Dominó de 2–4 con manos privadas**, **Brisca y Truco en salas**, **Ludo de 2–4 en sala**, **Damas Chinas de 2–6 en sala**, **salas de hasta 6**, **relay online configurable**, **replays automáticos y visor web**, **audio en las 30 mesas** y **crónica PDF con estadísticas**. Android 16 (API 36), APK/AAB firmados y PWA offline.
 
 ---
 
 ## Lo que ya puedes hacer
 
+- **Mahjong nativo (Compose, 3 variantes)**: americano, Riichi y Mahjong con naipes. Cuatro manos, muro de 152 o 136 piezas, flores y comodines, descartes, pon, chi, kan, ron, tsumo, riichi, furiten, yaku y puntuación por mano. Bots, modo pasar el teléfono, historial, PDF y XP.
+- **Luzhanqi nativo (Compose)**: guerra de piezas con niebla en un tablero de 5×12, 25 piezas por bando, vías, campamentos, ingenieros que desactivan minas, bombas y captura de bandera.
+- **Tren Mexicano nativo (Compose)**: dominó doble 12 para 2–8 jugadores, tres rondas, tren propio, tren público, trenes abiertos, pozo y bloqueos.
+- **Chickenfoot nativo (Compose)**: dominó doble 9 para 2–8 jugadores, tres rondas y la pata de tres ramas que da nombre al juego.
+- **Ajedrez para tres nativo (Compose)**: tablero de 12×12, tres ejércitos de 16 piezas, promociones, jaque, eliminación de reinos y bots.
 - **Póker de la casa nativo (Compose)**: Texas Hold'em 2–6 jugadores, ciegas 10/20, cuatro calles, subidas con mínimo, all-in, botes laterales, devolución de apuestas no igualadas, evaluación de la mejor mano de 5 entre 7, showdown y bots con tres dificultades. Solo fichas de práctica: sin dinero real.
 - **Dominó nativo (Compose)**: doble 6, 2–4 jugadores, parejas, pozo, tranca, cierre de mano, meta configurable y bots. Fichas dibujadas con pips, mesa de fieltro, selección de extremo y vibración.
 - **Reversi nativo (Compose)**: 8×8, volteo en ocho direcciones, passing automático, esquinas, movilidad, tres dificultades e historial.
@@ -41,16 +46,16 @@
 - **Modos**: solo contra bots, pasar el teléfono (humanos y bots mezclados), sala en línea con rondas y chat, **salas nativas LAN u online** para Damas, Mancala, Dominó, Serpientes, Brisca, Truco, Ludo y Damas Chinas, y **reconexión automática** del invitado si se cae la conexión.
 - **Progresión**: 10 niveles, XP real por partida, victoria, derrota o empate, con racha y mejor racha; las mesas nativas registran resultados.
 - **Crónica de partida**: últimos 5 movimientos visibles, historial completo en las mesas nativas, **replay con semilla** en Damas y Mancala, reproducción automática, **visor web**, **enlace y archivo de replay** importables y **PDF nativo** con título, fecha, movimientos, estadísticas y paginación. Se guarda en `Descargas/Mesa Viva` y se comparte con Android.
-- **Audio nativo**: música original procedural por festividad y efectos de carta, captura, coronación, dados, victoria y chat en **las 23 mesas**. Sin samples ni licencias externas; respeta los ajustes.
+- **Audio nativo**: música original procedural por festividad y efectos de carta, captura, coronación, dados, victoria y chat en **las 30 mesas**. Sin samples ni licencias externas; respeta los ajustes.
 - **Temas**: Halloween criollo (El Silbón, La Sayona, El Hachero), Navidad, Reyes, Carnaval, San Valentín, San Patricio, Semana Santa, Cruz de Mayo, Corpus Christi, independencia por país y mesa neutral. El acento puede venir de la temporada, del sistema (Material You en Android) o del color dominante del fondo de pantalla.
 - **Idiomas**: español, inglés, portugués de Brasil, portugués de Portugal, alemán, ruso, italiano, francés, chino tradicional, chino simplificado y japonés.
-- **Android**: cáscara nativa en **Jetpack Compose** (Material 3, color dinámico/festividad, inicio, catálogo, niveles, ajustes, sala y navegación), **los 19 juegos nativos** (Serpientes, Dominó, Ajedrez, Ludo, Mancala, Backgammon, Damas, Dados, Go, Jungle, Xiangqi, Damas Chinas, Caída, Furia, Póker, Reversi, Ur, Brisca y Truco), **crónica PDF con estadísticas**, **salas de hasta 4 jugadores**, **relay online**, **escáner QR**, **enlaces `mesaviva://join` y `mesaviva://replay`**, **audio procedural** y `GameWebActivity` como respaldo de la PWA y la sala remota con `WebViewAssetLoader`. El idioma y las preferencias de la cáscara viajan a la web; el perfil vuelve con `ShellSync`. Target Android 16 (API 36), edge-to-edge con insets, back predictivo, APK de release firmado, vibración, sensores para agitar/“lanzar” el teléfono, cámara para QR y guardado de PDF en Descargas.
+- **Android**: cáscara nativa en **Jetpack Compose** (Material 3, color dinámico/festividad, inicio, catálogo, niveles, ajustes, sala y navegación), **los 30 juegos nativos** (los 23 anteriores más Mahjong americano, Riichi, Mahjong con naipes, Luzhanqi, Tren Mexicano, Chickenfoot y Ajedrez para tres), **crónica PDF con estadísticas**, **salas de hasta 4 jugadores**, **relay online**, **escáner QR**, **enlaces `mesaviva://join` y `mesaviva://replay`**, **audio procedural** y `GameWebActivity` como respaldo de la PWA y la sala remota con `WebViewAssetLoader`. El idioma y las preferencias de la cáscara viajan a la web; el perfil vuelve con `ShellSync`. Target Android 16 (API 36), edge-to-edge con insets, back predictivo, APK de release firmado, vibración, sensores para agitar/“lanzar” el teléfono, cámara para QR y guardado de PDF en Descargas.
 - **Privacidad**: sin cuentas, sin anuncios, sin rastreo. Las partidas locales se quedan en el dispositivo. El diagnóstico se envía solo si tú abres el correo.
 - **PWA**: instalable, service worker y funcionamiento offline.
 
 ## Catálogo y roadmap
 
-El catálogo dentro de la app muestra **30 juegos** con su estado y reglas. **23 son jugables** y los otros 7 están marcados como próximos o en investigación: Luzhanqi, Tren Mexicano, Chickenfoot, Mahjong, Riichi, Mahjong con naipes y Ajedrez para tres. No se usan marcas, arte ni reglamentos propietarios de terceros: los nombres comerciales del catálogo son referencias culturales.
+El catálogo dentro de la app muestra **30 juegos** con su estado y reglas. **Los 30 son jugables** y forman parte de la app nativa. No se usan marcas, arte ni reglamentos propietarios de terceros: los nombres comerciales del catálogo son referencias culturales.
 
 ## Arranque rápido (web)
 
@@ -142,7 +147,7 @@ npm run test:relay            # requiere npm run rooms en otra terminal
 python tools/check_i18n.py   # claves usadas vs. catálogo español
 ```
 
-- 30 pruebas de motores web + 93 pruebas Kotlin (juegos, códec de salas con manos privadas, replays, Reversi y Ur). **123 en total**.
+- 30 pruebas de motores web + 146 pruebas Kotlin (juegos, códecs de salas con manos privadas, replays, Mahjong, Luzhanqi, trenes, ajedrez para tres, Reversi y Ur). **176 en total**.
 - TypeScript estricto, sin `any` en la capa de motores.
 - Motor determinista con semilla reproducible.
 - Host autoritativo en red; los clientes solo reciben su vista redactada.
@@ -163,7 +168,7 @@ src/theme/       festividades, Semana Santa/Carnaval, paletas y Material You
 src/i18n/        catálogos y formateo de crónicas
 src/audio/       música generativa y SFX sintetizados
 src/services/    diagnóstico, sensores, háptica, PDF, QR, PWA
-android/         app Android (Compose nativo + 19 juegos Kotlin + salas de 4 + replays + audio + WebView de respaldo)
+android/         app Android (Compose nativo + 30 juegos Kotlin + salas de 6 + replays + audio + WebView de respaldo)
 server/          relay de salas (Node + ws)
 docs/            arquitectura, roadmap, privacidad y seguridad
 ```

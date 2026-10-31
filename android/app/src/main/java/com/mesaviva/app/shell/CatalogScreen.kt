@@ -121,7 +121,7 @@ fun CatalogScreen(
         }
         item {
             Text(
-                "Mesa Viva 2.6.0 · 23 de 30 juegos · Damas Chinas, Ludo, Brisca y Truco en salas · sin anuncios",
+                "Mesa Viva 2.7.0 · 30 de 30 juegos · Mahjong, Riichi, Tren Mexicano y Chickenfoot · sin anuncios",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 8.dp),
