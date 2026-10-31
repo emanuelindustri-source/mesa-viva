@@ -19,7 +19,7 @@
 - [x] 30 juegos jugables de 30, todos 100 % Jetpack Compose.
 - [x] 146 pruebas Kotlin + 30 web = **176 pruebas**.
 - [x] APK debug, APK release firmado y AAB release firmado.
-- [ ] Capturas visuales de las mesas nuevas (recaptura pendiente por inestabilidad del emulador).
+- [x] Evidencia visual en `docs/evidence/v2.7.0/`.
 - [ ] Paridad web de los 7 juegos nuevos (v2.8.0).
 - [ ] Relay público con TLS, replays web de todos los juegos y accesibilidad completa (v2.8.0).
 - [ ] Baseline Profile y prueba en teléfono físico (v2.8.0).

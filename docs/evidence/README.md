@@ -15,6 +15,7 @@ Capturas de las versiones publicadas. Se conservan para auditoría y para que cu
 | v1.6.0 | [`v1.6.0/`](./v1.6.0/) | Serpientes de 4 asientos, relay online, replay exportable e importación |
 | v1.7.0 | [`v1.7.0/`](./v1.7.0/) | Dominó de 4 asientos con manos privadas, replay automático y visor web |
 | v1.8.0 | [`v1.8.0/`](./v1.8.0/) | Catálogo de 30, Reversi y Ur nativos |
+| v2.7.0 | [`v2.7.0/`](./v2.7.0/) | 30/30 jugables, Mahjong, Riichi, Luzhanqi, Tren Mexicano, Chickenfoot y Ajedrez para tres |
 
 Reglas:
 
