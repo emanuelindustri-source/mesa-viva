@@ -53,6 +53,7 @@ def main() -> int:
     parser.add_argument("--aab", default="")
     parser.add_argument("--debug", default="")
     parser.add_argument("--notes", default="")
+    parser.add_argument("--name", default="")
     args = parser.parse_args()
 
     token = os.environ.get("GITHUB_TOKEN", "").strip()
@@ -86,7 +87,7 @@ def main() -> int:
         payload = {
             "tag_name": args.tag,
             "target_commitish": "main",
-            "name": f"Mesa Viva {args.tag} · La mesa completa",
+            "name": args.name or f"Mesa Viva {args.tag}",
             "body": body,
             "draft": False,
             "prerelease": False,
