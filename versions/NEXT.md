@@ -4,7 +4,7 @@
 
 ## Estado actual
 
-- **Versión publicada:** 2.7.0.
+- **Versión publicada:** 2.7.1 (parche de mesa sobre 2.7.0).
 - **Catálogo:** 30 juegos.
 - **Juegos jugables:** 30, todos 100 % Jetpack Compose.
 - **Juegos en WebView:** 0 (el WebView queda como respaldo de la PWA y de la sala remota).
@@ -17,9 +17,9 @@
 - **Portada:** <https://emanuelindustri-source.github.io/mesa-viva/>
 - **Juego web:** <https://emanuelindustri-source.github.io/mesa-viva/play/>
 - **Replay web:** <https://emanuelindustri-source.github.io/mesa-viva/replay/>
-- **Release:** <https://github.com/emanuelindustri-source/mesa-viva/releases/tag/v2.7.0>
-- **VERSION:** `2.7.0`
-- **Android:** `versionCode=29`, `versionName=2.7.0`, compileSdk/targetSdk 36.
+- **Release:** <https://github.com/emanuelindustri-source/mesa-viva/releases/tag/v2.7.1>
+- **VERSION:** `2.7.1`
+- **Android:** `versionCode=30`, `versionName=2.7.1`, compileSdk/targetSdk 36.
 - **Gradle:** 8.14.4.
 
 ### Calidad
@@ -35,11 +35,11 @@
 - La web conserva 15 juegos; la paridad web queda para v2.8.0.
 - Teléfono físico `22101316G`: detectado por `adb`, pero MIUI rechaza la instalación USB.
 
-### Checksums v2.7.0
+### Checksums v2.7.1
 
-- APK release firmado: `8414012DE3103E33454C779A44258F354478FD5BF542833018ED5B417B2678A7` · 11.046.041 bytes.
-- AAB release firmado: `8FD7EB1722C0682091FF30FE3B2F4FE9950C4CF4BD0706087E97EB8FC3CFD741` · 10.675.504 bytes.
-- APK debug: `F8C5C33FABD054D4073019AB131B1D3EAF8BC2B2969211AAD909433E5479C567` · 16.671.605 bytes.
+- APK release firmado: `51E271357DC1B253C40B065159D2F884495332C0863C0074C65F3F0226C9F2D0` · 11.046.041 bytes.
+- AAB release firmado: `0AD277BFE446960435141A2CFF1CC7833A9D28681BDC6B337541C29CE1A311F2` · 10.675.504 bytes.
+- APK debug: `F076F4444A631B4D7C22F75A8B70EE2893B8FC1896106AC389C74040A16910CF` · 16.671.605 bytes.
 - Artefactos locales en `artifacts/`: `mesa-viva-2.7.0-release.apk`, `mesa-viva-2.7.0-release.aab` y `mesa-viva-2.7.0-debug.apk`.
 
 ## Compose

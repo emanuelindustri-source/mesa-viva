@@ -1,5 +1,22 @@
 # Changelog
 
+## 2.7.1 · 2026-10-30
+
+Ajustes de mesa.
+
+### Corregido
+
+- Mahjong conserva las reclamaciones de los bots cuando el humano pasa.
+- Los resultados de mano y ronda se pueden reabrir si se cierra el diálogo.
+- Se corrigieron los textos de las manos de Chickenfoot y Tren Mexicano.
+- Se añadió la ruta de QA `--es screen <id>` para abrir mesas directamente.
+
+### Pruebas
+
+- **146 pruebas Kotlin + 30 web = 176 verdes.**
+- APK debug, APK release firmado y AAB release firmado.
+- `versionCode=30`, `versionName=2.7.1`.
+
 ## 2.7.0 · 2026-10-30
 
 La mesa completa.

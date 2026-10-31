@@ -1,6 +1,16 @@
 ﻿# Roadmap
 
-## v2.7.0 · La mesa completa (actual)
+## v2.7.1 · Ajustes de mesa (actual)
+
+- [x] Reclamaciones de Mahjong por asiento y bots que conservan su turno.
+- [x] Resultado de mano/ronda reabrible en Mahjong, Tren Mexicano y Chickenfoot.
+- [x] Rutas de QA `--es screen <id>`.
+- [x] Textos de manos corregidos.
+- [x] 146 pruebas Kotlin + 30 web = 176 verdes.
+- [x] APK release y AAB firmados.
+- [ ] Paridad web y relay público (v2.8.0).
+
+## v2.7.0 · La mesa completa
 
 - [x] Mahjong americano, Riichi y Mahjong con naipes nativos en Compose.
 - [x] Luzhanqi con piezas ocultas, vías, campamentos, minas y bombas.

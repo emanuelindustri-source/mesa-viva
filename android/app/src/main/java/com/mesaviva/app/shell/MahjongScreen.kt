@@ -509,7 +509,6 @@ private fun MahjongResultDialog(
 ) {
     val finished = board.phase == MahjongPhase.MatchEnd ||
         (board.phase == MahjongPhase.HandEnd && board.round >= MahjongGame.HANDS)
-    val winner = if (finished) game.matchWinner(board) else board.winner
     AlertDialog(
         onDismissRequest = onClose,
         title = {
@@ -517,9 +516,9 @@ private fun MahjongResultDialog(
                 when {
                     finished -> state.t("mahjong.matchOver")
                     board.winner == null -> state.t("mahjong.drawHand")
-                    allHumans -> state.t("mahjong.wonBy", mapOf("name" to MahjongGame.SEAT_NAMES[board.winner!!]))
+                    allHumans -> state.t("mahjong.wonBy", mapOf("name" to MahjongGame.SEAT_NAMES[board.winner]))
                     board.winner == 0 -> state.t("mahjong.youWon")
-                    else -> state.t("mahjong.botWon", mapOf("name" to MahjongGame.BOT_NAMES[(board.winner!! + 2) % 3]))
+                    else -> state.t("mahjong.botWon", mapOf("name" to MahjongGame.BOT_NAMES[(board.winner + 2) % 3]))
                 },
             )
         },
