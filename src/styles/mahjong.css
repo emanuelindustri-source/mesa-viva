@@ -298,6 +298,250 @@
   color: #7fd8b4;
 }
 
+.surface-ur {
+  gap: 6px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.ur-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface-2) 80%, transparent);
+}
+
+.ur-die {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background: #f8f1de;
+  color: #2d2820;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.ur-die.is-rolled {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--gold) 45%, transparent);
+}
+
+.ur-status-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  font-size: 10px;
+}
+
+.ur-status-text strong {
+  font-size: 11px;
+}
+
+.ur-status-text span {
+  color: var(--muted);
+}
+
+.ur-extra {
+  color: var(--gold) !important;
+}
+
+.ur-capture {
+  color: #e87373 !important;
+}
+
+.ur-score {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--muted);
+  font-size: 10px;
+  text-align: right;
+}
+
+.ur-starts {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ur-start {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  font-size: 9px;
+  color: var(--muted);
+}
+
+.ur-start > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.ur-start.is-white {
+  background: color-mix(in srgb, #f8f1de 12%, transparent);
+}
+
+.ur-start.is-black {
+  background: color-mix(in srgb, #2d2820 22%, transparent);
+}
+
+.ur-track {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 3px;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #173d2e;
+}
+
+.ur-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 2px;
+  border: 1px solid #3d5c52;
+  border-radius: 6px;
+  background: #0f2e24;
+}
+
+.ur-cell.is-rosette {
+  border-color: var(--gold);
+  background: #2b3a1d;
+}
+
+.ur-cell.is-last {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--gold) 55%, transparent);
+}
+
+.ur-cell.is-goal {
+  border-color: #7fd8b4;
+  background: #123b2e;
+}
+
+.ur-cell-number {
+  position: absolute;
+  top: 2px;
+  left: 3px;
+  color: #7d9b8c;
+  font-size: 7px;
+}
+
+.ur-rosette {
+  color: var(--gold);
+  font-size: 11px;
+}
+
+.ur-cell-pieces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.ur-piece {
+  width: 15px;
+  height: 15px;
+  padding: 0;
+  border: 1px solid #7a6a50;
+  border-radius: 50%;
+  cursor: default;
+}
+
+.ur-piece.is-white {
+  background: #f8f1de;
+}
+
+.ur-piece.is-black {
+  background: #2d2820;
+  border-color: #9c8e70;
+}
+
+.ur-piece.is-playable {
+  cursor: pointer;
+  box-shadow: 0 0 0 2px var(--gold);
+}
+
+.ur-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+@media (max-width: 420px) {
+  .ur-track {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.surface-boardgame {
+  gap: 6px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.boardgame-frame {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface-2) 82%, transparent);
+}
+
+.board-cell.tone-camp {
+  background: color-mix(in srgb, #8bc34a 24%, var(--surface));
+}
+
+.board-cell.tone-rail {
+  background: color-mix(in srgb, #e0a63a 16%, var(--surface));
+}
+
+.board-cell.tone-hq {
+  border-color: var(--gold);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold) 55%, transparent);
+}
+
+.board-cell.side-r .cell-glyph {
+  color: #d64b4b;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.board-cell.side-b .cell-glyph {
+  color: #7aa7ff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.boardgame-frame .board {
+  width: 100%;
+}
+
+.boardgame-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 @media (max-width: 420px) {
   .mj-opponents {
     grid-template-columns: repeat(3, minmax(0, 1fr));

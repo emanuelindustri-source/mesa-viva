@@ -1,15 +1,16 @@
 # Mesa Viva · La fiesta se juega en tu mesa
 
-**Mesa Viva** es una aplicación de juegos de cartas y mesa con alma venezolana. Funciona sin conexión para jugar solo, contra bots o pasando el teléfono; y tiene salas en línea con código y QR para jugar con amigos. La web (18 juegos) y el APK Android (30 juegos nativos) comparten los motores de los juegos que existen en ambos.
+**Mesa Viva** es una aplicación de juegos de cartas y mesa con alma venezolana. Funciona sin conexión para jugar solo, contra bots o pasando el teléfono; y tiene salas en línea con código y QR para jugar con amigos. La web (22 juegos) y el APK Android (30 juegos nativos) comparten los motores de los juegos que existen en ambos.
 
-> Estado actual: **v2.8.0**. **Puente web y cultura:** Mahjong americano, Riichi y Mahjong con naipes ya se juegan en el navegador; la app suma festividades por país y diagnóstico con envío automático opcional. **La web tiene 18 juegos jugables** y **la app Android 30 de 30, todos 100 % Jetpack Compose**: Póker, Caída, Furia de Colores, Dominó, Dados Mentirosos, Ajedrez, Damas, Serpientes y Escaleras, Mancala, Go, Jungle, Ludo, Backgammon, Xiangqi, Damas Chinas, Reversi, Juego Real de Ur, **Brisca**, **Truco**, **Soroban**, **Shogi**, **Janggi**, **Aeroplane Chess**, **Mahjong americano**, **Riichi**, **Mahjong con naipes**, **Luzhanqi**, **Tren Mexicano**, **Chickenfoot** y **Ajedrez para tres**. La cáscara nativa suma **Dominó de 2–4 con manos privadas**, **Brisca y Truco en salas**, **Ludo de 2–4 en sala**, **Damas Chinas de 2–6 en sala**, **salas de hasta 6**, **relay online configurable**, **replays automáticos y visor web**, **audio en las 30 mesas** y **crónica PDF con estadísticas**. Android 16 (API 36), APK/AAB firmados y PWA offline.
+> Estado actual: **v2.9.0**. **Tableros en la web:** Reversi, Juego Real de Ur, Luzhanqi y Ajedrez para tres ya se juegan en el navegador. **La web tiene 22 juegos jugables** y **la app Android 30 de 30, todos 100 % Jetpack Compose**: Póker, Caída, Furia de Colores, Dominó, Dados Mentirosos, Ajedrez, Damas, Serpientes y Escaleras, Mancala, Go, Jungle, Ludo, Backgammon, Xiangqi, Damas Chinas, Reversi, Juego Real de Ur, **Brisca**, **Truco**, **Soroban**, **Shogi**, **Janggi**, **Aeroplane Chess**, **Mahjong americano**, **Riichi**, **Mahjong con naipes**, **Luzhanqi**, **Tren Mexicano**, **Chickenfoot** y **Ajedrez para tres**. La cáscara nativa suma **Dominó de 2–4 con manos privadas**, **Brisca y Truco en salas**, **Ludo de 2–4 en sala**, **Damas Chinas de 2–6 en sala**, **salas de hasta 6**, **relay online configurable**, **replays automáticos y visor web**, **audio en las 30 mesas** y **crónica PDF con estadísticas**. Android 16 (API 36), APK/AAB firmados y PWA offline.
 
 ---
 
 ## Lo que ya puedes hacer
 
 - **Mahjong nativo (Compose, 3 variantes)**: americano, Riichi y Mahjong con naipes. Cuatro manos, muro de 152 o 136 piezas, flores y comodines, descartes, pon, chi, kan, ron, tsumo, riichi, furiten, yaku y puntuación por mano. Bots, modo pasar el teléfono, historial, PDF y XP.
-- **Mahjong web (3 variantes)**: la misma mesa en el navegador, con rivales, melds, río de descartes, flores, mano, bots y modo pasar el teléfono. La web sube a 18 juegos jugables.
+- **Mahjong web (3 variantes)**: la misma mesa en el navegador, con rivales, melds, río de descartes, flores, mano, bots y modo pasar el teléfono. La web sube a 22 juegos jugables.
+- **Tableros web**: Reversi 8×8, Juego Real de Ur de 20 casillas, Luzhanqi con niebla y Ajedrez para tres de 12×12. Comparten una superficie de tablero, bots e historial.
 - **Luzhanqi nativo (Compose)**: guerra de piezas con niebla en un tablero de 5×12, 25 piezas por bando, vías, campamentos, ingenieros que desactivan minas, bombas y captura de bandera.
 - **Tren Mexicano nativo (Compose)**: dominó doble 12 para 2–8 jugadores, tres rondas, tren propio, tren público, trenes abiertos, pozo y bloqueos.
 - **Chickenfoot nativo (Compose)**: dominó doble 9 para 2–8 jugadores, tres rondas y la pata de tres ramas que da nombre al juego.
@@ -148,7 +149,7 @@ npm run test:relay            # requiere npm run rooms en otra terminal
 python tools/check_i18n.py   # claves usadas vs. catálogo español
 ```
 
-- 38 pruebas de motores web + 153 pruebas Kotlin (juegos, códecs de salas con manos privadas, replays, Mahjong, Luzhanqi, trenes, ajedrez para tres, festividades, Reversi y Ur). **191 en total**.
+- 50 pruebas de motores web + 153 pruebas Kotlin (juegos, códecs de salas con manos privadas, replays, Mahjong, Luzhanqi, trenes, ajedrez para tres, festividades, Reversi y Ur). **203 en total**.
 - TypeScript estricto, sin `any` en la capa de motores.
 - Motor determinista con semilla reproducible.
 - Host autoritativo en red; los clientes solo reciben su vista redactada.
@@ -161,10 +162,12 @@ python tools/check_i18n.py   # claves usadas vs. catálogo español
 
 ```
 src/core/        tipos, azar, niveles, registro, Match autoritativo
-src/games/       motores de los 18 juegos web
+src/games/       motores de los 22 juegos web
 src/games/mahjong.ts  motor web de Mahjong (3 variantes)
+src/games/reversi.ts, ur.ts, luzhanqi.ts, threechess.ts  tableros web
 src/ui/          pantallas, mesa, cartas, dados, tablero, resultados
 src/ui/MahjongSurface.tsx  mesa web de Mahjong
+src/ui/BoardGameSurface.tsx  superficie de tablero compartida
 landing/         portada estática, versiones, descargas y visor de replays
 src/net/         protocolo de sala y relay WebSocket
 src/theme/       festividades, Semana Santa/Carnaval, paletas y Material You

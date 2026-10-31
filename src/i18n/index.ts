@@ -160,6 +160,9 @@ export function formatLog(event: LogEvent, tr: (key: string, params?: Record<str
   if (typeof params.kind === 'string' && ['ron', 'pon', 'chi', 'kan'].includes(params.kind)) {
     params.kind = tr(`mahjong.${params.kind}`);
   }
+  if (typeof params.captured === 'string' && ['king', 'queen', 'rook', 'bishop', 'knight', 'pawn'].includes(params.captured)) {
+    params.captured = ` (×${tr(`three.piece.${params.captured}`)})`;
+  }
   if (typeof params.canto === 'string' && params.canto.length > 0) {
     params.canto = tr(`canto.${params.canto}`);
   }

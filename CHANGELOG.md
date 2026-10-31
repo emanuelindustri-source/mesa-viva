@@ -1,5 +1,39 @@
 # Changelog
 
+## 2.9.0 · 2026-10-31
+
+Tableros en la web.
+
+### Añadido
+
+- **Reversi web**: tablero 8×8, volteo, passing, bots y conteo final.
+- **Juego Real de Ur web**: pista de 20 casillas, rosetas, capturas, dado y meta exacta.
+- **Luzhanqi web**: niebla, vías, campamentos, ingeniero, minas, bombas y bandera.
+- **Ajedrez para tres web**: tablero 12×12, tres ejércitos, promociones y eliminación.
+- **Superficie de tablero compartida** para los juegos de rejilla.
+- 12 pruebas nuevas de los cuatro tableros.
+
+### Cambiado
+
+- La web pasa de **18 a 22 juegos jugables**.
+- Android: `versionCode=32`, `versionName=2.9.0`.
+- `APP_VERSION` web 2.9.0 y `GAMES_COUNT` 22.
+- Los eventos del historial ya no se duplican en los motores nuevos.
+- Inicio, catálogo, ajustes y portada muestran la 2.9.0.
+
+### Pruebas
+
+- **153 pruebas Kotlin** verdes y **50 web** verdes: **203 en total**.
+- TypeScript sin errores y build web correcto.
+- Reversi probado en navegador con volteo y respuesta del bot.
+- APK debug, APK release firmado y AAB release firmado.
+
+### Pendiente
+
+- Los 8 juegos web restantes para 30/30.
+- Relay público con TLS, replays web de todos los juegos y accesibilidad completa.
+- 11 idiomas nativos, Baseline Profile y teléfono físico.
+
 ## 2.8.0 · 2026-10-31
 
 Puente web y cultura.

@@ -15,6 +15,10 @@ import { xiangqiModule } from '../games/xiangqi';
 import { chinoModule } from '../games/chino';
 import { pokerModule } from '../games/poker';
 import { mahjongCardsModule, mahjongModule, riichiModule } from '../games/mahjong';
+import { reversiModule } from '../games/reversi';
+import { urModule } from '../games/ur';
+import { luzhanqiModule } from '../games/luzhanqi';
+import { threeChessModule } from '../games/threechess';
 
 export const GAME_MODULES: Record<GameId, GameModule<unknown>> = {
   caida: caidaModule as unknown as GameModule<unknown>,
@@ -35,6 +39,10 @@ export const GAME_MODULES: Record<GameId, GameModule<unknown>> = {
   mahjong: mahjongModule as unknown as GameModule<unknown>,
   riichi: riichiModule as unknown as GameModule<unknown>,
   'mahjong-cards': mahjongCardsModule as unknown as GameModule<unknown>,
+  reversi: reversiModule as unknown as GameModule<unknown>,
+  ur: urModule as unknown as GameModule<unknown>,
+  luzhanqi: luzhanqiModule as unknown as GameModule<unknown>,
+  'three-chess': threeChessModule as unknown as GameModule<unknown>,
 };
 
 export const GAMES: GameMeta[] = Object.values(GAME_MODULES).map((m) => m.meta);
@@ -78,8 +86,9 @@ export const CATALOG: CatalogEntry[] = [
   { id: 'shogi', name: 'Shogi', category: 'tablero', status: 'soon', players: '2', emoji: '☗', url: 'https://www.ymimports.com/pages/how-to-play-shogi' },
   { id: 'janggi', name: 'Janggi', category: 'tablero', status: 'research', players: '2', emoji: '🀄', url: 'https://www.ymimports.com/pages/how-to-play-janggi' },
   { id: 'jungle', name: 'Jungle', category: 'tablero', status: 'playable', players: '2', emoji: '🐯', url: 'https://www.ymimports.com/pages/how-to-play-jungle', note: 'Dou Shou Qi: río, trampas y saltos de tigre y león.' },
-  { id: 'luzhanqi', name: 'Luzhanqi', category: 'tablero', status: 'research', players: '2–4', emoji: '🎖️', url: 'https://www.ymimports.com/pages/how-to-play-luzhanqi' },
-  { id: 'ur', name: 'Juego Real de Ur', category: 'tablero', status: 'soon', players: '2', emoji: '🏺', url: 'https://www.ymimports.com/pages/how-to-play-royal-game-of-ur' },
+  { id: 'reversi', name: 'Reversi', category: 'tablero', status: 'playable', players: '2', emoji: '⚫', note: 'Voltea fichas en ocho direcciones y controla las esquinas.' },
+  { id: 'luzhanqi', name: 'Luzhanqi', category: 'tablero', status: 'playable', players: '2', emoji: '🎖️', url: 'https://www.ymimports.com/pages/how-to-play-luzhanqi', note: 'Guerra de piezas con niebla, vías y campamentos.' },
+  { id: 'ur', name: 'Juego Real de Ur', category: 'tablero', status: 'playable', players: '2', emoji: '🏺', url: 'https://www.ymimports.com/pages/how-to-play-royal-game-of-ur', note: 'Carrera de 20 casillas con rosetas, capturas y llegada exacta.' },
   { id: 'mexican-train', name: 'Tren Mexicano', category: 'tablero', status: 'soon', players: '2–8', emoji: '🚂', url: 'https://www.ymimports.com/pages/how-to-play-mexican-train-dominos' },
   { id: 'chickenfoot', name: 'Chickenfoot', category: 'tablero', status: 'soon', players: '2–8', emoji: '🐔', url: 'https://www.ymimports.com/pages/how-to-play-chickenfoot-dominoes' },
   { id: 'aeroplane', name: 'Aeroplane Chess', category: 'tablero', status: 'soon', players: '2–4', emoji: '✈️', url: 'https://www.ymimports.com/pages/how-to-play-aeroplane-chess-fei-xing-qi' },
@@ -87,6 +96,6 @@ export const CATALOG: CatalogEntry[] = [
   { id: 'mahjong', name: 'Mahjong', category: 'tablero', status: 'playable', players: '4', emoji: '🀄', url: 'https://www.ymimports.com/pages/how-to-play-american-mahjong', note: 'Mahjong americano con flores, comodines, pon, kan y ron.' },
   { id: 'riichi', name: 'Riichi Mahjong', category: 'tablero', status: 'playable', players: '4', emoji: '🀄', url: 'https://www.ymimports.com/pages/how-to-play-japanese-riichi-mahjong', note: 'Riichi con chi, furiten y yaku.' },
   { id: 'mahjong-cards', name: 'Mahjong con naipes', category: 'cartas', status: 'playable', players: '4', emoji: '🃏', url: 'https://www.ymimports.com/pages/american-mahjong-playing-cards-edition', note: 'La edición de naipes del mahjong americano.' },
-  { id: 'three-chess', name: 'Ajedrez para tres', category: 'tablero', status: 'research', players: '3', emoji: '♞', url: 'https://www.ymimports.com/pages/how-to-play-three-player-chess' },
+  { id: 'three-chess', name: 'Ajedrez para tres', category: 'tablero', status: 'playable', players: '3', emoji: '♞', url: 'https://www.ymimports.com/pages/how-to-play-three-player-chess', note: 'Tres ejércitos en un tablero de 12×12, con promociones y eliminación.' },
   { id: 'soroban', name: 'Soroban', category: 'herramienta', status: 'soon', players: '1', emoji: '🧮', url: 'https://www.ymimports.com/pages/how-to-use-a-soroban-abacus' },
 ];

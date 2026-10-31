@@ -4,10 +4,10 @@
 
 ## Estado actual
 
-- **Versión publicada:** 2.8.0.
+- **Versión publicada:** 2.9.0.
 - **Catálogo:** 30 juegos.
 - **Juegos jugables Android:** 30, todos 100 % Jetpack Compose.
-- **Juegos jugables web:** 18 (los 15 anteriores más Mahjong americano, Riichi y Mahjong con naipes).
+- **Juegos jugables web:** 22 (los 15 anteriores más Mahjong americano, Riichi, Mahjong con naipes, Reversi, Ur, Luzhanqi y Ajedrez para tres).
 - **Juegos en WebView:** 0 (el WebView queda como respaldo de la PWA y de la sala remota).
 - **Salas nativas:** Damas y Mancala (2), Dominó (2–4), Serpientes (2–4), Brisca (2–4), Truco (2), Ludo (2–4) y Damas Chinas (2–6), por LAN o relay online configurable.
 - **Manos privadas:** Dominó, Brisca y Truco.
@@ -20,28 +20,28 @@
 - **Portada:** <https://emanuelindustri-source.github.io/mesa-viva/>
 - **Juego web:** <https://emanuelindustri-source.github.io/mesa-viva/play/>
 - **Replay web:** <https://emanuelindustri-source.github.io/mesa-viva/replay/>
-- **Release:** <https://github.com/emanuelindustri-source/mesa-viva/releases/tag/v2.8.0>
-- **VERSION:** `2.8.0`
-- **Android:** `versionCode=31`, `versionName=2.8.0`, compileSdk/targetSdk 36.
+- **Release:** <https://github.com/emanuelindustri-source/mesa-viva/releases/tag/v2.9.0>
+- **VERSION:** `2.9.0`
+- **Android:** `versionCode=32`, `versionName=2.9.0`, compileSdk/targetSdk 36.
 - **Gradle:** 8.14.4.
 
 ### Calidad
 
-- 38/38 pruebas de motores web (30 base + 8 de Mahjong).
+- 50/50 pruebas de motores web (30 base + 8 de Mahjong + 12 de tableros).
 - 153/153 pruebas Kotlin (146 base + 7 de festividades).
-- **191 pruebas en total.**
+- **203 pruebas en total.**
 - TypeScript sin errores.
 - Web compilada con Vite 6.4.5 y sincronizada dentro del APK.
 - APK debug, APK release firmado y AAB release firmado.
 - Mahjong web probado en navegador: descarte humano, tres bots, robo y turno de vuelta sin errores de consola.
 - Teléfono físico `22101316G`: detectado por `adb`, pero MIUI rechaza la instalación USB.
 
-### Checksums v2.8.0
+### Checksums v2.9.0
 
-- APK release firmado: `7D2BADEEB555DA501CD906B08A431047BEA4B793BBE24539BD01E841AFE6DD9C` · 11.070.513 bytes.
-- AAB release firmado: `411D7300561C305A2933700621DB3AFB90EA19E26D73D43447443548EC434966` · 10.687.086 bytes.
-- APK debug: `3D7F6532B4070BB8EBFB1AEF488320F48285AA3F2025FB1F872F98A4CA4DF69E` · 14.917.366 bytes.
-- Artefactos locales en `artifacts/`: `mesa-viva-2.8.0-release.apk`, `mesa-viva-2.8.0-release.aab` y `mesa-viva-2.8.0-debug.apk`.
+- APK release firmado: `D1C4646388C9899BAD075BC6758F5E295205424BCFC1F3DDF51E5C1706D02735` · 11.081.077 bytes.
+- AAB release firmado: `5A829B08C81CA376F673E7774CCC88716FCA3BA060D7C937018391A72D1EF37B` · 10.697.911 bytes.
+- APK debug: `1F89FCEA676DABDFC43F80D477EDD595F80B83952042521E0A4BB9DA013D31C0` · 15.202.814 bytes.
+- Artefactos locales en `artifacts/`: `mesa-viva-2.9.0-release.apk`, `mesa-viva-2.9.0-release.aab` y `mesa-viva-2.9.0-debug.apk`.
 
 ## Web
 
@@ -49,7 +49,8 @@
 - Motor TypeScript con muro de 152/136, flores, comodines, pon, chi, kan, ron, tsumo, riichi, furiten y yaku.
 - Mesa web propia con rivales, melds, río de descartes, flores y mano.
 - Bots y modo pasar el teléfono.
-- 18 juegos jugables; faltan 12 para la paridad total.
+- Reversi, Ur, Luzhanqi y Ajedrez para tres jugables en la web.
+- 22 juegos jugables; faltan 8 para la paridad total.
 
 ## Compose
 
@@ -63,11 +64,11 @@
 - **Accesibilidad:** cartas, fichas, casillas, puntos y tableros descritos.
 - **Pendiente:** 11 idiomas nativos, accesibilidad completa, Baseline Profile, relay público y teléfono físico.
 
-## Siguiente versión: 2.9.0
+## Siguiente versión: 2.10.0
 
-Ver [`v2.9.0.md`](./v2.9.0.md). Incluye:
+Ver [`v2.10.0.md`](./v2.10.0.md). Incluye:
 
-1. Portar los 12 juegos web restantes hasta 30/30.
+1. Portar los 8 juegos web restantes hasta 30/30.
 2. Relay público con TLS y moderación.
 3. Replays web de todos los juegos.
 4. 11 idiomas y festividades completas en la cáscara nativa.
@@ -78,9 +79,14 @@ Ver [`v2.9.0.md`](./v2.9.0.md). Incluye:
 
 | Ruta | Contenido |
 |---|---|
-| `src/games/` | 18 motores web |
+| `src/games/` | 22 motores web |
 | `src/games/mahjong.ts` | Motor web de Mahjong (3 variantes) |
+| `src/games/reversi.ts` | Motor web de Reversi |
+| `src/games/ur.ts` | Motor web del Juego Real de Ur |
+| `src/games/luzhanqi.ts` | Motor web de Luzhanqi |
+| `src/games/threechess.ts` | Motor web del Ajedrez para tres |
 | `src/ui/MahjongSurface.tsx` | Mesa web de Mahjong |
+| `src/ui/BoardGameSurface.tsx` | Superficie web de tablero compartida |
 | `src/styles/mahjong.css` | Estilos de la mesa web |
 | `src/ui/GameSurface.tsx` | Superficies web |
 | `src/core/` | Tipos, registro, Match autoritativo, niveles |
@@ -140,4 +146,4 @@ cd android && gradlew.bat bundleRelease
 3. Mantener este `NEXT.md` actualizado, sin eliminarlo.
 4. No guardar tokens, contraseñas ni keystores en el repositorio.
 5. Antes de publicar: typecheck, tests web, tests Kotlin, build web, APK, AAB, CI/Pages/Android.
-6. No afirmar “100 % Compose” global hasta retirar el WebView. **Estado v2.8.0: los 30 juegos jugables Android son Compose; el WebView solo queda como respaldo de la PWA y la sala remota.**
+6. No afirmar “100 % Compose” global hasta retirar el WebView. **Estado v2.9.0: los 30 juegos jugables Android son Compose; el WebView solo queda como respaldo de la PWA y la sala remota.**

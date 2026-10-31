@@ -668,10 +668,11 @@ function mahjongView(state: MahjongState, viewerId: string, id: 'mahjong' | 'rii
 
 function mahjongAct(state: MahjongState, action: GameAction, actorId: string): ActResult<MahjongState> {
   if (state.phase === 'matchEnd') return { state, events: [], error: 'error.matchOver' };
+  const before = state.log.length;
   if (action.type === 'nextHand') {
     if (state.phase !== 'handEnd') return { state, events: [], error: 'error.invalidAction' };
     const next = nextHand(state);
-    return { state: next, events: next.log.slice(-2) };
+    return { state: next, events: next.log.slice(before) };
   }
   const actor = playerOf(state, actorId);
   if (!actor) return { state, events: [], error: 'error.notYourTurn' };
@@ -681,7 +682,7 @@ function mahjongAct(state: MahjongState, action: GameAction, actorId: string): A
     const claim = state.pending.find((value) => value.seatId === actorId && value.kind === kind);
     if (!claim) return { state, events: [], error: 'error.invalidAction' };
     const next = applyClaim(state, claim);
-    return { state: next, events: next.log.slice(-2) };
+    return { state: next, events: next.log.slice(before) };
   }
 
   if (action.type === 'pass') {
@@ -692,7 +693,7 @@ function mahjongAct(state: MahjongState, action: GameAction, actorId: string): A
       const nextSeat = nextClaim ? state.seats.find((seat) => seat.id === nextClaim.seatId) : undefined;
       if (nextClaim && nextSeat?.isBot) {
         const next = applyClaim(state, nextClaim);
-        return { state: next, events: next.log.slice(-2) };
+        return { state: next, events: next.log.slice(before) };
       }
       if (nextClaim) {
         return {
@@ -708,7 +709,7 @@ function mahjongAct(state: MahjongState, action: GameAction, actorId: string): A
     }
     const fromIndex = state.lastDiscardBy ? seatIndex(state, state.lastDiscardBy) : state.turn;
     const next = advanceFrom({ ...state, pending: [], lastDiscard: undefined }, fromIndex);
-    return { state: next, events: next.log.slice(-2) };
+    return { state: next, events: next.log.slice(before) };
   }
 
   if (state.pending.length > 0) return { state, events: [], error: 'error.notYourTurn' };
@@ -722,7 +723,7 @@ function mahjongAct(state: MahjongState, action: GameAction, actorId: string): A
       return { state, events: [], error: 'error.invalidAction' };
     }
     const next = settle(state, actorId, state.drawn, true);
-    return { state: next, events: next.log.slice(-1) };
+    return { state: next, events: next.log.slice(before) };
   }
 
   if (action.type === 'riichi') {
@@ -756,18 +757,18 @@ function mahjongAct(state: MahjongState, action: GameAction, actorId: string): A
     const ron = claims.find((claim) => claim.kind === 'ron');
     if (ron) {
       const next = settle(base, ron.seatId, tileValue, false);
-      return { state: next, events: next.log.slice(-2) };
+      return { state: next, events: next.log.slice(before) };
     }
     if (claims.length === 0) {
       const next = advance(base);
-      return { state: next, events: base.log.slice(-1) };
+      return { state: next, events: base.log.slice(before) };
     }
     const top = claims[0];
     if (top) {
       const topSeat = state.seats.find((seat) => seat.id === top.seatId);
       if (topSeat?.isBot) {
         const next = applyClaim({ ...base, pending: claims }, top);
-        return { state: next, events: next.log.slice(-2) };
+        return { state: next, events: next.log.slice(before) };
       }
       return {
         state: {
@@ -775,11 +776,11 @@ function mahjongAct(state: MahjongState, action: GameAction, actorId: string): A
           pending: claims,
           turn: seatIndex(state, top.seatId),
         },
-        events: base.log.slice(-1),
+        events: base.log.slice(before),
       };
     }
     const next = advance(base);
-    return { state: next, events: base.log.slice(-1) };
+    return { state: next, events: base.log.slice(before) };
   }
 
   return { state, events: [], error: 'error.invalidAction' };

@@ -121,7 +121,7 @@ fun CatalogScreen(
         }
         item {
             Text(
-                "Mesa Viva 2.8.0 · 30 de 30 juegos · Mahjong web, festividades y diagnóstico · sin anuncios",
+                "Mesa Viva 2.9.0 · 30 juegos Android · 22 en web · Reversi, Ur, Luzhanqi y Ajedrez para tres · sin anuncios",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 8.dp),

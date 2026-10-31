@@ -18,7 +18,11 @@ export type GameId =
   | 'poker'
   | 'mahjong'
   | 'riichi'
-  | 'mahjong-cards';
+  | 'mahjong-cards'
+  | 'reversi'
+  | 'ur'
+  | 'luzhanqi'
+  | 'three-chess';
 
 export type Difficulty = 'easy' | 'normal' | 'hard';
 export type GameCategory = 'cartas' | 'tablero' | 'dados';

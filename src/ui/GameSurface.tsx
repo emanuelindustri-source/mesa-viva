@@ -14,6 +14,8 @@ import { haptic } from '../services/haptics';
 import { sfx } from '../audio/engine';
 import { LUDO_HOME, LUDO_START, LUDO_TRACK, ludoTokenCoord, type LudoColor, type LudoToken } from '../games/ludo';
 import { MahjongSurface } from './MahjongSurface';
+import { BoardGameSurface } from './BoardGameSurface';
+import { UrSurface } from './UrSurface';
 
 export interface SurfaceProps {
   view: GameView;
@@ -1635,6 +1637,13 @@ export function GameSurface({ view, act, busy }: SurfaceProps) {
     case 'riichi':
     case 'mahjong-cards':
       return <MahjongSurface view={view} act={act} busy={busy} />;
+    case 'reversi':
+      return <BoardGameSurface view={view} act={act} busy={busy} />;
+    case 'ur':
+      return <UrSurface view={view} act={act} busy={busy} />;
+    case 'luzhanqi':
+    case 'three-chess':
+      return <BoardGameSurface view={view} act={act} busy={busy} />;
     default:
       return (
         <div className="surface surface-fallback">

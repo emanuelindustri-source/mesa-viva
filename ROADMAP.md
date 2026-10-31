@@ -1,6 +1,16 @@
 ﻿# Roadmap
 
-## v2.8.0 · Puente web y cultura (actual)
+## v2.9.0 · Tableros en la web (actual)
+
+- [x] Reversi, Ur, Luzhanqi y Ajedrez para tres jugables en la web.
+- [x] La web pasa de 18 a 22 juegos.
+- [x] Superficie de tablero compartida.
+- [x] Historial sin eventos duplicados.
+- [x] 153 pruebas Kotlin + 50 web = **203 pruebas**.
+- [x] APK release y AAB firmados.
+- [ ] 8 juegos web restantes y relay público (v2.10.0).
+
+## v2.8.0 · Puente web y cultura (anterior)
 
 - [x] Mahjong americano, Riichi y Mahjong con naipes jugables en la web.
 - [x] La web pasa de 15 a 18 juegos.
@@ -10,7 +20,7 @@
 - [x] Algoritmo de Pascua corregido (divisor 451).
 - [x] 153 pruebas Kotlin + 38 web = **191 pruebas**.
 - [x] APK release y AAB firmados.
-- [ ] 12 juegos web restantes y relay público (v2.9.0).
+- [x] Tableros web de Reversi, Ur, Luzhanqi y tres (v2.9.0).
 
 ## v2.7.1 · Ajustes de mesa (anterior)
 
