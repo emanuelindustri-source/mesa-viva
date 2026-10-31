@@ -1,6 +1,18 @@
 ﻿# Roadmap
 
-## v2.3.0 · El ábaco (actual)
+## v2.4.0 · Juegos del mundo (actual)
+
+- [x] Shogi 9×9 con promociones, capturas, drops y jaque.
+- [x] Bots de tres dificultades y modo pasar el teléfono.
+- [x] Historial, PDF y XP.
+- [x] 21 juegos jugables de 30.
+- [x] 141 pruebas verdes (30 web + 111 Kotlin).
+- [x] APK y AAB de release firmados.
+- [x] Evidencia visual en `docs/evidence/v2.4.0/`.
+- [ ] Janggi, Mahjong y los 7 juegos restantes (v2.5.0).
+- [ ] Relay público, replays web y accesibilidad completa (v2.5.0).
+
+## v2.3.0 · El ábaco
 
 - [x] Soroban jugable de 13 varillas con 10 retos.
 - [x] Puntuación, racha, historial, PDF y XP.
@@ -8,8 +20,8 @@
 - [x] 138 pruebas verdes (30 web + 108 Kotlin).
 - [x] APK y AAB de release firmados.
 - [x] Evidencia visual en `docs/evidence/v2.3.0/`.
-- [ ] Shogi, Janggi, Mahjong y el resto del catálogo (v2.4.0).
-- [ ] Relay público, replays web y accesibilidad completa (v2.4.0).
+- [x] Shogi jugable (v2.4.0).
+- [ ] Janggi y Mahjong (v2.5.0).
 
 ## v2.2.0 · La estrella conectada
 

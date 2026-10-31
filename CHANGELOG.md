@@ -1,5 +1,30 @@
 ﻿# Changelog
 
+## 2.4.0 · 2026-10-30
+
+Juegos del mundo.
+
+### Añadido
+
+- **Shogi nativo**: tablero 9×9, ocho piezas japonesas y promociones.
+- Capturas que pasan a la mano, drops y restricciones de peón/lanza/caballo/nifu.
+- Jaque, jugadas legales y mate comprobados con el rey a salvo.
+- Bots easy, normal y hard, modo pasar el teléfono, historial, PDF y XP.
+- Mesa con kanji, selección, destinos legales y diálogo de promoción.
+- 3 pruebas nuevas de Shogi.
+- El catálogo llega a **21 juegos jugables de 30**.
+
+### Cambiado
+
+- Android: `versionCode=26`, `versionName=2.4.0`.
+- El inicio, catálogo y ajustes muestran 21 juegos y la versión 2.4.0.
+
+### Pendiente
+
+- Janggi, Mahjong y los 7 juegos restantes.
+- Relay público, replays web y accesibilidad completa.
+- Teléfono físico.
+
 ## 2.3.0 · 2026-10-30
 
 El ábaco.

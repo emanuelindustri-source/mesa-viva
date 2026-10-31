@@ -940,4 +940,43 @@ class NativeGamesTest {
         assertTrue(state.score > 0)
         assertTrue(state.bestStreak >= 1)
     }
+
+    @Test
+    fun `shogi initial board has forty pieces and legal moves`() {
+        val game = ShogiGame(seed = 3)
+        val state = game.newMatch()
+        assertEquals(81, state.board.size)
+        assertEquals(40, state.board.count { it != null })
+        assertTrue(game.legalMoves(state).isNotEmpty())
+        assertEquals(0, state.turn)
+    }
+
+    @Test
+    fun `shogi promotes a pawn in the promotion zone`() {
+        val game = ShogiGame(seed = 4)
+        val base = game.newMatch()
+        val board = base.board.toMutableList()
+        board[ShogiGame.index(2, 0)] = ShogiPiece(0, ShogiKind.Pawn)
+        board[ShogiGame.index(6, 0)] = null
+        val state = base.copy(board = board)
+        val move = ShogiMove(ShogiGame.index(2, 0), ShogiGame.index(1, 0), promote = true)
+        val result = game.move(state, move)
+        assertEquals(null, result.error)
+        assertTrue(result.state.board[ShogiGame.index(1, 0)]?.promoted == true)
+    }
+
+    @Test
+    fun `shogi capture adds the piece to the hand`() {
+        val game = ShogiGame(seed = 6)
+        val base = game.newMatch()
+        val board = base.board.toMutableList()
+        board[ShogiGame.index(4, 4)] = ShogiPiece(0, ShogiKind.Rook)
+        board[ShogiGame.index(3, 4)] = ShogiPiece(1, ShogiKind.Pawn)
+        val state = base.copy(board = board)
+        val move = ShogiMove(ShogiGame.index(4, 4), ShogiGame.index(3, 4))
+        val result = game.move(state, move)
+        assertEquals(null, result.error)
+        assertEquals(1, result.state.hands[0][ShogiKind.Pawn])
+        assertEquals(null, result.state.board[ShogiGame.index(4, 4)])
+    }
 }
