@@ -16,6 +16,7 @@ Capturas de las versiones publicadas. Se conservan para auditoría y para que cu
 | v1.7.0 | [`v1.7.0/`](./v1.7.0/) | Dominó de 4 asientos con manos privadas, replay automático y visor web |
 | v1.8.0 | [`v1.8.0/`](./v1.8.0/) | Catálogo de 30, Reversi y Ur nativos |
 | v2.7.0 | [`v2.7.0/`](./v2.7.0/) | 30/30 jugables, Mahjong, Riichi, Luzhanqi, Tren Mexicano, Chickenfoot y Ajedrez para tres |
+| v2.8.0 | [`v2.8.0/`](./v2.8.0/) | Inicio, ajustes 2.8.0 y QA web de Mahjong |
 
 Reglas:
 

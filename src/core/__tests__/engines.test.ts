@@ -45,8 +45,12 @@ describe('núcleo', () => {
   });
 
   it('calcula Pascua y resuelve Halloween criollo', () => {
+    expect(easterSunday(2025).getMonth()).toBe(3);
+    expect(easterSunday(2025).getDate()).toBe(20);
     expect(easterSunday(2026).getMonth()).toBe(3);
     expect(easterSunday(2026).getDate()).toBe(5);
+    expect(easterSunday(2028).getMonth()).toBe(3);
+    expect(easterSunday(2028).getDate()).toBe(16);
     const festival = resolveFestival(new Date(2026, 9, 27), 'VE');
     expect(festival.id).toBe('halloween');
     expect(festival.characters.length).toBeGreaterThan(0);

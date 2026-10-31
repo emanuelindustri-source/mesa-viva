@@ -1,5 +1,39 @@
 # Changelog
 
+## 2.8.0 · 2026-10-31
+
+Puente web y cultura.
+
+### Añadido
+
+- **Mahjong americano, Riichi y Mahjong con naipes en la web**, con muro, flores, comodines, pon, chi, kan, ron, tsumo, riichi, furiten, yaku, bots y modo pasar el teléfono.
+- Mesa web propia de Mahjong: rivales, melds, río de descartes, flores y mano.
+- **Festividades nativas ampliadas**: Semana Santa, Carnaval, Corpus Christi, Cruz de Mayo, Día de Muertos, San Juan e independencia por país.
+- **Música procedural** para Carnaval, Semana Santa, Corpus, Cruz de Mayo y Día de Muertos.
+- **Diagnóstico con envío automático opcional** por `VITE_DIAGNOSTICS_ENDPOINT`, con correo manual como respaldo.
+- 8 pruebas web de Mahjong y 7 pruebas Kotlin de festividades.
+
+### Cambiado
+
+- La web pasa de **15 a 18 juegos jugables**.
+- Android: `versionCode=31`, `versionName=2.8.0`.
+- `APP_VERSION` web 2.8.0 y `GAMES_COUNT` 18.
+- El algoritmo de Pascua usa el divisor correcto **451** en Android y web.
+- Inicio, catálogo, ajustes y portada muestran la 2.8.0.
+
+### Pruebas
+
+- **153 pruebas Kotlin** verdes y **38 web** verdes: **191 en total**.
+- TypeScript sin errores y build web correcto.
+- Mahjong web probado en navegador con descarte, bots y turno completo.
+- APK debug, APK release firmado y AAB release firmado.
+
+### Pendiente
+
+- Los 12 juegos web restantes para 30/30.
+- Relay público con TLS, replays web de todos los juegos y accesibilidad completa.
+- 11 idiomas nativos, Baseline Profile y teléfono físico.
+
 ## 2.7.1 · 2026-10-30
 
 Ajustes de mesa.

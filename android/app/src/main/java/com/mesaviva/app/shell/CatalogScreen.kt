@@ -121,7 +121,7 @@ fun CatalogScreen(
         }
         item {
             Text(
-                "Mesa Viva 2.7.0 · 30 de 30 juegos · Mahjong, Riichi, Tren Mexicano y Chickenfoot · sin anuncios",
+                "Mesa Viva 2.8.0 · 30 de 30 juegos · Mahjong web, festividades y diagnóstico · sin anuncios",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 8.dp),

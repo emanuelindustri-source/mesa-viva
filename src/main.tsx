@@ -10,6 +10,7 @@ import '@fontsource/outfit/700.css';
 import './styles/base.css';
 import './styles/app.css';
 import './styles/table.css';
+import './styles/mahjong.css';
 import './styles/room.css';
 import App from './App';
 import { ErrorBoundary } from './ErrorBoundary';

@@ -15,7 +15,10 @@ export type GameId =
   | 'backgammon'
   | 'xiangqi'
   | 'chino'
-  | 'poker';
+  | 'poker'
+  | 'mahjong'
+  | 'riichi'
+  | 'mahjong-cards';
 
 export type Difficulty = 'easy' | 'normal' | 'hard';
 export type GameCategory = 'cartas' | 'tablero' | 'dados';
@@ -48,6 +51,7 @@ export interface GameOptions {
   seed?: number;
   doubleTwelve?: boolean;
   boardSize?: number;
+  mahjongVariant?: 'american' | 'riichi' | 'cards';
 }
 
 export interface Rng {

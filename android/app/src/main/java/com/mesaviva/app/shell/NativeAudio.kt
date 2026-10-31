@@ -210,11 +210,21 @@ object NativeAudio {
             "san-patricio" -> 293.66
             "independencia" -> 261.63
             "san-juan" -> 246.94
+            "carnaval" -> 293.66
+            "semana-santa" -> 220.0
+            "corpus" -> 261.63
+            "cruz-de-mayo" -> 246.94
+            "dia-de-muertos" -> 220.0
             else -> 261.63
         }
         val scale = when (festivalId) {
             "halloween" -> intArrayOf(0, 2, 3, 5, 7, 8, 10)
             "san-patricio" -> intArrayOf(0, 2, 4, 5, 7, 9, 10)
+            "carnaval" -> intArrayOf(0, 2, 3, 5, 7, 9, 10)
+            "semana-santa" -> intArrayOf(0, 2, 3, 5, 7, 8, 10)
+            "corpus" -> intArrayOf(0, 2, 4, 7, 9)
+            "cruz-de-mayo" -> intArrayOf(0, 2, 4, 5, 7, 9, 11)
+            "dia-de-muertos" -> intArrayOf(0, 2, 3, 5, 7, 8, 11)
             else -> intArrayOf(0, 2, 4, 5, 7, 9, 11)
         }
         val total = (MUSIC_SECONDS * RATE).toInt()

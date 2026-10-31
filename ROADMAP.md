@@ -1,6 +1,18 @@
 ﻿# Roadmap
 
-## v2.7.1 · Ajustes de mesa (actual)
+## v2.8.0 · Puente web y cultura (actual)
+
+- [x] Mahjong americano, Riichi y Mahjong con naipes jugables en la web.
+- [x] La web pasa de 15 a 18 juegos.
+- [x] Semana Santa, Carnaval, Corpus, Cruz de Mayo, Día de Muertos e independencia por país.
+- [x] Música procedural para las festividades nuevas.
+- [x] Diagnóstico con envío automático opcional y respaldo por correo.
+- [x] Algoritmo de Pascua corregido (divisor 451).
+- [x] 153 pruebas Kotlin + 38 web = **191 pruebas**.
+- [x] APK release y AAB firmados.
+- [ ] 12 juegos web restantes y relay público (v2.9.0).
+
+## v2.7.1 · Ajustes de mesa (anterior)
 
 - [x] Reclamaciones de Mahjong por asiento y bots que conservan su turno.
 - [x] Resultado de mano/ronda reabrible en Mahjong, Tren Mexicano y Chickenfoot.
@@ -8,7 +20,7 @@
 - [x] Textos de manos corregidos.
 - [x] 146 pruebas Kotlin + 30 web = 176 verdes.
 - [x] APK release y AAB firmados.
-- [ ] Paridad web y relay público (v2.8.0).
+- [x] Paridad web de Mahjong y festividades (v2.8.0).
 
 ## v2.7.0 · La mesa completa
 

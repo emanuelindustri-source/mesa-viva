@@ -151,8 +151,15 @@ export function formatLog(event: LogEvent, tr: (key: string, params?: Record<str
   const params: Record<string, unknown> = { ...(event.params ?? {}) };
   const card = params.card as CardView | undefined;
   if (card && typeof card === 'object') params.card = cardName(card, tr);
-  const tile = params.tile as { a: number; b: number } | undefined;
-  if (tile && typeof tile === 'object') params.tile = `${tile.a} · ${tile.b}`;
+  const tile = params.tile as { a?: number; b?: number; suit?: string; rank?: number } | undefined;
+  if (tile && typeof tile === 'object') {
+    params.tile = typeof tile.suit === 'string'
+      ? `${tr(`mahjong.suit.${tile.suit}`)} ${tile.rank ?? ''}`.trim()
+      : `${tile.a ?? '—'} · ${tile.b ?? '—'}`;
+  }
+  if (typeof params.kind === 'string' && ['ron', 'pon', 'chi', 'kan'].includes(params.kind)) {
+    params.kind = tr(`mahjong.${params.kind}`);
+  }
   if (typeof params.canto === 'string' && params.canto.length > 0) {
     params.canto = tr(`canto.${params.canto}`);
   }

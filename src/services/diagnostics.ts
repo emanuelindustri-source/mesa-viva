@@ -176,6 +176,42 @@ export function buildReport(note = '', options: { errors?: boolean; actions?: bo
   return lines.join('\n');
 }
 
+export interface SendReportResult {
+  ok: boolean;
+  reason?: string;
+}
+
+/**
+ * Envío automático opcional. Solo se ejecuta cuando la persona pulsa
+ * «Enviar»: no hay telemetría de fondo. Si no hay endpoint configurado,
+ * el llamador cae al correo manual.
+ */
+export async function sendReport(report: string, note = ''): Promise<SendReportResult> {
+  const endpoint = String(import.meta.env.VITE_DIAGNOSTICS_ENDPOINT ?? '').trim();
+  if (!endpoint) return { ok: false, reason: 'no-endpoint' };
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({
+        email: CONTACT_EMAIL,
+        subject: 'Informe de diagnóstico · Mesa Viva',
+        note: note.slice(0, 1200),
+        report: report.slice(0, 20000),
+        version: APP_VERSION,
+      }),
+    });
+    if (!response.ok) return { ok: false, reason: `HTTP ${response.status}` };
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, reason: error instanceof Error ? error.message : 'network' };
+  }
+}
+
+export function hasAutomaticReport(): boolean {
+  return Boolean(String(import.meta.env.VITE_DIAGNOSTICS_ENDPOINT ?? '').trim());
+}
+
 export function mailtoUrl(report: string, note = ''): string {
   const body = `${note ? `${note}\n\n` : ''}${report.slice(0, 6000)}`;
   return `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Informe de diagnóstico · Mesa Viva')}&body=${encodeURIComponent(body)}`;

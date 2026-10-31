@@ -21,7 +21,9 @@ import {
   getErrors,
   getStorageInfo,
   getSystemInfo,
+  hasAutomaticReport,
   mailtoUrl,
+  sendReport,
   testDiagnostic,
 } from '../services/diagnostics';
 import { useSession } from '../store/session';
@@ -39,6 +41,7 @@ export function DiagnosticsScreen() {
   const [includeActions, setIncludeActions] = useState(true);
   const [refresh, setRefresh] = useState(0);
   const [storage, setStorage] = useState('—');
+  const [sending, setSending] = useState(false);
   const errors = getErrors();
   const actions = getActions();
   const info = getSystemInfo();
@@ -52,7 +55,19 @@ export function DiagnosticsScreen() {
     : '';
   const report = () => buildReport(note, { errors: includeErrors, actions: includeActions, match: matchContext });
 
-  const send = () => {
+  const send = async () => {
+    if (sending) return;
+    setSending(true);
+    const result = await sendReport(report(), note);
+    setSending(false);
+    if (result.ok) {
+      toast(t('diag.sent'), 'success');
+      diag('info', 'Informe de diagnóstico enviado al endpoint configurado.', undefined, 'diagnostics:http');
+      return;
+    }
+    if (result.reason && result.reason !== 'no-endpoint') {
+      toast(t('diag.sendFailed'), 'warn');
+    }
     try {
       window.location.href = mailtoUrl(report(), note);
       toast(t('diag.sentHint'), 'success');
@@ -76,8 +91,11 @@ export function DiagnosticsScreen() {
         <div>
           <strong>{CONTACT_EMAIL}</strong>
           <p>{t('diag.contactHint', { email: CONTACT_EMAIL })}</p>
+          <p className="diag-note">{t(hasAutomaticReport() ? 'diag.autoOn' : 'diag.autoOff')}</p>
         </div>
-        <Button variant="primary" icon={<Send size={16} />} onClick={send}>{t('diag.send')}</Button>
+        <Button variant="primary" icon={<Send size={16} />} onClick={() => void send()} disabled={sending}>
+          {sending ? t('diag.sending') : t('diag.send')}
+        </Button>
       </section>
 
       <div className="diag-grid">
@@ -133,7 +151,9 @@ export function DiagnosticsScreen() {
           <pre>{report()}</pre>
         </div>
         <div className="diag-actions">
-          <Button variant="primary" icon={<Send size={16} />} onClick={send}>{t('diag.send')}</Button>
+          <Button variant="primary" icon={<Send size={16} />} onClick={() => void send()} disabled={sending}>
+            {sending ? t('diag.sending') : t('diag.send')}
+          </Button>
           <Button variant="secondary" icon={<Copy size={16} />} onClick={async () => { const ok = await copyReport(report()); toast(ok ? t('diag.copied') : t('notify.error'), ok ? 'success' : 'danger'); }}>{t('diag.copy')}</Button>
           <Button variant="ghost" icon={<Download size={16} />} onClick={() => { downloadReport(report()); toast(t('diag.downloaded'), 'success'); }}>{t('diag.download')}</Button>
         </div>
