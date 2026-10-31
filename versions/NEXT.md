@@ -40,7 +40,7 @@
 - APK release firmado: `51E271357DC1B253C40B065159D2F884495332C0863C0074C65F3F0226C9F2D0` · 11.046.041 bytes.
 - AAB release firmado: `0AD277BFE446960435141A2CFF1CC7833A9D28681BDC6B337541C29CE1A311F2` · 10.675.504 bytes.
 - APK debug: `F076F4444A631B4D7C22F75A8B70EE2893B8FC1896106AC389C74040A16910CF` · 16.671.605 bytes.
-- Artefactos locales en `artifacts/`: `mesa-viva-2.7.0-release.apk`, `mesa-viva-2.7.0-release.aab` y `mesa-viva-2.7.0-debug.apk`.
+- Artefactos locales en `artifacts/`: `mesa-viva-2.7.1-release.apk`, `mesa-viva-2.7.1-release.aab` y `mesa-viva-2.7.1-debug.apk`.
 
 ## Compose
 
@@ -132,4 +132,4 @@ cd android && gradlew.bat bundleRelease
 3. Mantener este `NEXT.md` actualizado, sin eliminarlo.
 4. No guardar tokens, contraseñas ni keystores en el repositorio.
 5. Antes de publicar: typecheck, tests web, tests Kotlin, build web, APK, AAB, CI/Pages/Android.
-6. No afirmar “100 % Compose” global hasta retirar el WebView. **Estado v2.7.0: los 30 juegos jugables son Compose; el WebView solo queda como respaldo de la PWA y la sala remota.**
+6. No afirmar “100 % Compose” global hasta retirar el WebView. **Estado v2.7.1: los 30 juegos jugables son Compose; el WebView solo queda como respaldo de la PWA y la sala remota.**
