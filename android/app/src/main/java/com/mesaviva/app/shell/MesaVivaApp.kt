@@ -94,6 +94,7 @@ fun MesaVivaApp(
         ShellScreen.Truco,
         ShellScreen.Soroban,
         ShellScreen.Shogi,
+        ShellScreen.Janggi,
     )
     Scaffold(
         containerColor = Color.Transparent,
@@ -146,6 +147,7 @@ fun MesaVivaApp(
                     "truco" -> ShellScreen.Truco
                     "soroban" -> ShellScreen.Soroban
                     "shogi" -> ShellScreen.Shogi
+                    "janggi" -> ShellScreen.Janggi
                     else -> ShellScreen.Catalog
                 }
             }
@@ -177,6 +179,7 @@ fun MesaVivaApp(
                     ShellScreen.Truco -> TrucoScreen(state) { state.screen = ShellScreen.Home }
                     ShellScreen.Soroban -> SorobanScreen(state) { state.screen = ShellScreen.Home }
                     ShellScreen.Shogi -> ShogiScreen(state) { state.screen = ShellScreen.Home }
+                    ShellScreen.Janggi -> JanggiScreen(state) { state.screen = ShellScreen.Home }
                 }
             }
         }
@@ -383,7 +386,7 @@ private fun HeroCard(state: ShellState, onOpenWeb: (String) -> Unit, onNative: (
                 }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                MiniBadge("21", state.t("home.games"))
+                MiniBadge("22", state.t("home.games"))
                 MiniBadge("11", state.t("home.languages"))
             }
         }

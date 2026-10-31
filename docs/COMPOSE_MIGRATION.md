@@ -68,7 +68,8 @@ Es un proyecto de varias versiones, no un commit.
 - [x] Damas Chinas en sala de 2–6 (v2.2.0).
 - [x] Soroban jugable de 13 varillas (v2.3.0).
 - [x] Shogi 9×9 con promociones, capturas y drops (v2.4.0).
-- [ ] Janggi, Mahjong y el resto; relay público; replays web (v2.5.0).
+- [x] Janggi 9×10 con palacio, río y cañón (v2.5.0).
+- [ ] Mahjong, Luzhanqi y el resto; relay público; replays web (v2.6.0).
 
 ### Fase 4 · Retirada del WebView
 
@@ -87,6 +88,7 @@ Es un proyecto de varias versiones, no un commit.
 - v2.2.0 suma Damas Chinas de 2–6 a las salas nativas. Ocho juegos tienen sala. El siguiente paso es el relay público, los replays web adicionales y el catálogo restante.
 - v2.3.0 suma Soroban jugable y lleva el catálogo a 20 juegos. El siguiente paso son Shogi, Janggi, Mahjong, el relay público y los replays web adicionales.
 - v2.4.0 suma Shogi 9×9 con promociones, capturas, drops y jaque, y lleva el catálogo a 21 juegos. El siguiente paso son Janggi, Mahjong, el relay público y los replays web adicionales.
+- v2.5.0 suma Janggi 9×10 con palacio, río y cañón, y lleva el catálogo a 22 juegos. El siguiente paso son Mahjong, Luzhanqi, el relay público y los replays web adicionales.
 
 ## Arquitectura propuesta
 

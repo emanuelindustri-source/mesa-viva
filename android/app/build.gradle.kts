@@ -21,8 +21,8 @@ android {
         applicationId = "com.mesaviva.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 26
-        versionName = "2.4.0"
+        versionCode = 27
+        versionName = "2.5.0"
 
         vectorDrawables {
             useSupportLibrary = true

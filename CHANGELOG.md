@@ -1,5 +1,29 @@
 ﻿# Changelog
 
+## 2.5.0 · 2026-10-30
+
+Palacio y río.
+
+### Añadido
+
+- **Janggi nativo**: ajedrez coreano 9×10 con palacio, río y generales.
+- Cañón con pantalla, caballo y elefante bloqueados, soldados laterales y generales enfrentados.
+- Jaque, jugadas legales, mate y bots easy/normal/hard.
+- Modo pasar el teléfono, historial, PDF y XP.
+- 2 pruebas nuevas de Janggi.
+- El catálogo llega a **22 juegos jugables de 30**.
+
+### Cambiado
+
+- Android: `versionCode=27`, `versionName=2.5.0`.
+- El inicio, catálogo y ajustes muestran 22 juegos y la versión 2.5.0.
+
+### Pendiente
+
+- Mahjong, Luzhanqi y los 6 juegos restantes.
+- Relay público, replays web y accesibilidad completa.
+- Teléfono físico.
+
 ## 2.4.0 · 2026-10-30
 
 Juegos del mundo.

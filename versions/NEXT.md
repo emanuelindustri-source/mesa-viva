@@ -4,41 +4,41 @@
 
 ## Estado actual
 
-- **Versión publicada:** 2.4.0.
+- **Versión publicada:** 2.5.0.
 - **Catálogo:** 30 juegos.
-- **Juegos jugables:** 21, todos 100 % Jetpack Compose.
+- **Juegos jugables:** 22, todos 100 % Jetpack Compose.
 - **Juegos en WebView:** 0 (el WebView queda como respaldo de la PWA y de la sala remota).
 - **Salas nativas:** Damas y Mancala (2), Dominó (2–4), Serpientes (2–4), Brisca (2–4), Truco (2), Ludo (2–4) y Damas Chinas (2–6), por LAN o relay online configurable.
 - **Manos privadas:** Dominó, Brisca y Truco.
 - **Replays:** semilla, paso a paso, automático, enlace, archivo JSON, importación y visor web de Damas/Mancala.
-- **Crónica PDF:** 21 mesas, con tarjeta de estadísticas.
-- **Audio nativo:** música procedural por festividad y efectos en las 21 mesas.
+- **Crónica PDF:** 22 mesas, con tarjeta de estadísticas.
+- **Audio nativo:** música procedural por festividad y efectos en las 22 mesas.
 - **Repositorio:** <https://github.com/emanuelindustri-source/mesa-viva>
 - **Portada:** <https://emanuelindustri-source.github.io/mesa-viva/>
 - **Juego web:** <https://emanuelindustri-source.github.io/mesa-viva/play/>
 - **Replay web:** <https://emanuelindustri-source.github.io/mesa-viva/replay/>
-- **Release:** <https://github.com/emanuelindustri-source/mesa-viva/releases/tag/v2.4.0>
-- **VERSION:** `2.4.0`
-- **Android:** `versionCode=26`, `versionName=2.4.0`, compileSdk/targetSdk 36.
+- **Release:** <https://github.com/emanuelindustri-source/mesa-viva/releases/tag/v2.5.0>
+- **VERSION:** `2.5.0`
+- **Android:** `versionCode=27`, `versionName=2.5.0`, compileSdk/targetSdk 36.
 - **Gradle:** 8.14.4.
 
 ### Calidad
 
 - 30/30 pruebas de motores web.
-- 111/111 pruebas Kotlin (juegos, salas, replays, Reversi, Ur, Brisca, Truco, Ludo, Damas Chinas, Soroban, Shogi y códecs).
-- **141 pruebas en total.**
+- 113/113 pruebas Kotlin (juegos, salas, replays, Reversi, Ur, Brisca, Truco, Ludo, Damas Chinas, Soroban, Shogi, Janggi y códecs).
+- **143 pruebas en total.**
 - TypeScript sin errores.
 - Web compilada con Vite 6.4.5 y sincronizada dentro del APK.
 - APK debug, APK release firmado y AAB release firmado.
-- Shogi probado en emulador Android 14.
-- 21 juegos nativos en el catálogo; 9 pendientes.
+- Janggi probado en emulador Android 14.
+- 22 juegos nativos en el catálogo; 8 pendientes.
 - Teléfono físico `22101316G`: detectado por `adb`, pero MIUI rechaza la instalación USB.
 
-### Checksums v2.4.0
+### Checksums v2.5.0
 
-- APK release firmado: `190377C4CDB404E2B1D5B773195948D258CD71271C9D6E2C5D23F7FC90E9D4FF` · 10.849.433 bytes.
-- AAB release firmado: `AF21436F3737A1C832FF34570A00FC9988BA6D6E8E6AD892ED4F0EE3F18E2280` · 10.465.858 bytes.
-- Artefactos locales en `artifacts/`: `mesa-viva-2.4.0-release.apk`, `mesa-viva-2.4.0-release.aab`. La release de GitHub añade `mesa-viva-2.4.0-debug.apk`.
+- APK release firmado: `FB0A1A82C51CF186DC4529B2B15290E784E34073699848FC71738AE52EB4F4C3` · 10.865.817 bytes.
+- AAB release firmado: `2BE2FED6BFEBA5C37EFAF60F1DA444FA0F6E0A88265F7719BEF3CBCE2008CDCE` · 10.494.054 bytes.
+- Artefactos locales en `artifacts/`: `mesa-viva-2.5.0-release.apk`, `mesa-viva-2.5.0-release.aab`. La release de GitHub añade `mesa-viva-2.5.0-debug.apk`.
 
 ## Compose
 
@@ -50,15 +50,15 @@
 - **Audio nativo** en las 19 mesas.
 - **XP real** al terminar.
 - **Accesibilidad:** cartas, fichas, casillas, puntos y tableros descritos.
-- **Pendiente:** los 9 juegos restantes.
+- **Pendiente:** los 8 juegos restantes.
 
-## Siguiente versión: 2.5.0
+## Siguiente versión: 2.6.0
 
-Ver [`v2.5.0.md`](./v2.5.0.md). Incluye:
+Ver [`v2.6.0.md`](./v2.6.0.md). Incluye:
 
-1. Janggi.
-2. Mahjong americano, Riichi y Mahjong con naipes.
-3. Luzhanqi, Tren Mexicano, Chickenfoot, Aeroplane Chess y Ajedrez para tres.
+1. Mahjong americano, Riichi y Mahjong con naipes.
+2. Luzhanqi con piezas ocultas.
+3. Tren Mexicano, Chickenfoot, Aeroplane Chess y Ajedrez para tres.
 4. Relay público, replays web y accesibilidad completa.
 
 ## Dónde está cada cosa

@@ -979,4 +979,31 @@ class NativeGamesTest {
         assertEquals(1, result.state.hands[0][ShogiKind.Pawn])
         assertEquals(null, result.state.board[ShogiGame.index(4, 4)])
     }
+
+    @Test
+    fun `janggi initial board has thirty two pieces and legal moves`() {
+        val game = JanggiGame(seed = 7)
+        val state = game.newMatch()
+        assertEquals(90, state.board.size)
+        assertEquals(32, state.board.count { it != null })
+        assertTrue(game.legalMoves(state).isNotEmpty())
+        assertEquals(JanggiSide.Cho, state.turn)
+    }
+
+    @Test
+    fun `janggi cannon jumps one screen to capture`() {
+        val game = JanggiGame(seed = 9)
+        val board = MutableList<JanggiPiece?>(JanggiGame.COLS * JanggiGame.ROWS) { null }
+        board[JanggiGame.indexOf(4, 0)] = JanggiPiece(JanggiSide.Han, JanggiKind.General)
+        board[JanggiGame.indexOf(4, 9)] = JanggiPiece(JanggiSide.Cho, JanggiKind.General)
+        board[JanggiGame.indexOf(4, 5)] = JanggiPiece(JanggiSide.Han, JanggiKind.Soldier)
+        board[JanggiGame.indexOf(0, 0)] = JanggiPiece(JanggiSide.Cho, JanggiKind.Cannon)
+        board[JanggiGame.indexOf(0, 1)] = JanggiPiece(JanggiSide.Han, JanggiKind.Soldier)
+        board[JanggiGame.indexOf(0, 2)] = JanggiPiece(JanggiSide.Han, JanggiKind.Soldier)
+        val state = JanggiState(board = board, turn = JanggiSide.Cho)
+        val result = game.move(state, JanggiMove(JanggiGame.indexOf(0, 0), JanggiGame.indexOf(0, 2)))
+        assertEquals(null, result.error)
+        assertEquals(JanggiKind.Cannon, result.state.board[JanggiGame.indexOf(0, 2)]?.kind)
+        assertTrue(result.state.history.any { it.contains("x") })
+    }
 }

@@ -1,6 +1,18 @@
 ﻿# Roadmap
 
-## v2.4.0 · Juegos del mundo (actual)
+## v2.5.0 · Palacio y río (actual)
+
+- [x] Janggi 9×10 con palacio, río, cañón y generales enfrentados.
+- [x] Bots easy, normal y hard; modo pasar el teléfono.
+- [x] Historial, PDF y XP.
+- [x] 22 juegos jugables de 30.
+- [x] 143 pruebas verdes (30 web + 113 Kotlin).
+- [x] APK y AAB de release firmados.
+- [x] Evidencia visual en `docs/evidence/v2.5.0/`.
+- [ ] Mahjong, Luzhanqi y los 6 juegos restantes (v2.6.0).
+- [ ] Relay público, replays web y accesibilidad completa (v2.6.0).
+
+## v2.4.0 · Juegos del mundo
 
 - [x] Shogi 9×9 con promociones, capturas, drops y jaque.
 - [x] Bots de tres dificultades y modo pasar el teléfono.
@@ -9,8 +21,8 @@
 - [x] 141 pruebas verdes (30 web + 111 Kotlin).
 - [x] APK y AAB de release firmados.
 - [x] Evidencia visual en `docs/evidence/v2.4.0/`.
-- [ ] Janggi, Mahjong y los 7 juegos restantes (v2.5.0).
-- [ ] Relay público, replays web y accesibilidad completa (v2.5.0).
+- [x] Janggi jugable (v2.5.0).
+- [ ] Mahjong y Luzhanqi (v2.6.0).
 
 ## v2.3.0 · El ábaco
 
