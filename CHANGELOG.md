@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.9.1 · 2026-10-31
+
+Parche de integración.
+
+### Corregido
+
+- Se eliminaron las claves `luzhanqi.rank.*` que ya no usaba la interfaz y hacían fallar el catálogo i18n del CI.
+- `python tools/check_i18n.py` vuelve a **missing 0**.
+- Android: `versionCode=33`, `versionName=2.9.1`.
+
+### Pruebas
+
+- **153 pruebas Kotlin + 50 web = 203 verdes.**
+- TypeScript sin errores, build web correcto.
+- APK debug, APK release firmado y AAB release firmado.
+
 ## 2.9.0 · 2026-10-31
 
 Tableros en la web.

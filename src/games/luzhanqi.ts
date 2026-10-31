@@ -22,22 +22,21 @@ type RankId =
 interface RankInfo {
   label: string;
   power: number;
-  nameKey: string;
 }
 
 const RANKS: Record<RankId, RankInfo> = {
-  commander: { label: '司令', power: 10, nameKey: 'luzhanqi.rank.commander' },
-  general: { label: '军长', power: 9, nameKey: 'luzhanqi.rank.general' },
-  division: { label: '师长', power: 8, nameKey: 'luzhanqi.rank.division' },
-  brigade: { label: '旅长', power: 7, nameKey: 'luzhanqi.rank.brigade' },
-  regiment: { label: '团长', power: 6, nameKey: 'luzhanqi.rank.regiment' },
-  battalion: { label: '营长', power: 5, nameKey: 'luzhanqi.rank.battalion' },
-  company: { label: '连长', power: 4, nameKey: 'luzhanqi.rank.company' },
-  platoon: { label: '排长', power: 3, nameKey: 'luzhanqi.rank.platoon' },
-  engineer: { label: '工兵', power: 2, nameKey: 'luzhanqi.rank.engineer' },
-  bomb: { label: '炸弹', power: 1, nameKey: 'luzhanqi.rank.bomb' },
-  mine: { label: '地雷', power: 0, nameKey: 'luzhanqi.rank.mine' },
-  flag: { label: '军旗', power: -1, nameKey: 'luzhanqi.rank.flag' },
+  commander: { label: '司令', power: 10 },
+  general: { label: '军长', power: 9 },
+  division: { label: '师长', power: 8 },
+  brigade: { label: '旅长', power: 7 },
+  regiment: { label: '团长', power: 6 },
+  battalion: { label: '营长', power: 5 },
+  company: { label: '连长', power: 4 },
+  platoon: { label: '排长', power: 3 },
+  engineer: { label: '工兵', power: 2 },
+  bomb: { label: '炸弹', power: 1 },
+  mine: { label: '地雷', power: 0 },
+  flag: { label: '军旗', power: -1 },
 };
 
 export interface LzPiece {

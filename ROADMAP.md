@@ -1,6 +1,14 @@
 ﻿# Roadmap
 
-## v2.9.0 · Tableros en la web (actual)
+## v2.9.1 · Parche de integración (actual)
+
+- [x] CI i18n sin claves faltantes (`missing 0`).
+- [x] 12 claves de rango de Luzhanqi eliminadas del motor.
+- [x] 203 pruebas verdes.
+- [x] APK release y AAB firmados.
+- [ ] 8 juegos web restantes y relay público (v2.10.0).
+
+## v2.9.0 · Tableros en la web (anterior)
 
 - [x] Reversi, Ur, Luzhanqi y Ajedrez para tres jugables en la web.
 - [x] La web pasa de 18 a 22 juegos.
@@ -8,7 +16,7 @@
 - [x] Historial sin eventos duplicados.
 - [x] 153 pruebas Kotlin + 50 web = **203 pruebas**.
 - [x] APK release y AAB firmados.
-- [ ] 8 juegos web restantes y relay público (v2.10.0).
+- [x] CI i18n corregido en v2.9.1.
 
 ## v2.8.0 · Puente web y cultura (anterior)
 

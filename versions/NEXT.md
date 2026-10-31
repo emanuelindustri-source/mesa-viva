@@ -4,7 +4,7 @@
 
 ## Estado actual
 
-- **Versión publicada:** 2.9.0.
+- **Versión publicada:** 2.9.1 (parche de integración sobre 2.9.0).
 - **Catálogo:** 30 juegos.
 - **Juegos jugables Android:** 30, todos 100 % Jetpack Compose.
 - **Juegos jugables web:** 22 (los 15 anteriores más Mahjong americano, Riichi, Mahjong con naipes, Reversi, Ur, Luzhanqi y Ajedrez para tres).
@@ -20,9 +20,9 @@
 - **Portada:** <https://emanuelindustri-source.github.io/mesa-viva/>
 - **Juego web:** <https://emanuelindustri-source.github.io/mesa-viva/play/>
 - **Replay web:** <https://emanuelindustri-source.github.io/mesa-viva/replay/>
-- **Release:** <https://github.com/emanuelindustri-source/mesa-viva/releases/tag/v2.9.0>
-- **VERSION:** `2.9.0`
-- **Android:** `versionCode=32`, `versionName=2.9.0`, compileSdk/targetSdk 36.
+- **Release:** <https://github.com/emanuelindustri-source/mesa-viva/releases/tag/v2.9.1>
+- **VERSION:** `2.9.1`
+- **Android:** `versionCode=33`, `versionName=2.9.1`, compileSdk/targetSdk 36.
 - **Gradle:** 8.14.4.
 
 ### Calidad
@@ -36,12 +36,12 @@
 - Mahjong web probado en navegador: descarte humano, tres bots, robo y turno de vuelta sin errores de consola.
 - Teléfono físico `22101316G`: detectado por `adb`, pero MIUI rechaza la instalación USB.
 
-### Checksums v2.9.0
+### Checksums v2.9.1
 
-- APK release firmado: `D1C4646388C9899BAD075BC6758F5E295205424BCFC1F3DDF51E5C1706D02735` · 11.081.077 bytes.
-- AAB release firmado: `5A829B08C81CA376F673E7774CCC88716FCA3BA060D7C937018391A72D1EF37B` · 10.697.911 bytes.
-- APK debug: `1F89FCEA676DABDFC43F80D477EDD595F80B83952042521E0A4BB9DA013D31C0` · 15.202.814 bytes.
-- Artefactos locales en `artifacts/`: `mesa-viva-2.9.0-release.apk`, `mesa-viva-2.9.0-release.aab` y `mesa-viva-2.9.0-debug.apk`.
+- APK release firmado: `4329AB713D41C92ACDE299D7C65B626CA0AB4D2A01279137ACBE1FBF7E4C278F` · 11.081.021 bytes.
+- AAB release firmado: `6EEE12D42B8F909CA39D75E87F2B462D216B9553975542C2043FC05F59FB62A4` · 10.697.855 bytes.
+- APK debug: `E67749AD64126B6F17E0FBAFB5348FA2A33A1816B36C324ADDB630D3D9772C28` · 14.929.990 bytes.
+- Artefactos locales en `artifacts/`: `mesa-viva-2.9.1-release.apk`, `mesa-viva-2.9.1-release.aab` y `mesa-viva-2.9.1-debug.apk`.
 
 ## Web
 
@@ -146,4 +146,4 @@ cd android && gradlew.bat bundleRelease
 3. Mantener este `NEXT.md` actualizado, sin eliminarlo.
 4. No guardar tokens, contraseñas ni keystores en el repositorio.
 5. Antes de publicar: typecheck, tests web, tests Kotlin, build web, APK, AAB, CI/Pages/Android.
-6. No afirmar “100 % Compose” global hasta retirar el WebView. **Estado v2.9.0: los 30 juegos jugables Android son Compose; el WebView solo queda como respaldo de la PWA y la sala remota.**
+6. No afirmar “100 % Compose” global hasta retirar el WebView. **Estado v2.9.1: los 30 juegos jugables Android son Compose; el WebView solo queda como respaldo de la PWA y la sala remota.**
